@@ -1,0 +1,11 @@
+target/
+reports/
+screenshots/
+drivers/
+*.class
+*.iml
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
