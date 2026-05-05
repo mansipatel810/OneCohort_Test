@@ -1,9 +1,9 @@
 package com.cts.mfrp.onecohort.tests;
 
 import com.cts.mfrp.onecohort.base.BaseTest;
-import com.cts.mfrp.onecohort.pages.DashboardPage;
-import com.cts.mfrp.onecohort.pages.LeavePage;
+import com.cts.mfrp.onecohort.pages.HomePage;
 import com.cts.mfrp.onecohort.pages.LoginPage;
+import com.cts.mfrp.onecohort.pages.analytics.TrainingProgressAnalyticsPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentManager;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
@@ -16,33 +16,36 @@ import org.testng.annotations.Test;
 @Listeners(ExtentReportListener.class)
 public class LeaveTest extends BaseTest {
 
-    private LeavePage leavePage;
+    private TrainingProgressAnalyticsPage analyticsPage;
 
     @BeforeMethod(alwaysRun = true)
     public void loginAndNavigate() {
         LoginPage loginPage = new LoginPage(getDriver());
-        DashboardPage dashboard = loginPage.loginAs(
-                ConfigReader.getUsername(), ConfigReader.getPassword());
-        leavePage = dashboard.navigateToLeave();
+        HomePage homePage = loginPage.loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
+        analyticsPage = homePage.navigateToTrainingAnalytics();
     }
 
     @Test(groups = {"smoke"}, retryAnalyzer = RetryAnalyzer.class,
-          description = "Verify leave list page loads")
-    public void leaveListLoadsTest() {
-        ExtentManager.getTest().info("Verifying leave table is visible");
-        Assert.assertTrue(leavePage.isLeaveTableVisible() || leavePage.isNoRecordsDisplayed(),
-                "Leave page should show table or no-records message");
+          description = "Verify Training Progress Analytics section loads on the dashboard")
+    public void trainingAnalyticsSectionLoadsTest() {
+        ExtentManager.getTest().info("Verifying analytics bar chart is visible");
+        Assert.assertTrue(analyticsPage.isProgressChartVisible(),
+                "Active Cohort Progress bar chart should be visible");
     }
 
     @Test(groups = {"regression"},
-          description = "Search leave by date range shows results or no records")
-    public void searchLeaveByDateRangeTest() {
-        leavePage.enterFromDate("2024-01-01")
-                 .enterToDate("2024-12-31")
-                 .clickSearch();
+          description = "Verify individual cohort detail cards are rendered")
+    public void cohortDetailCardsRenderTest() {
+        ExtentManager.getTest().info("Verifying individual cohort detail cards are visible");
+        Assert.assertTrue(analyticsPage.areCohortDetailCardsVisible(),
+                "Each active cohort should have a detail card with progress info");
+    }
 
-        ExtentManager.getTest().info("Searched leave by date range");
-        boolean hasResults = leavePage.isLeaveTableVisible() || leavePage.isNoRecordsDisplayed();
-        Assert.assertTrue(hasResults, "Leave search should return table or no-records message");
+    @Test(groups = {"regression"},
+          description = "Verify On Track status indicator is present for active cohorts")
+    public void onTrackIndicatorPresentTest() {
+        ExtentManager.getTest().info("Checking On Track status indicator");
+        Assert.assertTrue(analyticsPage.isOnTrackIndicatorVisible(),
+                "'On Track' status indicator should be visible for active cohorts");
     }
 }

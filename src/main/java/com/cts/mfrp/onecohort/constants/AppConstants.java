@@ -29,4 +29,17 @@ public class AppConstants {
     public static final String PROP_EXPLICIT_WAIT   = "explicit.wait";
     public static final String PROP_USERNAME        = "username";
     public static final String PROP_PASSWORD        = "password";
+
+    // Login validation alert messages (sourced from login.ts onLogin())
+    public static final String ALERT_EMPTY_USER_ID       = "Please enter a User ID";
+    public static final String ALERT_SELECT_SERVICE_LINE = "Please select a Service Line";
+    public static final String ALERT_ENTER_POC_ID        = "Please enter a POC ID";
+    public static final String ALERT_ENTER_COHORT_ID     = "Please enter a Cohort ID";
+
+    // URL path segments
+    public static final String URL_SUPER_ADMIN  = "/super-admin";
+    public static final String URL_MANAGER      = "/manager/";
+    public static final String URL_LEADER       = "/leader/";
+    public static final String URL_BATCH_OWNER  = "/batch-owner/";
+    public static final String URL_CR           = "/cr/";
 }

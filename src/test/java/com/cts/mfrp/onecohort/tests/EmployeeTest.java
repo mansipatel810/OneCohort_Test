@@ -1,9 +1,9 @@
 package com.cts.mfrp.onecohort.tests;
 
 import com.cts.mfrp.onecohort.base.BaseTest;
-import com.cts.mfrp.onecohort.pages.DashboardPage;
-import com.cts.mfrp.onecohort.pages.EmployeePage;
+import com.cts.mfrp.onecohort.pages.HomePage;
 import com.cts.mfrp.onecohort.pages.LoginPage;
+import com.cts.mfrp.onecohort.pages.cohort.CohortManagementPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentManager;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
@@ -16,39 +16,37 @@ import org.testng.annotations.Test;
 @Listeners(ExtentReportListener.class)
 public class EmployeeTest extends BaseTest {
 
-    private EmployeePage employeePage;
+    private CohortManagementPage cohortManagementPage;
 
     @BeforeMethod(alwaysRun = true)
     public void loginAndNavigate() {
         LoginPage loginPage = new LoginPage(getDriver());
-        DashboardPage dashboard = loginPage.loginAs(
-                ConfigReader.getUsername(), ConfigReader.getPassword());
-        employeePage = dashboard.navigateToEmployee();
+        HomePage homePage = loginPage.loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
+        cohortManagementPage = homePage.navigateToCohortManagement();
     }
 
     @Test(groups = {"smoke"}, retryAnalyzer = RetryAnalyzer.class,
-          description = "Verify employee list page loads")
-    public void employeeListLoadsTest() {
-        ExtentManager.getTest().info("Verifying employee table is visible");
-        Assert.assertTrue(employeePage.isEmployeeTableVisible(),
-                "Employee table should be visible");
+          description = "Verify Cohort Management grid loads after navigation")
+    public void cohortManagementGridLoadsTest() {
+        ExtentManager.getTest().info("Verifying Cohort Management grid is visible");
+        Assert.assertTrue(cohortManagementPage.isGridLoaded(),
+                "Cohort Management data grid should be visible");
     }
 
     @Test(groups = {"regression"},
-          description = "Verify add employee form opens")
-    public void addEmployeeFormOpensTest() {
-        employeePage.clickAddEmployee();
-        ExtentManager.getTest().info("Clicked Add Employee button");
-        Assert.assertTrue(employeePage.getCurrentUrl().contains("addEmployee"),
-                "URL should navigate to add employee page");
+          description = "Verify grid shows no-data state before filter is applied")
+    public void cohortGridEmptyStateTest() {
+        ExtentManager.getTest().info("Verifying initial empty state before filter");
+        Assert.assertTrue(cohortManagementPage.isEmptyStateDisplayed(),
+                "Grid should show 'No data found' before a filter is applied");
     }
 
     @Test(groups = {"regression"},
-          description = "Search for non-existent employee shows no records")
-    public void searchNonExistentEmployeeTest() {
-        employeePage.searchEmployee("ZZZ_NOT_EXIST_ZZZ");
-        ExtentManager.getTest().info("Searched for non-existent employee");
-        Assert.assertTrue(employeePage.isNoRecordsDisplayed(),
-                "No Records Found message should appear");
+          description = "Verify keyword search filters cohort grid in real time")
+    public void cohortKeywordSearchTest() {
+        ExtentManager.getTest().info("Searching cohorts by keyword: QEA");
+        cohortManagementPage.searchByKeyword("QEA");
+        Assert.assertTrue(cohortManagementPage.isGridLoaded(),
+                "Grid should display filtered results for keyword 'QEA'");
     }
 }

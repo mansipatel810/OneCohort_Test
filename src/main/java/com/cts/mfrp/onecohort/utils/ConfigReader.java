@@ -34,11 +34,13 @@ public class ConfigReader {
         return value.trim();
     }
 
-    public static String getBrowser()      { return get(AppConstants.PROP_BROWSER); }
-    public static String getBaseUrl()      { return get(AppConstants.PROP_BASE_URL); }
-    public static String getUsername()     { return get(AppConstants.PROP_USERNAME); }
-    public static String getPassword()     { return get(AppConstants.PROP_PASSWORD); }
-    public static boolean isHeadless()     { return Boolean.parseBoolean(get(AppConstants.PROP_HEADLESS)); }
-    public static int getImplicitWait()    { return Integer.parseInt(get(AppConstants.PROP_IMPLICIT_WAIT)); }
-    public static int getExplicitWait()    { return Integer.parseInt(get(AppConstants.PROP_EXPLICIT_WAIT)); }
+    public static String getBrowser()           { return get(AppConstants.PROP_BROWSER); }
+    public static String getBaseUrl()           { return get(AppConstants.PROP_BASE_URL); }
+    public static String getSuperAdminUserId()  { return get("super.admin.user.id"); }
+    public static String getValidServiceLineId(){ return get("valid.service.line.id"); }
+    public static String getValidPocId()        { return get("valid.poc.id"); }
+    public static String getValidCohortId()     { return get("valid.cohort.id"); }
+    public static boolean isHeadless()          { return Boolean.parseBoolean(get(AppConstants.PROP_HEADLESS)); }
+    public static int getImplicitWait()         { return Integer.parseInt(get(AppConstants.PROP_IMPLICIT_WAIT)); }
+    public static int getExplicitWait()         { return Integer.parseInt(get(AppConstants.PROP_EXPLICIT_WAIT)); }
 }

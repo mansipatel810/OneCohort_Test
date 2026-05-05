@@ -1,5 +1,4 @@
-﻿package com.cts.mfrp.onecohort.tests;
+package com.cts.mfrp.onecohort.tests;
 
 public class HomePageTest {
 }
-
