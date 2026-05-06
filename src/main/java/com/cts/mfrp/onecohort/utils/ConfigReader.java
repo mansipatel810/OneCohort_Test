@@ -43,4 +43,5 @@ public class ConfigReader {
     public static boolean isHeadless()          { return Boolean.parseBoolean(get(AppConstants.PROP_HEADLESS)); }
     public static int getImplicitWait()         { return Integer.parseInt(get(AppConstants.PROP_IMPLICIT_WAIT)); }
     public static int getExplicitWait()         { return Integer.parseInt(get(AppConstants.PROP_EXPLICIT_WAIT)); }
+
 }
