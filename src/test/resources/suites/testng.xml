@@ -41,6 +41,18 @@
         </classes>
     </test>
 
+    <test name="CR Login Negative Tests">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.cr.CRLoginNegativeTest"/>
+        </classes>
+    </test>
+
+    <test name="CR Dashboard Tests">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.cr.CRDashboardTest"/>
+        </classes>
+    </test>
+
     <test name="Managers and Leadership Tests">
         <classes>
             <class name="com.cts.mfrp.onecohort.tests.managers.ManagersLeadershipTest"/>
