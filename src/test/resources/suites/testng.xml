@@ -48,8 +48,30 @@
         </classes>
     </test>
 
+<<<<<<< Updated upstream
+=======
+    <test name="CR Dashboard Tests">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.cr.CRDashboardTest"/>
+        </classes>
+    </test>
+
+    <test name="CR Login Negative Tests">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.cr.CRLoginNegativeTest"/>
+        </classes>
+    </test>
+
+    <test name="Batch Owner Login Negative Tests">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerLoginNegativeTest"/>
+        </classes>
+    </test>
+
+>>>>>>> Stashed changes
     <test name="Batch Owners and POC Tests">
         <classes>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerDashboardTest"/>
             <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerFilterTest"/>
             <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerProfileCardTest"/>
             <class name="com.cts.mfrp.onecohort.tests.batchowners.AddBatchOwnerModalTest"/>
