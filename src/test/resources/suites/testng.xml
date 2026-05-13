@@ -60,8 +60,15 @@
         </classes>
     </test>
 
+    <test name="Batch Owner Login Negative Tests">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerLoginNegativeTest"/>
+        </classes>
+    </test>
+
     <test name="Batch Owners and POC Tests">
         <classes>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerDashboardTest"/>
             <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerFilterTest"/>
             <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerProfileCardTest"/>
             <class name="com.cts.mfrp.onecohort.tests.batchowners.AddBatchOwnerModalTest"/>
