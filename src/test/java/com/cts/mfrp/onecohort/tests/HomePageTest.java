@@ -14,14 +14,19 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import com.cts.mfrp.onecohort.utils.ExtentReportListener;
 
 import java.time.Duration;
 import java.util.List;
 
+@Listeners(ExtentReportListener.class)
 public class HomePageTest {
 
     private WebDriver driver;
+    /** Exposed for ExtentReportListener screenshot capture. */
+    public WebDriver getDriver() { return driver; }
     private WebDriverWait wait;
     private void highlight(WebElement element) {
         JavascriptExecutor js = (JavascriptExecutor) driver;

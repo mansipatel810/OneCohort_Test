@@ -37,6 +37,8 @@ public class ConfigReader {
     public static String getBrowser()           { return get(AppConstants.PROP_BROWSER); }
     public static String getBaseUrl()           { return get(AppConstants.PROP_BASE_URL); }
     public static String getSuperAdminUserId()  { return get("super.admin.user.id"); }
+    public static String getLeaderUserId()      { return get("leader.user.id"); }
+    public static String getManagerUserId()     { return get("manager.user.id"); }
     public static String getValidServiceLineId(){ return get("valid.service.line.id"); }
     public static String getValidPocId()        { return get("valid.poc.id"); }
     public static String getValidCohortId()     { return get("valid.cohort.id"); }
