@@ -1,25 +1,18 @@
 package com.cts.mfrp.onecohort.tests.cohort;
 
+import com.cts.mfrp.onecohort.base.BaseClassTest;
 import com.cts.mfrp.onecohort.pages.LoginPage;
 import com.cts.mfrp.onecohort.pages.cohort.CohortManagementPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,30 +43,12 @@ import java.util.stream.Collectors;
  * ─────────────────────────────────────────────────────────────────────────────
  */
 @Listeners(ExtentReportListener.class)
-public class CohortManagementGridTest {
+public class CohortManagementGridTest extends BaseClassTest {
 
-    private WebDriver driver;
-    /** Exposed for ExtentReportListener screenshot capture. */
-    public WebDriver getDriver() { return driver; }
-    private WebDriverWait wait;
     private CohortManagementPage cohortPage;
 
-    private void highlight(WebElement element) {
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        js.executeScript("arguments[0].style.border='3px solid red'", element);
-        js.executeScript("arguments[0].scrollIntoView(true);", element);
-    }
-
-    @BeforeClass
-    public void setup() {
-        WebDriverManager.chromedriver().setup();
-        ChromeOptions opts = new ChromeOptions();
-        opts.addArguments("--window-size=1920,1080", "--no-sandbox");
-        driver = new ChromeDriver(opts);
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(ConfigReader.getImplicitWait()));
-        wait = new WebDriverWait(driver, Duration.ofSeconds(ConfigReader.getExplicitWait()));
-
+    @BeforeClass(alwaysRun = true, dependsOnMethods = "setUpDriver")
+    public void loginAndNavigate() {
         driver.get(ConfigReader.getBaseUrl());
         new LoginPage(driver).loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
         wait.until(ExpectedConditions.urlContains("super-admin"));
@@ -136,7 +111,6 @@ public class CohortManagementGridTest {
     // -------------------------------------------------------
     // TC-COHORT-004 — Grid has required column headers
     // FRD 2.2.1 — Required columns: Cohort ID, Cohort Name, Status
-    //             Service Line, Start Date, End Date are also expected per FRD
     // -------------------------------------------------------
     @Test(priority = 4)
     public void verifyCohortGridColumns() {
@@ -152,7 +126,6 @@ public class CohortManagementGridTest {
                 .collect(Collectors.toList());
         System.out.println("INFO - Columns found: " + headerTexts);
 
-        // Minimum required columns per FRD 2.2.1
         String[] requiredColumns = {"Cohort ID", "Cohort Name", "Status"};
         for (String col : requiredColumns) {
             boolean found = headerTexts.stream().anyMatch(h -> h.contains(col));
@@ -164,7 +137,6 @@ public class CohortManagementGridTest {
             System.out.println("PASS - Column present: " + col);
         }
 
-        // Informational check for additional FRD columns
         List<String> optionalCols = Arrays.asList("Service Line", "Start Date", "End Date", "Actions");
         for (String col : optionalCols) {
             boolean found = headerTexts.stream().anyMatch(h -> h.contains(col));
@@ -208,7 +180,6 @@ public class CohortManagementGridTest {
                 "FAIL - Cohort ID cell in the first row is empty. " +
                 "FRD 2.2.1 requires each row to display its Cohort ID.");
 
-        // FRD 2.2.1 — Cohort ID should be a clickable link (hyperlink to detail page)
         List<WebElement> anchors = firstCell.findElements(By.tagName("a"));
         if (anchors.isEmpty()) {
             System.out.println("GAP - Cohort ID '" + cohortId + "' is not rendered as a hyperlink. " +
@@ -221,27 +192,16 @@ public class CohortManagementGridTest {
 
     // -------------------------------------------------------
     // TC-COHORT-007 — Status badges present with correct values
-    // FRD 2.2.1 — Status must be a colour-coded badge:
-    //             Planning (Yellow), In-Progress (Blue), Completed (Green)
+    // FRD 2.2.1 — Status must be a colour-coded badge
     // -------------------------------------------------------
     @Test(priority = 7)
     public void verifyStatusBadgesPresent() {
-        List<WebElement> statusCells = driver.findElements(By.cssSelector(
-                "table tbody tr td [class*='badge'], " +
-                "table tbody tr td [class*='status'], " +
-                "table tbody tr td .chip, " +
-                "table tbody tr td .tag"));
-
-        if (statusCells.isEmpty()) {
-            statusCells = driver.findElements(By.cssSelector("table tbody tr td:nth-child(4)"));
-        }
-
+        List<WebElement> statusCells = cohortPage.getStatusBadgesInTable();
         Assert.assertFalse(
                 statusCells.isEmpty(),
                 "FAIL - No status badges or status-column cells found in the cohort grid. " +
                 "FRD 2.2.1 requires each row to show a colour-coded status badge.");
 
-        // FRD 2.2.1 accepted status values
         List<String> acceptedStatuses = Arrays.asList(
                 "Planning", "In-Progress", "In Progress", "Completed", "Active", "Upcoming");
 
@@ -252,8 +212,6 @@ public class CohortManagementGridTest {
                         .anyMatch(s -> text.equalsIgnoreCase(s));
                 if (isAccepted) {
                     System.out.println("PASS - Status badge value: '" + text + "'");
-
-                    // Colour class check per FRD 2.2.1
                     String classes = cell.getAttribute("class") != null
                             ? cell.getAttribute("class").toLowerCase() : "";
                     if (text.equalsIgnoreCase("Planning")) {
@@ -366,8 +324,7 @@ public class CohortManagementGridTest {
 
     // -------------------------------------------------------
     // TC-COHORT-012 — Create Cohort modal contains required fields
-    // FRD 2.2.2 — Mandatory fields: Cohort Name, Service Line,
-    //             Start Date, End Date
+    // FRD 2.2.2 — Mandatory fields: Cohort Name, Service Line, Start Date, End Date
     // -------------------------------------------------------
     @Test(priority = 12)
     public void verifyCreateCohortModalFields() {
@@ -408,11 +365,5 @@ public class CohortManagementGridTest {
             wait.until(ExpectedConditions.invisibilityOfElementLocated(
                     By.cssSelector("[class*='modal'], [role='dialog']")));
         } catch (Exception ignored) {}
-    }
-
-    @AfterClass
-    public void tearDown() {
-        if (driver != null) driver.quit();
-        System.out.println("Browser closed — CohortManagementGridTest complete");
     }
 }

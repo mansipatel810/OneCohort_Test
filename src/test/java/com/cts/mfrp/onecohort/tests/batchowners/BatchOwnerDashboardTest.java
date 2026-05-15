@@ -1,18 +1,18 @@
 package com.cts.mfrp.onecohort.tests.batchowners;
 
+import com.cts.mfrp.onecohort.base.BaseClassTest;
+import com.cts.mfrp.onecohort.pages.LoginPage;
+import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 import java.time.Duration;
 import java.util.List;
@@ -42,23 +42,12 @@ import java.util.List;
  *   🟢 Green  — assertion passed
  *   🔴 Red    — violation / assertion failed
  *
- * KEY DESIGN: @BeforeClass / @AfterClass — ONE browser session for ALL tests.
+ * KEY DESIGN: @BeforeClass — ONE browser session for ALL tests.
  *
- * Credentials: userId=123456 | role=Batch Owner | serviceLine=QEA | pocId=USR-40002
- * URL        : https://one-cohort-1.onrender.com
+ * Login: Batch Owner role — credentials from ConfigReader
  */
 @Listeners(ExtentReportListener.class)
-public class BatchOwnerDashboardTest {
-
-    // ── Credentials ──────────────────────────────────────────────────────────
-    private static final String USER_ID      = "123456";
-    private static final String SERVICE_LINE = "QEA";
-    private static final String POC_ID       = "USR-40002";
-    private static final String BASE_URL     = "https://one-cohort-1.onrender.com";
-
-    // ── Shared driver ─────────────────────────────────────────────────────────
-    private WebDriver          driver;
-    private JavascriptExecutor js;
+public class BatchOwnerDashboardTest extends BaseClassTest {
 
     // ── LOGIN LOCATORS (FRD 13.2) ─────────────────────────────────────────────
     // FRD 13.2.1: "User ID free-text input with placeholder text"
@@ -190,13 +179,11 @@ public class BatchOwnerDashboardTest {
     private final By cohortIdLinks = By.cssSelector("table tbody tr td:first-child a, table tbody tr td a");
 
     // ── COHORT DETAIL LOCATORS (FRD 13.5) ─────────────────────────────────────
-    // FRD 13.5: "Back to Cohorts" link
     // FRD 13.5: "Back to Cohorts" — located via JavaScript since XPath normalize-space()
     // fails on Angular components with _ngcontent attributes and mixed text/element children.
     // CSS selector targets the exact classes: btn btn-link text-decoration-none text-muted mb-3
     private final By backToCohortsLink = By.cssSelector(
             "button.btn-link.text-muted, button.btn.btn-link");
-    // FRD 13.5: Header summary cards — Total Members, Learning Path, Status
     // FRD 13.5: "Total Members" card — match label text directly without ancestor constraint
     private final By detailTotalMembersCard = By.xpath(
             "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'total member') " +
@@ -266,67 +253,21 @@ public class BatchOwnerDashboardTest {
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-    @BeforeClass(alwaysRun = true)
-    public void setUpClass() {
-        WebDriverManager.chromedriver().setup();
-        ChromeOptions opts = new ChromeOptions();
-        opts.addArguments("--window-size=1920,1080", "--no-sandbox", "--disable-gpu");
-        driver = new ChromeDriver(opts);
-        js     = (JavascriptExecutor) driver;
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
+    @BeforeClass(alwaysRun = true, dependsOnMethods = "setUpDriver")
+    public void setup() {
+        driver.get(ConfigReader.getBaseUrl());
+        new LoginPage(driver).loginAsBatchOwner(
+                ConfigReader.getSuperAdminUserId(),
+                ConfigReader.getValidServiceLineId(),
+                ConfigReader.getValidPocId());
+        wait.until(d -> !d.getCurrentUrl().contains("login"));
+        System.out.println("Setup complete — Batch Owner Dashboard URL: " + driver.getCurrentUrl());
     }
 
-    @AfterClass(alwaysRun = true)
-    public void tearDownClass() {
-        if (driver != null) driver.quit();
-    }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // ── Wait helper ──────────────────────────────────────────────────────────
 
     private WebDriverWait wait(int s) {
         return new WebDriverWait(driver, Duration.ofSeconds(s));
-    }
-
-    private boolean isAlertPresent() {
-        try {
-            new WebDriverWait(driver, Duration.ofSeconds(3)).until(ExpectedConditions.alertIsPresent());
-            driver.switchTo().alert().accept();
-            return true;
-        } catch (Exception e) { return false; }
-    }
-
-    private boolean elementExists(By locator) {
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
-        boolean found = !driver.findElements(locator).isEmpty();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        return found;
-    }
-
-    /**
-     * Visually highlights an element in the browser.
-     * 🟡 yellow = locating | 🟢 green = passed | 🔴 red = violation/failed
-     */
-    private void highlight(WebElement element, String color, String label) {
-        try {
-            String border = switch (color) {
-                case "green" -> "3px solid #22c55e";
-                case "red"   -> "3px solid #ef4444";
-                default      -> "3px solid #f59e0b";
-            };
-            js.executeScript(
-                    "arguments[0].style.border     = '" + border + "';" +
-                            "arguments[0].style.boxShadow  = '0 0 6px 2px " + color + "';" +
-                            "arguments[0].style.transition = 'all 0.2s ease';" +
-                            "arguments[0].setAttribute('title', 'TESTING: " + label + "');",
-                    element);
-            Thread.sleep(400);
-        } catch (Exception ignored) {}
-    }
-
-    private void highlightAll(List<WebElement> elements, String color, String label) {
-        for (WebElement el : elements) highlight(el, color, label);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -334,148 +275,19 @@ public class BatchOwnerDashboardTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * TC-BO-001: Automated Batch Owner Login
+     * TC-BO-001: Batch Owner login — dashboard URL reached
      * FRD 13.2.2 — User ID + Role=Batch Owner + Service Line + POC ID → dashboard
      *
-     * Steps:
-     *   1. Navigate to https://one-cohort-1.onrender.com
-     *   2. Enter User ID = 123456
-     *   3. Select Role = Batch Owner
-     *   4. Select Service Line = QEA (appears after Batch Owner selected)
-     *   5. Enter POC ID = USR-40002 (appears after Batch Owner selected)
-     *   6. Click Login
-     * Expected: No alert; browser navigates away from /login.
-     *
-     * Highlighted: User ID input, Role dropdown, Service Line dropdown, POC ID input, Login button
+     * Login is performed in @BeforeClass via LoginPage. This test verifies
+     * the resulting URL confirms a successful Batch Owner login.
      */
     @Test(priority = 1, groups = {"smoke","regression"},
-            description = "TC-BO-001 [FRD 13.2]: Automated Batch Owner login")
-    public void tc_bo_001_automatedBatchOwnerLogin() throws InterruptedException {
-        driver.get(BASE_URL);
-
-        // ── User ID ──────────────────────────────────────────────────────────
-        WebElement userIdEl = wait(20).until(ExpectedConditions.visibilityOfElementLocated(userIdInput));
-        highlight(userIdEl, "yellow", "User ID Input [FRD 13.2]");
-        userIdEl.clear();
-        userIdEl.sendKeys(USER_ID);
-        highlight(userIdEl, "green", "User ID — filled");
-
-        // ── Role dropdown ─────────────────────────────────────────────────────
-        WebElement roleEl = wait(10).until(ExpectedConditions.visibilityOfElementLocated(roleDropdown));
-        highlight(roleEl, "yellow", "Select Role Dropdown [FRD 13.2]");
-        Select roleSelect = new Select(roleEl);
-
-        StringBuilder optLog = new StringBuilder("Role options: ");
-        for (WebElement o : roleSelect.getOptions()) optLog.append("[\"").append(o.getText()).append("\"] ");
-        System.out.println(optLog);
-
-        boolean rolePicked = false;
-        for (String txt : new String[]{"Batch Owner","batch owner","BATCH OWNER","POC","poc"}) {
-            try { roleSelect.selectByVisibleText(txt); rolePicked = true; break; }
-            catch (Exception ignored) {}
-        }
-        if (!rolePicked) {
-            for (WebElement o : roleSelect.getOptions()) {
-                String v = o.getAttribute("value").toLowerCase();
-                if (v.contains("batch") || v.contains("poc") || v.contains("owner")) {
-                    roleSelect.selectByValue(o.getAttribute("value")); rolePicked = true; break;
-                }
-            }
-        }
-        Assert.assertTrue(rolePicked, "Could not select Batch Owner role. Options: " + optLog);
-        highlight(roleEl, "green", "Role = Batch Owner selected");
-
-        // ── Service Line dropdown (appears after Batch Owner selected) ────────
-        // FRD 13.2.2: "Service Line — required dropdown, first additional field"
-        Thread.sleep(500); // allow Angular *ngIf to render
-        WebElement serviceLineEl = null;
-        try {
-            serviceLineEl = wait(10).until(ExpectedConditions.visibilityOfElementLocated(serviceLineDropdown));
-        } catch (Exception e) {
-            // Fallback: find any new select that appeared after role selection
-            for (WebElement sel : driver.findElements(By.cssSelector("select"))) {
-                if (sel.isDisplayed() && !sel.equals(roleEl)) { serviceLineEl = sel; break; }
-            }
-        }
-        Assert.assertNotNull(serviceLineEl, "Service Line dropdown did not appear after selecting Batch Owner role.");
-        highlight(serviceLineEl, "yellow", "Service Line Dropdown [FRD 13.2.2]");
-
-        // Wait for Angular to populate options beyond just the placeholder
-        final WebElement finalSlEl = serviceLineEl;
-        try {
-            new WebDriverWait(driver, Duration.ofSeconds(10)).until(d ->
-                    new Select(finalSlEl).getOptions().size() > 1
-            );
-        } catch (Exception e) {
-            System.out.println("TC-BO-001 warning: Service Line options did not load within 10s.");
-        }
-
-        Select slSelect = new Select(serviceLineEl);
-        StringBuilder slLog = new StringBuilder("Service Line options: ");
-        for (WebElement o : slSelect.getOptions()) slLog.append("[\"").append(o.getText()).append("\"] ");
-        System.out.println(slLog);
-
-        boolean slPicked = false;
-        // Attempt 1: visible text contains "QEA"
-        for (WebElement o : slSelect.getOptions()) {
-            if (o.getText().toUpperCase().contains("QEA")) {
-                slSelect.selectByVisibleText(o.getText()); slPicked = true; break;
-            }
-        }
-        // Attempt 2: value attribute contains "QEA" or "SRV-10001"
-        if (!slPicked) {
-            for (WebElement o : slSelect.getOptions()) {
-                String v = o.getAttribute("value").toUpperCase();
-                if (v.contains("QEA") || v.contains("SRV-10001")) {
-                    slSelect.selectByValue(o.getAttribute("value")); slPicked = true; break;
-                }
-            }
-        }
-        // Attempt 3: first non-placeholder option
-        if (!slPicked) {
-            for (WebElement o : slSelect.getOptions()) {
-                String txt = o.getText().trim();
-                if (!txt.isEmpty() && !txt.equalsIgnoreCase("select service line") && !txt.equals("--")) {
-                    slSelect.selectByVisibleText(txt);
-                    System.out.println("Service Line fallback: selected \"" + txt + "\"");
-                    slPicked = true; break;
-                }
-            }
-        }
-        Assert.assertTrue(slPicked, "Could not select QEA service line. Options: " + slLog);
-        highlight(serviceLineEl, "green", "Service Line = QEA selected");
-
-        // ── POC ID input (second additional field) ────────────────────────────
-        // FRD 13.2.2: "POC ID — required free-text input, second additional field"
-        Thread.sleep(400);
-        WebElement pocEl = null;
-        try {
-            pocEl = wait(10).until(ExpectedConditions.visibilityOfElementLocated(pocIdInput));
-        } catch (Exception e) {
-            // Fallback: any visible text input that is not userId or cohortId
-            for (WebElement inp : driver.findElements(By.cssSelector("input[type='text'],input:not([type])"))) {
-                String ph = inp.getAttribute("placeholder");
-                if (inp.isDisplayed() && ph != null
-                        && !ph.contains("123456") && !ph.contains("COH")) {
-                    pocEl = inp;
-                    System.out.println("Fallback POC ID field: placeholder=\"" + ph + "\"");
-                    break;
-                }
-            }
-        }
-        Assert.assertNotNull(pocEl, "POC ID field did not appear after selecting Batch Owner role.");
-        highlight(pocEl, "yellow", "POC ID Input [FRD 13.2.2]");
-        pocEl.clear();
-        pocEl.sendKeys(POC_ID);
-        highlight(pocEl, "green", "POC ID — filled");
-
-        // ── Login button ──────────────────────────────────────────────────────
-        WebElement loginBtn = wait(10).until(ExpectedConditions.elementToBeClickable(loginButton));
-        highlight(loginBtn, "yellow", "Login Button [FRD 13.2]");
-        loginBtn.click();
-
-        Assert.assertFalse(isAlertPresent(), "Unexpected validation alert after valid Batch Owner login.");
-        System.out.println("TC-BO-001 PASSED. URL = " + driver.getCurrentUrl());
+            description = "TC-BO-001 [FRD 13.2]: Batch Owner login — dashboard URL reached")
+    public void tc_bo_001_automatedBatchOwnerLogin() {
+        String url = driver.getCurrentUrl();
+        Assert.assertFalse(url.contains("/login"),
+                "FRD 13.2: URL should not be on /login after Batch Owner login. Actual: " + url);
+        System.out.println("TC-BO-001 PASSED. URL = " + url);
     }
 
     /**
@@ -492,7 +304,7 @@ public class BatchOwnerDashboardTest {
         try {
             wait(60).until(d -> {
                 String url = d.getCurrentUrl();
-                return !url.equals(BASE_URL) && !url.equals(BASE_URL + "/")
+                return !url.equals(ConfigReader.getBaseUrl()) && !url.equals(ConfigReader.getBaseUrl() + "/")
                         && !url.contains("/login");
             });
         } catch (Exception e) {
@@ -979,7 +791,7 @@ public class BatchOwnerDashboardTest {
         // Strategy 2: JavaScript — find any button whose innerText contains "Back"
         if (!found || backBtn == null) {
             try {
-                backBtn = (WebElement) js.executeScript(
+                backBtn = (WebElement) ((JavascriptExecutor) driver).executeScript(
                         "var buttons = document.querySelectorAll('button');" +
                                 "for(var i=0; i<buttons.length; i++){" +
                                 "  if(buttons[i].innerText && buttons[i].innerText.toLowerCase().indexOf('back') >= 0){" +
@@ -996,7 +808,7 @@ public class BatchOwnerDashboardTest {
         // Strategy 3: any element whose innerText contains "Back" via JS
         if (!found || backBtn == null) {
             try {
-                backBtn = (WebElement) js.executeScript(
+                backBtn = (WebElement) ((JavascriptExecutor) driver).executeScript(
                         "var all = document.querySelectorAll('*');" +
                                 "for(var i=0; i<all.length; i++){" +
                                 "  var t = all[i].childNodes;" +
@@ -1295,7 +1107,7 @@ public class BatchOwnerDashboardTest {
         // Attempt 3: navigate to base URL
         if (!loggedOut) {
             System.out.println("TC-BO-027: Logout button not found. Navigating to base URL.");
-            driver.get(BASE_URL);
+            driver.get(ConfigReader.getBaseUrl());
             Thread.sleep(1000);
         }
 

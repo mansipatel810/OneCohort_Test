@@ -1,22 +1,16 @@
 package com.cts.mfrp.onecohort.tests.leader;
 
+import com.cts.mfrp.onecohort.base.BaseClassTest;
 import com.cts.mfrp.onecohort.pages.LoginPage;
 import com.cts.mfrp.onecohort.pages.leader.LeaderDashboardPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
+import com.cts.mfrp.onecohort.utils.ExtentReportListener;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-import com.cts.mfrp.onecohort.utils.ExtentReportListener;
 
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -26,8 +20,8 @@ import java.util.List;
  * Login flow : User ID + Role "Leader" + Service Line ID
  * URL pattern: /leader/{serviceLineId}/dashboard
  *
- * All 26 test cases run sequentially in a single browser session
- * (driver created in @BeforeClass, closed in @AfterClass).
+ * All 46 test cases run sequentially in a single browser session
+ * (driver created in @BeforeClass via BaseClassTest, closed in @AfterClass via BaseClassTest).
  *
  * KPI structure verified against leader-dashboard.html:
  *   Cohorts section       → 4 cards  (Total Cohorts, Active, Completed, Upcoming)
@@ -36,26 +30,14 @@ import java.util.List;
  *   Stats grids           → 3 grids  (Cohorts per Service Line / Learning Path / Completion Distribution)
  */
 @Listeners(ExtentReportListener.class)
-public class LeaderDashboardTest {
+public class LeaderDashboardTest extends BaseClassTest {
 
-    private WebDriver           driver;
-    /** Exposed for ExtentReportListener screenshot capture. */
-    public WebDriver getDriver() { return driver; }
-    private WebDriverWait       wait;
     private LeaderDashboardPage dashPage;
 
-    // ── Setup / Teardown ──────────────────────────────────────────────────────
+    // ── Setup ─────────────────────────────────────────────────────────────────
 
-    @BeforeClass
+    @BeforeClass(alwaysRun = true, dependsOnMethods = "setUpDriver")
     public void setup() {
-        WebDriverManager.chromedriver().setup();
-        ChromeOptions opts = new ChromeOptions();
-        opts.addArguments("--window-size=1920,1080", "--no-sandbox");
-        driver = new ChromeDriver(opts);
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-
         // ── Login as Leader ────────────────────────────────────────────────
         driver.get(ConfigReader.getBaseUrl());
         LoginPage loginPage = new LoginPage(driver);
@@ -72,14 +54,6 @@ public class LeaderDashboardTest {
         dashPage = new LeaderDashboardPage(driver);
         dashPage.waitForDashboardLoad();
         System.out.println("Leader dashboard loaded");
-    }
-
-    @AfterClass
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
-        System.out.println("Browser closed - All Leader Dashboard tests done!");
     }
 
     // =========================================================================

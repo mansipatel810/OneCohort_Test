@@ -1,18 +1,17 @@
 package com.cts.mfrp.onecohort.tests.cr;
 
+import com.cts.mfrp.onecohort.base.BaseClassTest;
+import com.cts.mfrp.onecohort.pages.LoginPage;
+import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 import java.time.Duration;
 import java.util.List;
@@ -29,22 +28,15 @@ import java.util.List;
  *
  * Based on FRD Section 12 — CR (Class Representative) Role.
  *
- * KEY DESIGN: @BeforeClass / @AfterClass — ONE browser session for ALL tests.
+ * KEY DESIGN: @BeforeClass — ONE browser session for ALL tests.
  *
- * Credentials: userId=123456 | role=CR | cohortId=INTCLD024
- * URL        : https://one-cohort-1.onrender.com
+ * Login: CR role — userId from ConfigReader | cohortId from ConfigReader
  */
 @Listeners(ExtentReportListener.class)
-public class CRDashboardTest {
+public class CRDashboardTest extends BaseClassTest {
 
     // ── Credentials ──────────────────────────────────────────────────────────
-    private static final String CR_USER_ID   = "123456";
-    private static final String CR_COHORT_ID = "INTCLD024";
-    private static final String BASE_URL     = "https://one-cohort-1.onrender.com";
-
-    // ── Shared driver ─────────────────────────────────────────────────────────
-    private WebDriver driver;
-    private JavascriptExecutor js;
+    private static final String CR_COHORT_ID = ConfigReader.getValidCohortId();
 
     // ── LOGIN LOCATORS (FRD 12.1) ─────────────────────────────────────────────
     private final By userIdInput   = By.cssSelector("input[placeholder='e.g. 123456']");
@@ -119,86 +111,18 @@ public class CRDashboardTest {
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-    @BeforeClass(alwaysRun = true)
-    public void setUpClass() {
-        WebDriverManager.chromedriver().setup();
-        ChromeOptions opts = new ChromeOptions();
-        opts.addArguments("--window-size=1920,1080", "--no-sandbox", "--disable-gpu");
-        driver = new ChromeDriver(opts);
-        js     = (JavascriptExecutor) driver;
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
+    @BeforeClass(alwaysRun = true, dependsOnMethods = "setUpDriver")
+    public void setup() {
+        driver.get(ConfigReader.getBaseUrl());
+        new LoginPage(driver).loginAsCR(ConfigReader.getSuperAdminUserId(), CR_COHORT_ID);
+        wait.until(ExpectedConditions.urlContains("/cr/"));
+        System.out.println("Setup complete — CR Dashboard URL: " + driver.getCurrentUrl());
     }
 
-    @AfterClass(alwaysRun = true)
-    public void tearDownClass() {
-        if (driver != null) driver.quit();
-    }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // ── Wait helper ──────────────────────────────────────────────────────────
 
     private WebDriverWait wait(int s) {
         return new WebDriverWait(driver, Duration.ofSeconds(s));
-    }
-
-    private boolean isAlertPresent() {
-        try {
-            new WebDriverWait(driver, Duration.ofSeconds(3)).until(ExpectedConditions.alertIsPresent());
-            driver.switchTo().alert().accept();
-            return true;
-        } catch (Exception e) { return false; }
-    }
-
-    private boolean elementExists(By locator) {
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
-        boolean found = !driver.findElements(locator).isEmpty();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        return found;
-    }
-
-    /**
-     * Highlights a WebElement in the browser to show which UI component is being tested.
-     *
-     * @param element   the element to highlight
-     * @param color     "yellow" = locating | "green" = passed | "red" = failed
-     * @param label     short label shown as the element's title tooltip in the browser
-     */
-    private void highlight(WebElement element, String color, String label) {
-        try {
-            String border = switch (color) {
-                case "green" -> "3px solid #22c55e";
-                case "red"   -> "3px solid #ef4444";
-                default      -> "3px solid #f59e0b"; // yellow
-            };
-            js.executeScript(
-                    "arguments[0].style.border     = '" + border + "';" +
-                            "arguments[0].style.boxShadow  = '0 0 6px 2px " + color + "';" +
-                            "arguments[0].style.transition = 'all 0.2s ease';" +
-                            "arguments[0].setAttribute('title', 'TESTING: " + label + "');",
-                    element
-            );
-            Thread.sleep(400); // pause so the highlight is visible on screen
-        } catch (Exception ignored) {}
-    }
-
-    /**
-     * Finds the first element matching the locator, highlights it in yellow,
-     * then returns it. Call highlight(el, "green"/"red", label) after assertion.
-     */
-    private WebElement findAndHighlight(By locator, String label) {
-        WebElement el = driver.findElement(locator);
-        highlight(el, "yellow", label);
-        return el;
-    }
-
-    /**
-     * Highlights all elements in a list (e.g. all summary cards, all week buttons).
-     */
-    private void highlightAll(List<WebElement> elements, String color, String label) {
-        for (WebElement el : elements) {
-            highlight(el, color, label);
-        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -206,65 +130,21 @@ public class CRDashboardTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * TC-CR-001: Automated CR Login
+     * TC-CR-001: CR login — URL contains /cr/ route
      * FRD 12.1 — User ID + Role=CR + Cohort ID → /cr/{COHORT_ID}
      *
-     * Highlighted components: User ID input, Role dropdown, Cohort ID input, Login button
+     * Login is performed in @BeforeClass via LoginPage. This test verifies
+     * the resulting URL confirms a successful CR login.
      */
     @Test(priority = 1, groups = {"smoke","regression"},
-            description = "TC-CR-001 [FRD 12.1]: Automated CR login")
+            description = "TC-CR-001 [FRD 12.1]: CR login — URL contains /cr/ route")
     public void tc_cr_001_automatedCRLogin() {
-        driver.get(BASE_URL);
-
-        // ── User ID ──────────────────────────────────────────────────────────
-        WebElement userIdEl = wait(20).until(ExpectedConditions.visibilityOfElementLocated(userIdInput));
-        highlight(userIdEl, "yellow", "User ID Input [FRD 12.1]");
-        userIdEl.clear();
-        userIdEl.sendKeys(CR_USER_ID);
-        highlight(userIdEl, "green", "User ID Input — filled");
-
-        // ── Role dropdown ─────────────────────────────────────────────────────
-        WebElement roleEl = wait(10).until(ExpectedConditions.visibilityOfElementLocated(roleDropdown));
-        highlight(roleEl, "yellow", "Select Role Dropdown [FRD 12.1]");
-        Select roleSelect = new Select(roleEl);
-        StringBuilder optLog = new StringBuilder("Role options: ");
-        for (WebElement o : roleSelect.getOptions()) optLog.append("[\"").append(o.getText()).append("\"] ");
-        System.out.println(optLog);
-
-        boolean picked = false;
-        for (String txt : new String[]{"CR", "cr", "Cr", "Class Representative"}) {
-            try { roleSelect.selectByVisibleText(txt); picked = true; break; } catch (Exception ignored) {}
-        }
-        Assert.assertTrue(picked, "Could not select CR role.");
-        highlight(roleEl, "green", "Role = CR selected");
-
-        // ── Cohort ID ─────────────────────────────────────────────────────────
-        WebElement cohortEl = null;
-        try {
-            cohortEl = wait(10).until(ExpectedConditions.visibilityOfElementLocated(cohortIdInput));
-        } catch (Exception e) {
-            for (WebElement inp : driver.findElements(By.cssSelector("input[type='text'],input:not([type])"))) {
-                String ph = inp.getAttribute("placeholder");
-                if (inp.isDisplayed() && ph != null && !ph.contains("123456")) {
-                    cohortEl = inp;
-                    System.out.println("Fallback cohort field: placeholder=\"" + ph + "\"");
-                    break;
-                }
-            }
-        }
-        Assert.assertNotNull(cohortEl, "Cohort ID field did not appear after selecting CR role.");
-        highlight(cohortEl, "yellow", "Cohort ID Input [FRD 12.1.2]");
-        cohortEl.clear();
-        cohortEl.sendKeys(CR_COHORT_ID);
-        highlight(cohortEl, "green", "Cohort ID — filled");
-
-        // ── Login button ──────────────────────────────────────────────────────
-        WebElement loginBtn = wait(10).until(ExpectedConditions.elementToBeClickable(loginButton));
-        highlight(loginBtn, "yellow", "Login Button [FRD 12.1]");
-        loginBtn.click();
-
-        Assert.assertFalse(isAlertPresent(), "Unexpected validation alert after valid CR login.");
-        System.out.println("TC-CR-001 PASSED. URL = " + driver.getCurrentUrl());
+        String url = driver.getCurrentUrl();
+        Assert.assertTrue(url.contains("/cr/"),
+                "FRD 12.1: URL should contain /cr/ after CR login. Actual: " + url);
+        Assert.assertTrue(url.contains(CR_COHORT_ID),
+                "FRD 12.1: URL should contain cohort ID " + CR_COHORT_ID + ". Actual: " + url);
+        System.out.println("TC-CR-001 PASSED. URL = " + url);
     }
 
     /**
@@ -767,7 +647,7 @@ public class CRDashboardTest {
         // Attempt 3: fallback — navigate to base URL
         if (!loggedOut) {
             System.out.println("TC-CR-020: Logout button not found. Navigating to base URL as fallback.");
-            driver.get(BASE_URL);
+            driver.get(ConfigReader.getBaseUrl());
             Thread.sleep(1000);
         }
 

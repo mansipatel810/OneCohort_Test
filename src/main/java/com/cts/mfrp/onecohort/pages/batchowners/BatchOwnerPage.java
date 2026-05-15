@@ -79,10 +79,46 @@ public class BatchOwnerPage extends BasePage {
         } catch (Exception ignored) {}
     }
 
+    // ── Service Line filter (element access) ─────────────────────────────────
+
+    public WebElement getServiceLineDropdownElement() {
+        return driver.findElement(serviceLineDropdown);
+    }
+
+    public List<WebElement> getServiceLineOptions() {
+        try {
+            return new org.openqa.selenium.support.ui.Select(
+                    driver.findElement(serviceLineDropdown)).getOptions();
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
     // ── Learning Path filter ──────────────────────────────────────────────────
 
     public boolean isLearningPathDropdownVisible() {
         return isDisplayed(learningPathDropdown);
+    }
+
+    public WebElement getLearningPathDropdownElement() {
+        return driver.findElement(learningPathDropdown);
+    }
+
+    public void selectLearningPathByVisibleText(String visibleText) {
+        try {
+            new org.openqa.selenium.support.ui.Select(
+                    driver.findElement(learningPathDropdown))
+                    .selectByVisibleText(visibleText);
+        } catch (Exception ignored) {}
+    }
+
+    public List<WebElement> getLearningPathOptions() {
+        try {
+            return new org.openqa.selenium.support.ui.Select(
+                    driver.findElement(learningPathDropdown)).getOptions();
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     // ── Profile cards ─────────────────────────────────────────────────────────

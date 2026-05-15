@@ -125,6 +125,27 @@ public class LoginPage extends BasePage {
         }
     }
 
+    // ── Page state checks ────────────────────────────────────────────────────
+
+    /**
+     * Returns true if the browser is still on the login page.
+     * Handles Angular SPAs where the URL may not change on a failed login attempt.
+     */
+    public boolean isOnLoginPage() {
+        String url = driver.getCurrentUrl();
+        if (url.contains("/login") || url.endsWith("/") ||
+                url.equals(com.cts.mfrp.onecohort.utils.ConfigReader.getBaseUrl()) ||
+                url.equals(com.cts.mfrp.onecohort.utils.ConfigReader.getBaseUrl() + "/")) {
+            return true;
+        }
+        // Fallback: check whether the login User ID input is still visible
+        driver.manage().timeouts().implicitlyWait(java.time.Duration.ofSeconds(0));
+        boolean inputVisible = !driver.findElements(userIdInput).isEmpty();
+        driver.manage().timeouts().implicitlyWait(
+                java.time.Duration.ofSeconds(com.cts.mfrp.onecohort.utils.ConfigReader.getImplicitWait()));
+        return inputVisible;
+    }
+
     // ── Convenience login flows ──────────────────────────────────────────────
 
     public HomePage loginAsSuperAdmin(String userId) {

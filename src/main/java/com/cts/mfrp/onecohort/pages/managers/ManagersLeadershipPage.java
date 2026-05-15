@@ -50,6 +50,19 @@ public class ManagersLeadershipPage extends BasePage {
         return isDisplayed(pageHeading);
     }
 
+    public WebElement getPageHeadingElement() {
+        return driver.findElement(pageHeading);
+    }
+
+    public boolean isCreateManagerBtnEnabled() {
+        try { return driver.findElement(createManagerBtn).isEnabled(); }
+        catch (Exception e) { return false; }
+    }
+
+    public WebElement getCreateManagerBtnElement() {
+        return driver.findElement(createManagerBtn);
+    }
+
     // ── Profile cards ─────────────────────────────────────────────────────────
 
     public boolean areProfileCardsVisible() {

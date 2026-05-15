@@ -1,26 +1,19 @@
 package com.cts.mfrp.onecohort.tests.batchowners;
 
+import com.cts.mfrp.onecohort.base.BaseClassTest;
 import com.cts.mfrp.onecohort.pages.LoginPage;
 import com.cts.mfrp.onecohort.pages.batchowners.BatchOwnerPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -47,30 +40,12 @@ import java.util.List;
  * ─────────────────────────────────────────────────────────────────────────────
  */
 @Listeners(ExtentReportListener.class)
-public class BatchOwnerFilterTest {
+public class BatchOwnerFilterTest extends BaseClassTest {
 
-    private WebDriver driver;
-    /** Exposed for ExtentReportListener screenshot capture. */
-    public WebDriver getDriver() { return driver; }
-    private WebDriverWait wait;
     private BatchOwnerPage batchOwnerPage;
 
-    private void highlight(WebElement element) {
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        js.executeScript("arguments[0].style.border='3px solid red'", element);
-        js.executeScript("arguments[0].scrollIntoView(true);", element);
-    }
-
-    @BeforeClass
+    @BeforeClass(alwaysRun = true, dependsOnMethods = "setUpDriver")
     public void setup() {
-        WebDriverManager.chromedriver().setup();
-        ChromeOptions opts = new ChromeOptions();
-        opts.addArguments("--window-size=1920,1080", "--no-sandbox");
-        driver = new ChromeDriver(opts);
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(ConfigReader.getImplicitWait()));
-        wait = new WebDriverWait(driver, Duration.ofSeconds(ConfigReader.getExplicitWait()));
-
         driver.get(ConfigReader.getBaseUrl());
         new LoginPage(driver).loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
         wait.until(ExpectedConditions.urlContains("super-admin"));
@@ -257,12 +232,5 @@ public class BatchOwnerFilterTest {
         List<WebElement> cards = batchOwnerPage.getProfileCards();
         System.out.println("PASS - Learning Path filter '" + lpValue + "' returned " +
                 cards.size() + " profile card(s)");
-    }
-
-    // ── Teardown ──────────────────────────────────────────────────────────────
-    @AfterClass
-    public void tearDown() {
-        if (driver != null) driver.quit();
-        System.out.println("Browser closed — BatchOwnerFilterTest complete");
     }
 }

@@ -1,18 +1,18 @@
 package com.cts.mfrp.onecohort.tests.cr;
 
+import com.cts.mfrp.onecohort.base.BaseTest;
+import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 import java.time.Duration;
 import java.util.List;
@@ -33,51 +33,31 @@ import java.util.List;
  *   TC-NEG-003  Cohort ID field hidden   → before CR is selected   [FRD 12.1.2]
  *   TC-NEG-004  All fields blank         → alert on Login click     [FRD 12.1 + 12.1.2]
  *
- * DESIGN: @BeforeMethod / @AfterMethod — fresh browser per test.
+ * DESIGN: @BeforeMethod / @AfterMethod — fresh browser per test (provided by BaseTest).
  */
 @Listeners(ExtentReportListener.class)
-public class CRLoginNegativeTest {
-
-    private static final String BASE_URL     = "https://one-cohort-1.onrender.com";
-    private static final String VALID_USER   = "123456";
-    private static final String VALID_COHORT = "INTCLD024";
-
-    private WebDriver         driver;
-    private JavascriptExecutor js;
+public class CRLoginNegativeTest extends BaseTest {
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     @BeforeMethod(alwaysRun = true)
-    public void setUp() {
-        WebDriverManager.chromedriver().setup();
-        ChromeOptions opts = new ChromeOptions();
-        opts.addArguments("--window-size=1920,1080", "--no-sandbox", "--disable-gpu");
-        driver = new ChromeDriver(opts);
-        js     = (JavascriptExecutor) driver;
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
-        driver.get(BASE_URL);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown() {
-        if (driver != null) driver.quit();
+    public void navigateToLogin() {
+        getDriver().get(ConfigReader.getBaseUrl());
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private WebDriverWait wait(int s) {
-        return new WebDriverWait(driver, Duration.ofSeconds(s));
+        return new WebDriverWait(getDriver(), Duration.ofSeconds(s));
     }
 
     /** Waits up to 5s for a browser alert, captures its text, and dismisses it. */
     private String getAlertText() {
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(5))
+            new WebDriverWait(getDriver(), Duration.ofSeconds(5))
                     .until(ExpectedConditions.alertIsPresent());
-            String msg = driver.switchTo().alert().getText();
-            driver.switchTo().alert().accept();
+            String msg = getDriver().switchTo().alert().getText();
+            getDriver().switchTo().alert().accept();
             return msg;
         } catch (Exception e) { return null; }
     }
@@ -87,13 +67,14 @@ public class CRLoginNegativeTest {
      * Handles Angular SPAs where the URL may not change on failed login.
      */
     private boolean isOnLoginPage() {
-        String url = driver.getCurrentUrl();
-        if (url.contains("/login") || url.equals(BASE_URL) || url.equals(BASE_URL + "/"))
+        String url = getDriver().getCurrentUrl();
+        String base = ConfigReader.getBaseUrl();
+        if (url.contains("/login") || url.equals(base) || url.equals(base + "/"))
             return true;
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
-        boolean inputVisible = !driver.findElements(
+        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
+        boolean inputVisible = !getDriver().findElements(
                 By.cssSelector("input[placeholder='e.g. 123456']")).isEmpty();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         return inputVisible;
     }
 
@@ -111,7 +92,7 @@ public class CRLoginNegativeTest {
                 case "red"   -> "3px solid #ef4444";
                 default      -> "3px solid #f59e0b"; // yellow
             };
-            js.executeScript(
+            ((JavascriptExecutor) getDriver()).executeScript(
                     "arguments[0].style.border     = '" + border + "';" +
                             "arguments[0].style.boxShadow  = '0 0 6px 2px " + color + "';" +
                             "arguments[0].style.transition = 'all 0.2s ease';" +
@@ -166,7 +147,7 @@ public class CRLoginNegativeTest {
                             "or contains(@placeholder,'Cohort') or contains(@placeholder,'INTCLD') " +
                             "or (contains(@placeholder,'ID') and not(contains(@placeholder,'123456')))]")));
         } catch (Exception e) {
-            for (WebElement inp : driver.findElements(
+            for (WebElement inp : getDriver().findElements(
                     By.cssSelector("input[type='text'],input:not([type])"))) {
                 String ph = inp.getAttribute("placeholder");
                 if (inp.isDisplayed() && ph != null && !ph.contains("123456")) {
@@ -216,20 +197,20 @@ public class CRLoginNegativeTest {
         highlight(userIdEl, "yellow", "User ID Input — LEFT BLANK [FRD 12.1]");
 
         selectCRRole();
-        enterCohortId(VALID_COHORT);
+        enterCohortId(ConfigReader.getValidCohortId());
         clickLogin();
 
         String alert = getAlertText();
-        System.out.println("TC-NEG-001: Alert = \"" + alert + "\"  |  URL = " + driver.getCurrentUrl());
+        System.out.println("TC-NEG-001: Alert = \"" + alert + "\"  |  URL = " + getDriver().getCurrentUrl());
 
         // Re-locate User ID field and highlight based on result
         try {
-            WebElement userIdAfter = driver.findElement(By.cssSelector("input[placeholder='e.g. 123456']"));
+            WebElement userIdAfter = getDriver().findElement(By.cssSelector("input[placeholder='e.g. 123456']"));
             highlight(userIdAfter, "green", "User ID empty — validation correctly triggered");
         } catch (Exception ignored) {}
 
         Assert.assertTrue(isOnLoginPage(),
-                "FRD 12.1: App should stay on login page when User ID is empty. URL: " + driver.getCurrentUrl());
+                "FRD 12.1: App should stay on login page when User ID is empty. URL: " + getDriver().getCurrentUrl());
         if (alert != null) {
             Assert.assertTrue(
                     alert.toLowerCase().contains("user") || alert.toLowerCase().contains("id"),
@@ -259,7 +240,7 @@ public class CRLoginNegativeTest {
     @Test(priority = 2, groups = {"negative","regression"},
             description = "TC-NEG-002 [FRD 12.1.2]: Empty Cohort ID — alert fires and page stays on login")
     public void tc_neg_002_emptyCohortId() throws InterruptedException {
-        enterUserId(VALID_USER);
+        enterUserId(ConfigReader.getSuperAdminUserId());
         selectCRRole();
 
         // Locate Cohort ID field and show it's being left blank
@@ -271,7 +252,7 @@ public class CRLoginNegativeTest {
                             "or contains(@placeholder,'Cohort') or contains(@placeholder,'INTCLD') " +
                             "or (contains(@placeholder,'ID') and not(contains(@placeholder,'123456')))]")));
         } catch (Exception e) {
-            for (WebElement inp : driver.findElements(By.cssSelector("input[type='text'],input:not([type])"))) {
+            for (WebElement inp : getDriver().findElements(By.cssSelector("input[type='text'],input:not([type])"))) {
                 String ph = inp.getAttribute("placeholder");
                 if (inp.isDisplayed() && ph != null && !ph.contains("123456")) { cohortEl = inp; break; }
             }
@@ -284,13 +265,13 @@ public class CRLoginNegativeTest {
         clickLogin();
 
         String alert = getAlertText();
-        System.out.println("TC-NEG-002: Alert = \"" + alert + "\"  |  URL = " + driver.getCurrentUrl());
+        System.out.println("TC-NEG-002: Alert = \"" + alert + "\"  |  URL = " + getDriver().getCurrentUrl());
 
         // Re-highlight cohort field green to show validation was triggered correctly
         if (cohortEl != null) highlight(cohortEl, "green", "Cohort ID empty — validation correctly triggered");
 
         Assert.assertTrue(isOnLoginPage(),
-                "FRD 12.1.2: App should stay on login page when Cohort ID is empty. URL: " + driver.getCurrentUrl());
+                "FRD 12.1.2: App should stay on login page when Cohort ID is empty. URL: " + getDriver().getCurrentUrl());
         if (alert != null) {
             Assert.assertTrue(
                     alert.toLowerCase().contains("cohort"),
@@ -325,12 +306,12 @@ public class CRLoginNegativeTest {
         highlight(userIdEl, "green", "Login Page loaded — checking Cohort ID field visibility");
 
         // Highlight the role dropdown to show current default role
-        WebElement roleEl = driver.findElement(By.cssSelector("div.space-y-5 select"));
+        WebElement roleEl = getDriver().findElement(By.cssSelector("div.space-y-5 select"));
         highlight(roleEl, "yellow", "Role Dropdown — default (not CR) [FRD 12.1.2]");
 
         // Check if cohort ID field is visible under the default role
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
-        List<WebElement> cohortFields = driver.findElements(By.xpath(
+        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
+        List<WebElement> cohortFields = getDriver().findElements(By.xpath(
                 "//input[contains(@placeholder,'COH') or contains(@placeholder,'cohort') " +
                         "or contains(@placeholder,'Cohort') or contains(@placeholder,'INTCLD')]"));
         boolean anyVisible = cohortFields.stream().anyMatch(WebElement::isDisplayed);
@@ -344,7 +325,7 @@ public class CRLoginNegativeTest {
             highlight(roleEl, "green", "Cohort ID correctly hidden before CR selected");
         }
 
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
         Assert.assertFalse(anyVisible,
                 "FRD 12.1.2: Cohort ID field should NOT be visible before CR role is selected.");
@@ -373,23 +354,23 @@ public class CRLoginNegativeTest {
                 By.cssSelector("input[placeholder='e.g. 123456']")));
         highlight(userIdEl, "yellow", "User ID — intentionally BLANK [FRD 12.1]");
 
-        WebElement roleEl = driver.findElement(By.cssSelector("div.space-y-5 select"));
+        WebElement roleEl = getDriver().findElement(By.cssSelector("div.space-y-5 select"));
         highlight(roleEl, "yellow", "Role Dropdown — intentionally unchanged [FRD 12.1]");
 
         // Click Login without filling anything
         clickLogin();
 
         String alert = getAlertText();
-        System.out.println("TC-NEG-004: Alert = \"" + alert + "\"  |  URL = " + driver.getCurrentUrl());
+        System.out.println("TC-NEG-004: Alert = \"" + alert + "\"  |  URL = " + getDriver().getCurrentUrl());
 
         // Highlight User ID green after successful validation trigger
         try {
-            WebElement userIdAfter = driver.findElement(By.cssSelector("input[placeholder='e.g. 123456']"));
+            WebElement userIdAfter = getDriver().findElement(By.cssSelector("input[placeholder='e.g. 123456']"));
             highlight(userIdAfter, "green", "Blank login rejected — validation working correctly");
         } catch (Exception ignored) {}
 
         Assert.assertTrue(isOnLoginPage(),
-                "FRD 12.1: App should stay on login page when all fields are blank. URL: " + driver.getCurrentUrl());
+                "FRD 12.1: App should stay on login page when all fields are blank. URL: " + getDriver().getCurrentUrl());
         Assert.assertNotNull(alert,
                 "FRD 12.1: A validation alert must appear when Login is clicked with no fields filled.");
         System.out.println("TC-NEG-004 PASSED.");

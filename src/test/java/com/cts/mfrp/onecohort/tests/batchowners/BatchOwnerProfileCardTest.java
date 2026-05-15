@@ -1,25 +1,19 @@
 package com.cts.mfrp.onecohort.tests.batchowners;
 
+import com.cts.mfrp.onecohort.base.BaseClassTest;
 import com.cts.mfrp.onecohort.pages.LoginPage;
 import com.cts.mfrp.onecohort.pages.batchowners.BatchOwnerPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -44,30 +38,12 @@ import java.util.List;
  * ─────────────────────────────────────────────────────────────────────────────
  */
 @Listeners(ExtentReportListener.class)
-public class BatchOwnerProfileCardTest {
+public class BatchOwnerProfileCardTest extends BaseClassTest {
 
-    private WebDriver driver;
-    /** Exposed for ExtentReportListener screenshot capture. */
-    public WebDriver getDriver() { return driver; }
-    private WebDriverWait wait;
     private BatchOwnerPage batchOwnerPage;
 
-    private void highlight(WebElement element) {
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        js.executeScript("arguments[0].style.border='3px solid red'", element);
-        js.executeScript("arguments[0].scrollIntoView(true);", element);
-    }
-
-    @BeforeClass
+    @BeforeClass(alwaysRun = true, dependsOnMethods = "setUpDriver")
     public void setup() {
-        WebDriverManager.chromedriver().setup();
-        ChromeOptions opts = new ChromeOptions();
-        opts.addArguments("--window-size=1920,1080", "--no-sandbox");
-        driver = new ChromeDriver(opts);
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(ConfigReader.getImplicitWait()));
-        wait = new WebDriverWait(driver, Duration.ofSeconds(ConfigReader.getExplicitWait()));
-
         driver.get(ConfigReader.getBaseUrl());
         new LoginPage(driver).loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
         wait.until(ExpectedConditions.urlContains("super-admin"));
@@ -90,7 +66,7 @@ public class BatchOwnerProfileCardTest {
         // If a Learning Path dropdown appeared, select the first real option
         if (batchOwnerPage.isLearningPathDropdownVisible()) {
             try {
-                org.openqa.selenium.support.ui.Select lpSelect = new org.openqa.selenium.support.ui.Select(
+                Select lpSelect = new Select(
                         driver.findElement(By.cssSelector(
                                 "select[name='learningPath'], select#learningPathFilter, " +
                                 "select[formcontrolname='learningPath']")));
@@ -165,7 +141,7 @@ public class BatchOwnerProfileCardTest {
         String cardText = firstCard.getText();
         boolean hasServiceLine = cardText.contains("SRV-") ||
                 cardText.toLowerCase().contains("service line") ||
-                cardText.toLowerCase().contains("service") ;
+                cardText.toLowerCase().contains("service");
         Assert.assertTrue(
                 hasServiceLine,
                 "FAIL - First card does not show Service Line information. " +
@@ -307,12 +283,5 @@ public class BatchOwnerProfileCardTest {
                 "FRD 2.4.2 implies navigation to profile and back must be supported. " +
                 "Current URL: " + urlAfter);
         System.out.println("PASS - Back navigation returned to Batch Owners list: " + urlAfter);
-    }
-
-    // ── Teardown ──────────────────────────────────────────────────────────────
-    @AfterClass
-    public void tearDown() {
-        if (driver != null) driver.quit();
-        System.out.println("Browser closed — BatchOwnerProfileCardTest complete");
     }
 }

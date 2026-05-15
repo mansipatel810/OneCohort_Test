@@ -1,18 +1,18 @@
 package com.cts.mfrp.onecohort.tests.batchowners;
 
+import com.cts.mfrp.onecohort.base.BaseTest;
+import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 import java.time.Duration;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.List;
  *   TC-NEG-BO-003  Service Line + POC ID fields   → hidden before Batch Owner selected  [FRD 13.2.2]
  *   TC-NEG-BO-004  All fields blank               → alert on Login click     [FRD 13.2.1 + 13.2.2]
  *
- * DESIGN: @BeforeMethod / @AfterMethod — fresh browser per test.
+ * DESIGN: @BeforeMethod / @AfterMethod — fresh browser per test (provided by BaseTest).
  *
  * UI Highlighting:
  *   🟡 Yellow — element located, being tested
@@ -41,58 +41,38 @@ import java.util.List;
  *   🔴 Red    — violation / field visible when it shouldn't be
  */
 @Listeners(ExtentReportListener.class)
-public class BatchOwnerLoginNegativeTest {
-
-    private static final String BASE_URL     = "https://one-cohort-1.onrender.com";
-    private static final String VALID_USER   = "123456";
-    private static final String VALID_SL     = "QEA";
-    private static final String VALID_POC_ID = "USR-40002";
-
-    private WebDriver          driver;
-    private JavascriptExecutor js;
+public class BatchOwnerLoginNegativeTest extends BaseTest {
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     @BeforeMethod(alwaysRun = true)
-    public void setUp() {
-        WebDriverManager.chromedriver().setup();
-        ChromeOptions opts = new ChromeOptions();
-        opts.addArguments("--window-size=1920,1080", "--no-sandbox", "--disable-gpu");
-        driver = new ChromeDriver(opts);
-        js     = (JavascriptExecutor) driver;
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
-        driver.get(BASE_URL);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown() {
-        if (driver != null) driver.quit();
+    public void navigateToLogin() {
+        getDriver().get(ConfigReader.getBaseUrl());
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private WebDriverWait wait(int s) {
-        return new WebDriverWait(driver, Duration.ofSeconds(s));
+        return new WebDriverWait(getDriver(), Duration.ofSeconds(s));
     }
 
     private String getAlertText() {
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.alertIsPresent());
-            String msg = driver.switchTo().alert().getText();
-            driver.switchTo().alert().accept();
+            new WebDriverWait(getDriver(), Duration.ofSeconds(5)).until(ExpectedConditions.alertIsPresent());
+            String msg = getDriver().switchTo().alert().getText();
+            getDriver().switchTo().alert().accept();
             return msg;
         } catch (Exception e) { return null; }
     }
 
     private boolean isOnLoginPage() {
-        String url = driver.getCurrentUrl();
-        if (url.contains("/login") || url.equals(BASE_URL) || url.equals(BASE_URL + "/")) return true;
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
-        boolean visible = !driver.findElements(
+        String url  = getDriver().getCurrentUrl();
+        String base = ConfigReader.getBaseUrl();
+        if (url.contains("/login") || url.equals(base) || url.equals(base + "/")) return true;
+        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
+        boolean visible = !getDriver().findElements(
                 By.cssSelector("input[placeholder='e.g. 123456']")).isEmpty();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         return visible;
     }
 
@@ -107,7 +87,7 @@ public class BatchOwnerLoginNegativeTest {
                 case "red"   -> "3px solid #ef4444";
                 default      -> "3px solid #f59e0b";
             };
-            js.executeScript(
+            ((JavascriptExecutor) getDriver()).executeScript(
                     "arguments[0].style.border     = '" + border + "';" +
                             "arguments[0].style.boxShadow  = '0 0 6px 2px " + color + "';" +
                             "arguments[0].style.transition = 'all 0.2s ease';" +
@@ -156,7 +136,6 @@ public class BatchOwnerLoginNegativeTest {
         Thread.sleep(500);
 
         // Primary locator: find the select that is near a "Service Line" label
-        // (same strategy as BatchOwnerDashboardTest.serviceLineDropdown)
         By serviceLineDropdown = By.xpath(
                 "//select[preceding-sibling::*[contains(text(),'Service Line')] " +
                         "or following-sibling::*[contains(text(),'Service Line')]] " +
@@ -168,8 +147,8 @@ public class BatchOwnerLoginNegativeTest {
             slEl = wait(8).until(ExpectedConditions.visibilityOfElementLocated(serviceLineDropdown));
         } catch (Exception e) {
             // Fallback: any visible select that is not the role dropdown
-            WebElement roleEl = driver.findElement(By.cssSelector("div.space-y-5 select"));
-            for (WebElement sel : driver.findElements(By.cssSelector("select"))) {
+            WebElement roleEl = getDriver().findElement(By.cssSelector("div.space-y-5 select"));
+            for (WebElement sel : getDriver().findElements(By.cssSelector("select"))) {
                 if (sel.isDisplayed() && !sel.equals(roleEl)) { slEl = sel; break; }
             }
         }
@@ -225,7 +204,7 @@ public class BatchOwnerLoginNegativeTest {
         try {
             pocEl = wait(8).until(ExpectedConditions.visibilityOfElementLocated(locator));
         } catch (Exception e) {
-            for (WebElement inp : driver.findElements(
+            for (WebElement inp : getDriver().findElements(
                     By.cssSelector("input[type='text'],input:not([type])"))) {
                 String ph = inp.getAttribute("placeholder");
                 if (inp.isDisplayed() && ph != null
@@ -258,17 +237,13 @@ public class BatchOwnerLoginNegativeTest {
      * Highlighted:
      *   🟡 User ID input — intentionally left blank
      *   🟡 Role dropdown (Batch Owner selected)
-     *   🟡 Service Line dropdown (QEA selected)
-     *   🟡 POC ID input (filled with valid value)
      *   🟡 Login button (clicked)
      *   🟢 User ID input — validation correctly triggered
      *
      * Steps:
      *   1. Leave User ID blank
      *   2. Select Role = Batch Owner
-     *   3. Select Service Line = QEA
-     *   4. Enter POC ID = USR-40002
-     *   5. Click Login
+     *   3. Click Login (User ID validation fires first)
      * Expected: Alert fires; page stays on login.
      */
     @Test(priority = 1, groups = {"negative","regression"},
@@ -287,17 +262,17 @@ public class BatchOwnerLoginNegativeTest {
         clickLogin();
 
         String alert = getAlertText();
-        System.out.println("TC-NEG-BO-001: Alert = \"" + alert + "\"  |  URL = " + driver.getCurrentUrl());
+        System.out.println("TC-NEG-BO-001: Alert = \"" + alert + "\"  |  URL = " + getDriver().getCurrentUrl());
 
         // Re-highlight User ID green — validation correctly triggered
         try {
-            WebElement userIdAfter = driver.findElement(
+            WebElement userIdAfter = getDriver().findElement(
                     By.cssSelector("input[placeholder='e.g. 123456']"));
             highlight(userIdAfter, "green", "User ID empty — validation correctly triggered");
         } catch (Exception ignored) {}
 
         Assert.assertTrue(isOnLoginPage(),
-                "FRD 13.2.1: App should stay on login when User ID is empty. URL: " + driver.getCurrentUrl());
+                "FRD 13.2.1: App should stay on login when User ID is empty. URL: " + getDriver().getCurrentUrl());
         if (alert != null) {
             Assert.assertTrue(
                     alert.toLowerCase().contains("user") || alert.toLowerCase().contains("id"),
@@ -313,15 +288,15 @@ public class BatchOwnerLoginNegativeTest {
      * Highlighted:
      *   🟡 User ID input (filled)
      *   🟡 Role dropdown (Batch Owner selected)
-     *   🟡 Service Line dropdown (QEA selected)
+     *   🟡 Service Line dropdown (selected)
      *   🟡 POC ID input — intentionally left blank
      *   🟡 Login button (clicked)
      *   🟢 POC ID input — validation correctly triggered
      *
      * Steps:
-     *   1. Enter User ID = 123456
+     *   1. Enter User ID
      *   2. Select Role = Batch Owner
-     *   3. Select Service Line = QEA
+     *   3. Select Service Line
      *   4. Leave POC ID blank
      *   5. Click Login
      * Expected: Alert fires; page stays on login.
@@ -331,9 +306,9 @@ public class BatchOwnerLoginNegativeTest {
     public void tc_neg_bo_002_emptyPocId() throws InterruptedException {
         // IMPORTANT: User ID must be entered BEFORE selecting role so the service
         // line API call fires and populates the dropdown options.
-        enterUserId(VALID_USER);
+        enterUserId(ConfigReader.getSuperAdminUserId());
         selectBatchOwnerRole();
-        selectServiceLine(VALID_SL);
+        selectServiceLine(ConfigReader.getValidServiceLineId());
 
         // Locate POC ID field and show it's intentionally left blank
         WebElement pocEl = enterPocId(null); // locates field, highlights yellow, types nothing
@@ -343,14 +318,14 @@ public class BatchOwnerLoginNegativeTest {
         clickLogin();
 
         String alert = getAlertText();
-        System.out.println("TC-NEG-BO-002: Alert = \"" + alert + "\"  |  URL = " + driver.getCurrentUrl());
+        System.out.println("TC-NEG-BO-002: Alert = \"" + alert + "\"  |  URL = " + getDriver().getCurrentUrl());
 
         // Re-highlight POC ID green
         try { highlight(pocEl, "green", "POC ID empty — validation correctly triggered"); }
         catch (Exception ignored) {}
 
         Assert.assertTrue(isOnLoginPage(),
-                "FRD 13.2.2: App should stay on login when POC ID is empty. URL: " + driver.getCurrentUrl());
+                "FRD 13.2.2: App should stay on login when POC ID is empty. URL: " + getDriver().getCurrentUrl());
 
         // The app validates in order: User ID → Service Line → POC ID.
         // With User ID and Service Line filled, the alert must reference POC ID.
@@ -394,22 +369,22 @@ public class BatchOwnerLoginNegativeTest {
         highlight(userIdEl, "green", "Login page loaded — checking field visibility [FRD 13.2.2]");
 
         // Highlight default role dropdown
-        WebElement roleEl = driver.findElement(By.cssSelector("div.space-y-5 select"));
+        WebElement roleEl = getDriver().findElement(By.cssSelector("div.space-y-5 select"));
         highlight(roleEl, "yellow", "Role Dropdown — default role (not Batch Owner) [FRD 13.2.2]");
 
         // Check Service Line dropdown not visible
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
-        List<WebElement> selects = driver.findElements(By.cssSelector("select"));
+        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
+        List<WebElement> selects = getDriver().findElements(By.cssSelector("select"));
         boolean slVisible = selects.stream()
                 .filter(s -> !s.equals(roleEl))
                 .anyMatch(WebElement::isDisplayed);
 
         // Check POC ID field not visible
-        List<WebElement> pocInputs = driver.findElements(By.xpath(
+        List<WebElement> pocInputs = getDriver().findElements(By.xpath(
                 "//input[contains(@placeholder,'USR') or contains(@placeholder,'POC') " +
                         "or contains(@placeholder,'poc')]"));
         boolean pocVisible = pocInputs.stream().anyMatch(WebElement::isDisplayed);
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
         if (slVisible) {
             selects.stream().filter(s -> !s.equals(roleEl) && s.isDisplayed()).forEach(s ->
@@ -454,27 +429,27 @@ public class BatchOwnerLoginNegativeTest {
                 By.cssSelector("input[placeholder='e.g. 123456']")));
 
         // Highlight all visible fields to show they're intentionally empty
-        WebElement userIdEl = driver.findElement(By.cssSelector("input[placeholder='e.g. 123456']"));
+        WebElement userIdEl = getDriver().findElement(By.cssSelector("input[placeholder='e.g. 123456']"));
         highlight(userIdEl, "yellow", "User ID — intentionally BLANK [FRD 13.2.1]");
 
-        WebElement roleEl = driver.findElement(By.cssSelector("div.space-y-5 select"));
+        WebElement roleEl = getDriver().findElement(By.cssSelector("div.space-y-5 select"));
         highlight(roleEl, "yellow", "Role Dropdown — intentionally unchanged [FRD 13.2.1]");
 
         // Click Login without filling anything
         clickLogin();
 
         String alert = getAlertText();
-        System.out.println("TC-NEG-BO-004: Alert = \"" + alert + "\"  |  URL = " + driver.getCurrentUrl());
+        System.out.println("TC-NEG-BO-004: Alert = \"" + alert + "\"  |  URL = " + getDriver().getCurrentUrl());
 
         // Highlight User ID green after validation triggered
         try {
-            WebElement userIdAfter = driver.findElement(
+            WebElement userIdAfter = getDriver().findElement(
                     By.cssSelector("input[placeholder='e.g. 123456']"));
             highlight(userIdAfter, "green", "Blank login rejected — validation working correctly");
         } catch (Exception ignored) {}
 
         Assert.assertTrue(isOnLoginPage(),
-                "FRD 13.2.1: App should stay on login page when all fields are blank. URL: " + driver.getCurrentUrl());
+                "FRD 13.2.1: App should stay on login page when all fields are blank. URL: " + getDriver().getCurrentUrl());
         Assert.assertNotNull(alert,
                 "FRD 13.2.1: A validation alert must appear when Login is clicked with no fields filled.");
         System.out.println("TC-NEG-BO-004 PASSED.");
