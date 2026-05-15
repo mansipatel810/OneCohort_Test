@@ -5,16 +5,20 @@ import com.cts.mfrp.onecohort.pages.LoginPage;
 import com.cts.mfrp.onecohort.pages.managers.CreateManagerModal;
 import com.cts.mfrp.onecohort.pages.managers.ManagersLeadershipPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
+import com.cts.mfrp.onecohort.utils.ExcelUtils;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Create Manager Modal Tests — FRD Section 2.3.2
@@ -37,6 +41,9 @@ import java.util.List;
  */
 @Listeners(ExtentReportListener.class)
 public class CreateManagerTest extends BaseClassTest {
+
+    private static final String MANAGER_DATA_FILE =
+            "src/test/resources/testdata/ManagerTestData.xlsx";
 
     private ManagersLeadershipPage managersPage;
 
@@ -216,6 +223,86 @@ public class CreateManagerTest extends BaseClassTest {
         } catch (Exception e) {
             Assert.fail("FAIL - Modal is still visible after clicking Cancel. " +
                         "FRD 2.3.2 requires a Cancel button to dismiss the Create Manager form.");
+        }
+    }
+
+    // -------------------------------------------------------
+    // TC-CREATE-MGR-008 — Data-driven form fill & validation
+    // FRD 2.3.2 — Valid rows must pass; rows with missing required fields
+    //             must trigger validation and keep the modal open
+    // Data source: ManagerTestData.xlsx → CreateManager sheet
+    // -------------------------------------------------------
+    @DataProvider(name = "managerFormData")
+    public Object[][] managerFormData() {
+        return ExcelUtils.getTestData(MANAGER_DATA_FILE, "CreateManager");
+    }
+
+    @Test(priority = 8, dataProvider = "managerFormData")
+    public void verifyCreateManagerFormWithData(Map<String, String> row) {
+        String fullName      = row.getOrDefault("FullName",      "");
+        String employeeId    = row.getOrDefault("EmployeeId",    "");
+        String serviceLine   = row.getOrDefault("ServiceLine",   "");
+        String expectedResult = row.getOrDefault("ExpectedResult", "");
+
+        System.out.println("\n--- TC-CREATE-MGR-008 DataDriven | FullName=" + fullName
+                + " | EmpId=" + employeeId + " | SL=" + serviceLine
+                + " | Expected=" + expectedResult + " ---");
+
+        CreateManagerModal modal = openCreateManagerModal();
+
+        try {
+            // Fill Full Name
+            if (!fullName.isEmpty()) {
+                WebElement nameInput = driver.findElement(By.cssSelector(
+                        "input[formcontrolname='name'], input[formcontrolname='fullName'], " +
+                        "input[placeholder*='Name']"));
+                nameInput.clear();
+                nameInput.sendKeys(fullName);
+            }
+            // Fill Employee ID
+            if (!employeeId.isEmpty()) {
+                WebElement empInput = driver.findElement(By.cssSelector(
+                        "input[formcontrolname='employeeId'], input[formcontrolname='empId'], " +
+                        "input[placeholder*='Employee'], input[placeholder*='ID']"));
+                empInput.clear();
+                empInput.sendKeys(employeeId);
+            }
+            // Select Service Line
+            if (!serviceLine.isEmpty()) {
+                List<WebElement> selects = driver.findElements(By.cssSelector("select"));
+                if (!selects.isEmpty()) {
+                    new Select(selects.get(0)).selectByValue(serviceLine);
+                }
+            }
+
+            modal.clickSubmit();
+            Thread.sleep(800);
+
+            boolean modalOpen = managersPage.isModalVisible();
+            List<WebElement> errors = driver.findElements(By.cssSelector(
+                    "[class*='error'], [class*='invalid'], .mat-error, " +
+                    ".ng-invalid ~ .error-msg, [class*='validation']"));
+
+            if ("success".equalsIgnoreCase(expectedResult)) {
+                Assert.assertFalse(modalOpen,
+                        "FAIL - Modal still open after submitting valid data. "
+                        + "Expected a successful create for FullName='" + fullName + "'.");
+                System.out.println("PASS - Manager created successfully with valid data");
+            } else {
+                // validation_error expected — modal must stay open OR errors shown
+                Assert.assertTrue(modalOpen || !errors.isEmpty(),
+                        "FAIL - Modal closed without showing validation for incomplete data. "
+                        + "FullName='" + fullName + "' EmpId='" + employeeId
+                        + "' SL='" + serviceLine + "'. FRD 2.3.2 requires field validation.");
+                System.out.println("PASS - Validation triggered for missing field(s): errors="
+                        + errors.size() + " | modalOpen=" + modalOpen);
+            }
+        } catch (AssertionError ae) {
+            throw ae;
+        } catch (Exception e) {
+            Assert.fail("FAIL - TC-CREATE-MGR-008 unexpected error: " + e.getMessage());
+        } finally {
+            if (managersPage.isModalVisible()) closeModal();
         }
     }
 }

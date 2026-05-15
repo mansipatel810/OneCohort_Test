@@ -5,6 +5,7 @@ import com.cts.mfrp.onecohort.pages.LoginPage;
 import com.cts.mfrp.onecohort.pages.cohort.CohortFilterDropdownComponent;
 import com.cts.mfrp.onecohort.pages.cohort.CohortManagementPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
+import com.cts.mfrp.onecohort.utils.ExcelUtils;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -12,11 +13,13 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +46,9 @@ import java.util.stream.Collectors;
  */
 @Listeners(ExtentReportListener.class)
 public class CohortSearchAndFilterTest extends BaseClassTest {
+
+    private static final String COHORT_DATA_FILE =
+            "src/test/resources/testdata/CohortTestData.xlsx";
 
     private CohortManagementPage cohortPage;
     private CohortFilterDropdownComponent filterComponent;
@@ -244,70 +250,48 @@ public class CohortSearchAndFilterTest extends BaseClassTest {
     }
 
     // -------------------------------------------------------
-    // TC-FILTER-006 — Status filter "Active" shows only Active rows
+    // TC-FILTER-006 / TC-FILTER-007 — Status filter shows only matching rows
     // FRD 2.2.5 — Filtering by status must narrow results correctly
+    // Data-driven: reads all statuses from CohortTestData.xlsx → FilterStatus sheet
+    // Replaces the old separate Active / Completed tests with a single parameterised test
     // -------------------------------------------------------
-    @Test(priority = 6)
-    public void verifyStatusFilterActive() {
-        if (!filterComponent.isStatusDropdownVisible()) {
-            System.out.println("SKIP - Status filter not available; skipping Active filter test");
-            return;
-        }
-
-        filterComponent.selectStatus("Active");
-        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
-
-        List<WebElement> rows = cohortPage.getTableRows();
-        if (rows.isEmpty()) {
-            System.out.println("INFO - No Active cohorts in DB; empty result is expected");
-        } else {
-            for (WebElement row : rows) {
-                List<WebElement> statusCells = row.findElements(By.cssSelector(
-                        "[class*='badge'], [class*='status'], td:nth-child(4)"));
-                if (!statusCells.isEmpty()) {
-                    String statusText = statusCells.get(0).getText().trim();
-                    Assert.assertTrue(
-                            statusText.equalsIgnoreCase("Active") || statusText.isEmpty(),
-                            "FAIL - After filtering by 'Active', a row shows status '" +
-                            statusText + "'. FRD 2.2.5 requires only Active cohorts to appear.");
-                }
-            }
-            System.out.println("PASS - Status filter 'Active' returned " + rows.size() + " row(s)");
-        }
-
-        resetStatusFilter();
+    @DataProvider(name = "statusFilterData")
+    public Object[][] statusFilterData() {
+        return ExcelUtils.getTestData(COHORT_DATA_FILE, "FilterStatus");
     }
 
-    // -------------------------------------------------------
-    // TC-FILTER-007 — Status filter "Completed" shows only Completed rows
-    // FRD 2.2.5 — Same filtering rule applies for Completed status
-    // -------------------------------------------------------
-    @Test(priority = 7)
-    public void verifyStatusFilterCompleted() {
+    @Test(priority = 6, dataProvider = "statusFilterData")
+    public void verifyStatusFilter(Map<String, String> row) {
+        String statusValue    = row.get("StatusValue");
+        String expectedBadge  = row.get("ExpectedBadgeText");
+
         if (!filterComponent.isStatusDropdownVisible()) {
-            System.out.println("SKIP - Status filter not available; skipping Completed filter test");
+            System.out.println("SKIP - Status dropdown not available for: " + statusValue);
             return;
         }
 
-        filterComponent.selectStatus("Completed");
+        System.out.println("\n--- TC-FILTER-006/007 [" + statusValue + "] ---");
+        filterComponent.selectStatus(statusValue);
         try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
 
         List<WebElement> rows = cohortPage.getTableRows();
         if (rows.isEmpty()) {
-            System.out.println("INFO - No Completed cohorts in DB; empty result is expected");
+            System.out.println("INFO - No '" + statusValue + "' cohorts in DB; empty result accepted");
         } else {
-            for (WebElement row : rows) {
-                List<WebElement> statusCells = row.findElements(By.cssSelector(
+            for (WebElement tableRow : rows) {
+                List<WebElement> statusCells = tableRow.findElements(By.cssSelector(
                         "[class*='badge'], [class*='status'], td:nth-child(4)"));
                 if (!statusCells.isEmpty()) {
-                    String statusText = statusCells.get(0).getText().trim();
+                    String actualStatus = statusCells.get(0).getText().trim();
                     Assert.assertTrue(
-                            statusText.equalsIgnoreCase("Completed") || statusText.isEmpty(),
-                            "FAIL - After filtering by 'Completed', a row shows status '" +
-                            statusText + "'. FRD 2.2.5 requires only Completed cohorts to appear.");
+                            actualStatus.equalsIgnoreCase(expectedBadge) || actualStatus.isEmpty(),
+                            "FAIL - After filtering by '" + statusValue
+                            + "', a row shows status '" + actualStatus + "'. "
+                            + "FRD 2.2.5 requires only '" + expectedBadge + "' cohorts.");
                 }
             }
-            System.out.println("PASS - Status filter 'Completed' returned " + rows.size() + " row(s)");
+            System.out.println("PASS - Status filter '" + statusValue
+                    + "' returned " + rows.size() + " matching row(s)");
         }
 
         resetStatusFilter();

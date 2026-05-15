@@ -4,6 +4,7 @@ import com.cts.mfrp.onecohort.base.BaseClassTest;
 import com.cts.mfrp.onecohort.pages.LoginPage;
 import com.cts.mfrp.onecohort.pages.cohort.CohortManagementPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
+import com.cts.mfrp.onecohort.utils.ExcelUtils;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -11,13 +12,18 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.List;
+import java.util.Map;
 
 @Listeners(ExtentReportListener.class)
 public class CohortManagementTest extends BaseClassTest {
+
+    private static final String COHORT_DATA_FILE =
+            "src/test/resources/testdata/CohortTestData.xlsx";
 
     private CohortManagementPage page;
 
@@ -107,26 +113,46 @@ public class CohortManagementTest extends BaseClassTest {
     // ═══════════════════════════════════════════════════
     // TEST 4 - Search bar filters rows in real time
     // FRD 4.1.1 | FR-011
+    // Data-driven: reads keywords from CohortTestData.xlsx → SearchCohort sheet
     // ═══════════════════════════════════════════════════
-    @Test(priority = 4)
-    public void checkSearchBarFilters() {
-        System.out.println("\n--- TEST 4: checkSearchBarFilters ---");
+    @DataProvider(name = "cohortSearchData")
+    public Object[][] cohortSearchData() {
+        return ExcelUtils.getTestData(COHORT_DATA_FILE, "SearchCohort");
+    }
+
+    @Test(priority = 4, dataProvider = "cohortSearchData")
+    public void checkSearchBarFilters(Map<String, String> row) {
+        String keyword     = row.get("SearchKeyword");
+        String description = row.get("Description");
+        int expectedMin    = Integer.parseInt(row.getOrDefault("ExpectedMinRows", "0"));
+
+        System.out.println("\n--- TEST 4: checkSearchBarFilters [" + keyword + "] — " + description + " ---");
         try {
             WebElement search = page.getSearchInputElement();
-            int before = page.getAlignedRows().size();
             highlight(search);
             search.clear();
-            search.sendKeys("INT");
+            search.sendKeys(keyword);
             Thread.sleep(700);
-            int after = page.getAlignedRows().size();
-            System.out.println("PASS - Search filter works. Before: " + before + " | After 'INT': " + after);
+
+            int resultCount = page.getAlignedRows().size();
+            System.out.println("INFO - Keyword: '" + keyword + "' | Results: " + resultCount
+                    + " | Expected min: " + expectedMin);
+
+            if (expectedMin > 0) {
+                Assert.assertTrue(resultCount >= expectedMin,
+                        "Search for '" + keyword + "' returned " + resultCount
+                        + " rows, expected at least " + expectedMin + ". FRD 4.1.1 FR-011.");
+            }
+            System.out.println("PASS - Search filter keyword '" + keyword
+                    + "' returned " + resultCount + " result(s)");
+
             search.clear();
             Thread.sleep(500);
             page.waitForTableToLoad();
         } catch (AssertionError ae) {
-            System.out.println("FAIL - TEST 4: " + ae.getMessage()); throw ae;
+            System.out.println("FAIL - TEST 4 [" + keyword + "]: " + ae.getMessage()); throw ae;
         } catch (Exception e) {
-            String m = "FAIL - TEST 4: Search filter error. Reason: " + e.getClass().getSimpleName();
+            String m = "FAIL - TEST 4 [" + keyword + "]: " + e.getClass().getSimpleName();
             System.out.println(m); Assert.fail(m);
         }
     }
