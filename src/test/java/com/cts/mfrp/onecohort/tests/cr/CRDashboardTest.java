@@ -2,9 +2,9 @@ package com.cts.mfrp.onecohort.tests.cr;
 
 import com.cts.mfrp.onecohort.base.BaseClassTest;
 import com.cts.mfrp.onecohort.pages.LoginPage;
+import com.cts.mfrp.onecohort.pages.cr.CRDashboardPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -17,11 +17,9 @@ import java.time.Duration;
 import java.util.List;
 
 /**
- * CR Dashboard — Complete Test Suite (FRD-Aligned v5 — with UI highlighting)
+ * CR Dashboard — Complete Test Suite (FRD-Aligned — with UI highlighting)
  *
- * Every component under test is visually highlighted in the browser with a
- * coloured border so you can see exactly what is being tested in real time:
- *
+ * Every component under test is visually highlighted in the browser:
  *   🟡 Yellow border  — element located, about to be tested
  *   🟢 Green border   — element passed verification
  *   🔴 Red border     — element failed (drawn before Assert fires)
@@ -29,6 +27,7 @@ import java.util.List;
  * Based on FRD Section 12 — CR (Class Representative) Role.
  *
  * KEY DESIGN: @BeforeClass — ONE browser session for ALL tests.
+ * ZERO inline By-locators or driver.findElement calls — all routing through CRDashboardPage.
  *
  * Login: CR role — userId from ConfigReader | cohortId from ConfigReader
  */
@@ -36,79 +35,9 @@ import java.util.List;
 @Test(groups = {"smoke", "regression", "dashboard", "cr"})
 public class CRDashboardTest extends BaseClassTest {
 
-    // ── Credentials ──────────────────────────────────────────────────────────
     private static final String CR_COHORT_ID = ConfigReader.getValidCohortId();
 
-    // ── LOGIN LOCATORS (FRD 12.1) ─────────────────────────────────────────────
-    private final By userIdInput   = By.cssSelector("input[placeholder='e.g. 123456']");
-    private final By roleDropdown  = By.cssSelector("div.space-y-5 select");
-    private final By cohortIdInput = By.xpath(
-            "//input[contains(@placeholder,'COH') or contains(@placeholder,'cohort') " +
-                    "or contains(@placeholder,'Cohort') or contains(@placeholder,'INTCLD') " +
-                    "or contains(@placeholder,'ID') or @required and not(contains(@placeholder,'123456'))]");
-    private final By loginButton   = By.xpath("//button[normalize-space()='Login']");
-
-    // ── DASHBOARD LOCATORS (FRD 12.2) ─────────────────────────────────────────
-    private final By welcomeGreeting = By.xpath(
-            "//*[contains(text(),'Welcome') and contains(text(),'CR')]");
-    private final By sidebarCohortEntry = By.xpath(
-            "//*[contains(@class,'sidebar') or contains(@class,'nav') or contains(@class,'side')]" +
-                    "//*[contains(text(),'" + CR_COHORT_ID + "')]");
-    private final By summaryHeaderCards = By.cssSelector(
-            "[class*='card'], [class*='summary'], [class*='stat'], [class*='metric'], [class*='header-card']");
-    private final By totalMembersCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'total member') " +
-                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'members')]" +
-                    "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
-    private final By learningPathCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'learning path')]" +
-                    "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
-    private final By statusCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'status')]" +
-                    "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
-    private final By cohortNameOrId = By.xpath(
-            "//*[contains(text(),'" + CR_COHORT_ID + "')]");
-    private final By batchOwnerField = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'batch owner')]");
-    private final By startDateField = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'start date')]");
-    private final By totalInternsField = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'total intern') " +
-                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'interns')]");
-    private final By currentProgressField = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'current progress') " +
-                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'% complete')]");
-    private final By trainingTimelineSection = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'training timeline') " +
-                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'timeline')]");
-    private final By weekButtons = By.xpath(
-            "//button[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'week')] " +
-                    "| //*[contains(@class,'week')]");
-    private final By qualifierExam = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'qualifier')]");
-    private final By interimEvaluation = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'interim')]");
-    private final By finalEvaluation = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'final')]");
-    private final By overallProgressCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'overall progress') " +
-                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'weeks remaining')]");
-    private final By traineesTable = By.cssSelector("table");
-    private final By traineesRows  = By.cssSelector("table tbody tr");
-    private final By crudButtons   = By.xpath(
-            "//button[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'create') " +
-                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'edit') " +
-                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'delete') " +
-                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'add trainee')]");
-    private final By logoutDirect = By.xpath(
-            "//button[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'logout')" +
-                    " or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'sign out')" +
-                    " or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'log out')]" +
-                    "|//a[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'logout')]" +
-                    "|//*[@aria-label='Logout' or @aria-label='Sign out' or @title='Logout']");
-    private final By userMenuTrigger = By.cssSelector(
-            "[class*='user-menu'],[class*='avatar'],[class*='account'],[class*='profile-icon']," +
-                    "[class*='user-icon'],[class*='dropdown-toggle'],[class*='user-btn']");
+    private CRDashboardPage crPage;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -117,6 +46,7 @@ public class CRDashboardTest extends BaseClassTest {
         driver.get(ConfigReader.getBaseUrl());
         new LoginPage(driver).loginAsCR(ConfigReader.getSuperAdminUserId(), CR_COHORT_ID);
         wait.until(ExpectedConditions.urlContains("/cr/"));
+        crPage = new CRDashboardPage(driver, CR_COHORT_ID);
         System.out.println("Setup complete — CR Dashboard URL: " + driver.getCurrentUrl());
     }
 
@@ -137,7 +67,7 @@ public class CRDashboardTest extends BaseClassTest {
      * Login is performed in @BeforeClass via LoginPage. This test verifies
      * the resulting URL confirms a successful CR login.
      */
-    @Test(priority = 1, groups = {"smoke","regression"},
+    @Test(priority = 1, groups = {"smoke", "regression"},
             description = "TC-CR-001 [FRD 12.1]: CR login — URL contains /cr/ route")
     public void tc_cr_001_automatedCRLogin() {
         String url = driver.getCurrentUrl();
@@ -153,7 +83,7 @@ public class CRDashboardTest extends BaseClassTest {
      * FRD 12.1.2 — "URL after login: localhost:4200/cr/{COHORT_ID}"
      */
     @Test(priority = 2, dependsOnMethods = "tc_cr_001_automatedCRLogin",
-            groups = {"smoke","regression"},
+            groups = {"smoke", "regression"},
             description = "TC-CR-002 [FRD 12.1.2]: URL redirects to /cr/INTCLD024")
     public void tc_cr_002_urlContainsCrRoute() {
         try {
@@ -178,17 +108,17 @@ public class CRDashboardTest extends BaseClassTest {
      * Highlighted component: Welcome greeting text
      */
     @Test(priority = 3, dependsOnMethods = "tc_cr_002_urlContainsCrRoute",
-            groups = {"smoke","regression"},
+            groups = {"smoke", "regression"},
             description = "TC-CR-003 [FRD 12.2]: 'Welcome, CR.' greeting is displayed")
     public void tc_cr_003_welcomeGreetingVisible() {
         try {
-            WebElement greeting = wait(15).until(ExpectedConditions.visibilityOfElementLocated(welcomeGreeting));
+            WebElement greeting = crPage.getWelcomeGreetingElement();
             highlight(greeting, "yellow", "Welcome Greeting [FRD 12.2]");
             Assert.assertTrue(greeting.isDisplayed());
             highlight(greeting, "green", "Welcome Greeting — PASSED");
             System.out.println("TC-CR-003 PASSED. Greeting = \"" + greeting.getText() + "\"");
         } catch (Exception e) {
-            String body = driver.findElement(By.tagName("body")).getText();
+            String body = crPage.getPageBodyText();
             Assert.assertFalse(body.isBlank(), "Page body is empty after login.");
             System.out.println("TC-CR-003 PASSED (fallback). Page has content.");
         }
@@ -204,25 +134,11 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-004 [FRD 12.2/12.3]: Sidebar shows only assigned cohort INTCLD024")
     public void tc_cr_004_sidebarShowsOnlyAssignedCohort() {
-        boolean cohortFound = false;
-
-        // Try sidebar-scoped locator first
-        if (elementExists(sidebarCohortEntry)) {
-            WebElement entry = driver.findElement(sidebarCohortEntry);
-            highlight(entry, "yellow", "Sidebar Cohort Entry [FRD 12.2]");
-            highlight(entry, "green", "Sidebar — INTCLD024 found");
-            cohortFound = true;
-        }
-        // Broader fallback: cohort ID visible anywhere on page
-        if (!cohortFound && elementExists(By.xpath("//*[contains(text(),'" + CR_COHORT_ID + "')]"))) {
-            WebElement entry = driver.findElement(By.xpath("//*[contains(text(),'" + CR_COHORT_ID + "')]"));
-            highlight(entry, "yellow", "Cohort ID on page [FRD 12.2]");
-            highlight(entry, "green", "Cohort ID visible — PASSED");
-            cohortFound = true;
-        }
-
-        Assert.assertTrue(cohortFound,
+        Assert.assertTrue(crPage.isCohortIdVisibleOnPage(),
                 "Cohort ID " + CR_COHORT_ID + " should be visible on the CR dashboard.");
+        WebElement entry = crPage.getCohortIdElement();
+        highlight(entry, "yellow", "Cohort ID on page [FRD 12.2]");
+        highlight(entry, "green", "Cohort ID visible — PASSED");
         System.out.println("TC-CR-004 PASSED.");
     }
 
@@ -240,7 +156,7 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-005 [FRD 12.2.1]: Three summary header cards present")
     public void tc_cr_005_summaryHeaderCardsPresent() {
-        List<WebElement> cards = driver.findElements(summaryHeaderCards);
+        List<WebElement> cards = crPage.getSummaryHeaderCards();
         highlightAll(cards, "yellow", "Summary Header Card [FRD 12.2.1]");
         System.out.println("TC-CR-005: Summary card count = " + cards.size());
         Assert.assertTrue(cards.size() >= 3,
@@ -259,11 +175,8 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-006 [FRD 12.2.1]: TOTAL MEMBERS card visible")
     public void tc_cr_006_totalMembersCardVisible() {
-        By locator = elementExists(totalMembersCard) ? totalMembersCard :
-                By.xpath("//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'member') " +
-                        "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'intern')]");
-        Assert.assertTrue(elementExists(locator), "FRD 12.2.1: TOTAL MEMBERS card not found.");
-        WebElement card = driver.findElement(locator);
+        Assert.assertTrue(crPage.isTotalMembersCardVisible(), "FRD 12.2.1: TOTAL MEMBERS card not found.");
+        WebElement card = crPage.getTotalMembersCardElement();
         highlight(card, "yellow", "TOTAL MEMBERS Card [FRD 12.2.1]");
         highlight(card, "green", "TOTAL MEMBERS — PASSED");
         System.out.println("TC-CR-006 PASSED.");
@@ -279,10 +192,8 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-007 [FRD 12.2.1]: LEARNING PATH card visible")
     public void tc_cr_007_learningPathCardVisible() {
-        By locator = elementExists(learningPathCard) ? learningPathCard :
-                By.xpath("//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'learning')]");
-        Assert.assertTrue(elementExists(locator), "FRD 12.2.1: LEARNING PATH card not found.");
-        WebElement card = driver.findElement(locator);
+        Assert.assertTrue(crPage.isLearningPathCardVisible(), "FRD 12.2.1: LEARNING PATH card not found.");
+        WebElement card = crPage.getLearningPathCardElement();
         highlight(card, "yellow", "LEARNING PATH Card [FRD 12.2.1]");
         highlight(card, "green", "LEARNING PATH — PASSED");
         System.out.println("TC-CR-007 PASSED.");
@@ -298,12 +209,8 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-008 [FRD 12.2.1]: STATUS card visible")
     public void tc_cr_008_statusCardVisible() {
-        By locator = elementExists(statusCard) ? statusCard :
-                By.xpath("//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'status') " +
-                        "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'completed') " +
-                        "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'in-progress')]");
-        Assert.assertTrue(elementExists(locator), "FRD 12.2.1: STATUS card not found.");
-        WebElement card = driver.findElement(locator);
+        Assert.assertTrue(crPage.isStatusCardVisible(), "FRD 12.2.1: STATUS card not found.");
+        WebElement card = crPage.getStatusCardElement();
         highlight(card, "yellow", "STATUS Card [FRD 12.2.1]");
         highlight(card, "green", "STATUS — PASSED");
         System.out.println("TC-CR-008 PASSED.");
@@ -323,9 +230,9 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-009 [FRD 12.2.2]: Cohort ID visible in Information Panel")
     public void tc_cr_009_cohortInfoPanelCohortIdVisible() {
-        Assert.assertTrue(elementExists(cohortNameOrId),
+        Assert.assertTrue(crPage.isCohortIdVisibleOnPage(),
                 "FRD 12.2.2: Cohort ID " + CR_COHORT_ID + " not found in Cohort Information Panel.");
-        WebElement el = driver.findElement(cohortNameOrId);
+        WebElement el = crPage.getCohortIdElement();
         highlight(el, "yellow", "Cohort ID in Info Panel [FRD 12.2.2]");
         highlight(el, "green", "Cohort ID — PASSED");
         System.out.println("TC-CR-009 PASSED.");
@@ -341,9 +248,9 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-010 [FRD 12.2.2]: Batch Owner field present")
     public void tc_cr_010_batchOwnerFieldVisible() {
-        Assert.assertTrue(elementExists(batchOwnerField),
+        Assert.assertTrue(crPage.isBatchOwnerFieldVisible(),
                 "FRD 12.2.2: 'Batch Owner' label not found in Cohort Information Panel.");
-        WebElement el = driver.findElement(batchOwnerField);
+        WebElement el = crPage.getBatchOwnerFieldElement();
         highlight(el, "yellow", "Batch Owner Field [FRD 12.2.2]");
         highlight(el, "green", "Batch Owner — PASSED");
         System.out.println("TC-CR-010 PASSED.");
@@ -359,9 +266,9 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-011 [FRD 12.2.2]: Start Date field present")
     public void tc_cr_011_startDateFieldVisible() {
-        Assert.assertTrue(elementExists(startDateField),
+        Assert.assertTrue(crPage.isStartDateFieldVisible(),
                 "FRD 12.2.2: 'Start Date' label not found in Cohort Information Panel.");
-        WebElement el = driver.findElement(startDateField);
+        WebElement el = crPage.getStartDateFieldElement();
         highlight(el, "yellow", "Start Date Field [FRD 12.2.2]");
         highlight(el, "green", "Start Date — PASSED");
         System.out.println("TC-CR-011 PASSED.");
@@ -377,17 +284,17 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-012 [FRD 12.2.2]: Total Interns and Current Progress present")
     public void tc_cr_012_totalInternsAndProgressVisible() {
-        boolean internsFound  = elementExists(totalInternsField);
-        boolean progressFound = elementExists(currentProgressField);
+        boolean internsFound  = crPage.isTotalInternsFieldVisible();
+        boolean progressFound = crPage.isCurrentProgressFieldVisible();
         System.out.println("TC-CR-012: Interns found=" + internsFound + ", Progress found=" + progressFound);
 
         if (internsFound) {
-            WebElement el = driver.findElement(totalInternsField);
+            WebElement el = crPage.getTotalInternsFieldElement();
             highlight(el, "yellow", "Total Interns Field [FRD 12.2.2]");
             highlight(el, "green", "Total Interns — PASSED");
         }
         if (progressFound) {
-            WebElement el = driver.findElement(currentProgressField);
+            WebElement el = crPage.getCurrentProgressFieldElement();
             highlight(el, "yellow", "Current Progress Field [FRD 12.2.2]");
             highlight(el, "green", "Current Progress — PASSED");
         }
@@ -411,9 +318,9 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-013 [FRD 12.2.3]: Training Timeline section present")
     public void tc_cr_013_trainingTimelineSectionVisible() {
-        Assert.assertTrue(elementExists(trainingTimelineSection),
+        Assert.assertTrue(crPage.isTrainingTimelineSectionVisible(),
                 "FRD 12.2.3: Training Timeline section not found.");
-        WebElement el = driver.findElement(trainingTimelineSection);
+        WebElement el = crPage.getTrainingTimelineSectionElement();
         highlight(el, "yellow", "Training Timeline Section [FRD 12.2.3]");
         highlight(el, "green", "Training Timeline — PASSED");
         System.out.println("TC-CR-013 PASSED.");
@@ -429,7 +336,7 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-014 [FRD 12.2.3]: Week buttons rendered in Training Timeline")
     public void tc_cr_014_weekButtonsRendered() {
-        List<WebElement> weeks = driver.findElements(weekButtons);
+        List<WebElement> weeks = crPage.getWeekButtons();
         System.out.println("TC-CR-014: Week buttons found = " + weeks.size());
         Assert.assertFalse(weeks.isEmpty(), "FRD 12.2.3: No week buttons found in Training Timeline.");
         highlightAll(weeks, "yellow", "Week Button [FRD 12.2.3]");
@@ -451,16 +358,16 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-015 [FRD 12.2.4]: Qualifier, Interim, Final evaluation milestones present")
     public void tc_cr_015_evaluationsPanelAllMilestones() {
-        boolean qualifier = elementExists(qualifierExam);
-        boolean interim   = elementExists(interimEvaluation);
-        boolean finalEval = elementExists(finalEvaluation);
+        boolean qualifier = crPage.isQualifierExamVisible();
+        boolean interim   = crPage.isInterimEvaluationVisible();
+        boolean finalEval = crPage.isFinalEvaluationVisible();
         System.out.println("TC-CR-015: Qualifier=" + qualifier + " Interim=" + interim + " Final=" + finalEval);
 
-        if (qualifier) { WebElement el = driver.findElement(qualifierExam);
+        if (qualifier) { WebElement el = crPage.getQualifierExamElement();
             highlight(el, "yellow", "Qualifier Exam [FRD 12.2.4]"); highlight(el, "green", "Qualifier — PASSED"); }
-        if (interim)   { WebElement el = driver.findElement(interimEvaluation);
+        if (interim)   { WebElement el = crPage.getInterimEvaluationElement();
             highlight(el, "yellow", "Interim Evaluation [FRD 12.2.4]"); highlight(el, "green", "Interim — PASSED"); }
-        if (finalEval) { WebElement el = driver.findElement(finalEvaluation);
+        if (finalEval) { WebElement el = crPage.getFinalEvaluationElement();
             highlight(el, "yellow", "Final Evaluation [FRD 12.2.4]"); highlight(el, "green", "Final — PASSED"); }
 
         Assert.assertTrue(qualifier, "FRD 12.2.4: 'Qualifier Exam' not found.");
@@ -483,21 +390,11 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-016 [FRD 12.2.5]: Overall Progress Card visible")
     public void tc_cr_016_overallProgressCardVisible() {
-        boolean found = elementExists(overallProgressCard);
-        By fallback   = By.cssSelector("canvas,[class*='progress'],[role='progressbar'],[class*='bar']");
-
-        if (found) {
-            WebElement el = driver.findElement(overallProgressCard);
-            highlight(el, "yellow", "Overall Progress Card [FRD 12.2.5]");
-            highlight(el, "green", "Overall Progress — PASSED");
-        } else if (elementExists(fallback)) {
-            WebElement el = driver.findElement(fallback);
-            highlight(el, "yellow", "Progress Bar [FRD 12.2.5]");
-            highlight(el, "green", "Progress Bar — PASSED");
-            found = true;
-        }
-
+        boolean found = crPage.isOverallProgressCardVisible() || crPage.isOverallProgressFallbackVisible();
         Assert.assertTrue(found, "FRD 12.2.5: Overall Progress card not found.");
+        WebElement el = crPage.getOverallProgressCardElement();
+        highlight(el, "yellow", "Overall Progress Card [FRD 12.2.5]");
+        highlight(el, "green", "Overall Progress — PASSED");
         System.out.println("TC-CR-016 PASSED.");
     }
 
@@ -515,12 +412,11 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-017 [FRD 12.2.6]: Trainees Table present with at least one row")
     public void tc_cr_017_traineesTableHasRows() {
-        Assert.assertTrue(elementExists(traineesTable), "FRD 12.2.6: Trainees table not found.");
-
-        WebElement table = driver.findElement(traineesTable);
+        Assert.assertTrue(crPage.isTraineesTableVisible(), "FRD 12.2.6: Trainees table not found.");
+        WebElement table = crPage.getTraineesTableElement();
         highlight(table, "yellow", "Trainees Table [FRD 12.2.6]");
 
-        List<WebElement> rows = driver.findElements(traineesRows);
+        List<WebElement> rows = crPage.getTraineesTableRows();
         System.out.println("TC-CR-017: Trainee rows = " + rows.size());
         Assert.assertFalse(rows.isEmpty(), "FRD 12.2.6: Trainees table is empty.");
 
@@ -539,23 +435,19 @@ public class CRDashboardTest extends BaseClassTest {
             groups = {"regression"},
             description = "TC-CR-018 [FRD 12.2.6]: Trainees table has correct column headers")
     public void tc_cr_018_traineesTableColumnHeaders() {
-        List<WebElement> headers = driver.findElements(By.cssSelector("table thead th, table th"));
+        List<WebElement> headers = crPage.getTraineesTableHeaders();
         highlightAll(headers, "yellow", "Table Header [FRD 12.2.6]");
 
         StringBuilder headerText = new StringBuilder("Table headers: ");
         for (WebElement h : headers) headerText.append("[").append(h.getText().trim()).append("] ");
         System.out.println(headerText);
 
-        String all     = headerText.toString().toLowerCase();
-        boolean hasId      = all.contains("id");
-        boolean hasName    = all.contains("name");
-        boolean hasEmail   = all.contains("email");
-        boolean hasEmpType = all.contains("employment") || all.contains("type");
-
-        Assert.assertTrue(hasId,      "FRD 12.2.6: 'ID' column header missing.");
-        Assert.assertTrue(hasName,    "FRD 12.2.6: 'Full Name' column header missing.");
-        Assert.assertTrue(hasEmail,   "FRD 12.2.6: 'Email' column header missing.");
-        Assert.assertTrue(hasEmpType, "FRD 12.2.6: 'Employment Type' column header missing.");
+        String all = headerText.toString().toLowerCase();
+        Assert.assertTrue(all.contains("id"),                               "FRD 12.2.6: 'ID' column header missing.");
+        Assert.assertTrue(all.contains("name"),                             "FRD 12.2.6: 'Full Name' column header missing.");
+        Assert.assertTrue(all.contains("email"),                            "FRD 12.2.6: 'Email' column header missing.");
+        Assert.assertTrue(all.contains("employment") || all.contains("type"),
+                "FRD 12.2.6: 'Employment Type' column header missing.");
 
         highlightAll(headers, "green", "Column Headers — PASSED");
         System.out.println("TC-CR-018 PASSED.");
@@ -576,15 +468,14 @@ public class CRDashboardTest extends BaseClassTest {
             description = "TC-CR-019 [FRD 12.3]: No CRUD buttons present — dashboard is read-only")
     public void tc_cr_019_noCreateEditDeleteButtons() {
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
-        List<WebElement> crudEls = driver.findElements(crudButtons);
+        List<WebElement> crudEls = crPage.getCrudButtonElements();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
         if (!crudEls.isEmpty()) {
-            // Highlight violations in red before failing
             highlightAll(crudEls, "red", "CRUD Button — FRD 12.3 VIOLATION");
             StringBuilder found = new StringBuilder("CRUD buttons found: ");
             for (WebElement el : crudEls) found.append("[").append(el.getText()).append("] ");
-            Assert.fail("FRD 12.3: CR dashboard should be read-only. Found: " + found);
+            Assert.fail("FRD 12.3: CR dashboard should be read-only. " + found);
         }
 
         System.out.println("TC-CR-019 PASSED. No Create/Edit/Delete buttons found.");
@@ -601,46 +492,44 @@ public class CRDashboardTest extends BaseClassTest {
      * Highlighted component: Logout button, then User ID input on login page
      */
     @Test(priority = 20, dependsOnMethods = "tc_cr_002_urlContainsCrRoute",
-            groups = {"smoke","regression"},
+            groups = {"smoke", "regression"},
             description = "TC-CR-020 [FRD 12.3]: Logout returns to login page")
-    public void tc_cr_020_logoutRedirectsToLogin() throws InterruptedException {
+    public void tc_cr_020_logoutRedirectsToLogin() {
         boolean loggedOut = false;
 
         // Attempt 1: direct logout button/link
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
-        List<WebElement> directBtns = driver.findElements(logoutDirect);
+        List<WebElement> directBtns = crPage.getLogoutDirectElements();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         if (!directBtns.isEmpty()) {
             highlight(directBtns.get(0), "yellow", "Logout Button [FRD 12.3]");
-            try { directBtns.get(0).click(); loggedOut = true; wait(10).until(ExpectedConditions.visibilityOfElementLocated(userIdInput)); }
-            catch (Exception e) { System.out.println("TC-CR-020: Direct logout click failed."); }
+            try {
+                directBtns.get(0).click();
+                loggedOut = true;
+                crPage.waitForLoginPageUserId(wait(10));
+            } catch (Exception e) { System.out.println("TC-CR-020: Direct logout click failed."); }
         }
 
         // Attempt 2: user-menu trigger → logout inside dropdown
         if (!loggedOut) {
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
-            List<WebElement> menus = driver.findElements(userMenuTrigger);
+            List<WebElement> menus = crPage.getUserMenuTriggerElements();
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             for (WebElement menu : menus) {
                 try {
                     highlight(menu, "yellow", "User Menu Trigger [FRD 12.3]");
-                    menu.click(); wait(5).until(ExpectedConditions.visibilityOfElementLocated(logoutDirect));
+                    menu.click();
+                    wait(5).until(d -> crPage.isLogoutVisibleAfterMenuOpen());
                     driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
-                    List<WebElement> btns = driver.findElements(logoutDirect);
+                    List<WebElement> btns = crPage.getLogoutDirectElements();
                     driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
                     if (!btns.isEmpty()) {
                         highlight(btns.get(0), "yellow", "Logout in Menu [FRD 12.3]");
-                        btns.get(0).click(); loggedOut = true; wait(10).until(ExpectedConditions.visibilityOfElementLocated(userIdInput)); break;
+                        btns.get(0).click();
+                        loggedOut = true;
+                        crPage.waitForLoginPageUserId(wait(10));
+                        break;
                     }
-                    for (WebElement el : driver.findElements(By.xpath(
-                            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'logout')" +
-                                    " or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'sign out')]"))) {
-                        if (el.isDisplayed()) {
-                            highlight(el, "yellow", "Logout Link [FRD 12.3]");
-                            el.click(); loggedOut = true; wait(10).until(ExpectedConditions.visibilityOfElementLocated(userIdInput)); break;
-                        }
-                    }
-                    if (loggedOut) break;
                 } catch (Exception ignored) {}
             }
         }
@@ -649,13 +538,11 @@ public class CRDashboardTest extends BaseClassTest {
         if (!loggedOut) {
             System.out.println("TC-CR-020: Logout button not found. Navigating to base URL as fallback.");
             driver.get(ConfigReader.getBaseUrl());
-            wait(10).until(ExpectedConditions.visibilityOfElementLocated(userIdInput));
         }
 
         // Verify login page
         try {
-            WebElement userInput = wait(15).until(
-                    ExpectedConditions.visibilityOfElementLocated(userIdInput));
+            WebElement userInput = crPage.waitForLoginPageUserId(wait(15));
             highlight(userInput, "green", "Login Page — User ID Input visible after logout");
         } catch (Exception e) {
             Assert.fail("Login page not visible after logout. URL: " + driver.getCurrentUrl());

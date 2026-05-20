@@ -71,7 +71,7 @@ public abstract class BasePage {
      * @param color   "yellow" = locating | "green" = passed | "red" = failed/default
      * @param label   short label set as the element's title tooltip in the browser
      */
-    protected void highlight(WebElement element, String color, String label) {
+    public void highlight(WebElement element, String color, String label) {
         try {
             String border = switch (color) {
                 case "green" -> "3px solid #22c55e";
@@ -106,4 +106,22 @@ public abstract class BasePage {
 
     public String getPageTitle()   { return driver.getTitle(); }
     public String getCurrentUrl()  { return driver.getCurrentUrl(); }
+
+    /** Returns the &lt;body&gt; element — used for page-level highlight after navigation. */
+    public WebElement getBodyElement() {
+        return driver.findElement(By.tagName("body"));
+    }
+
+    /**
+     * Waits until the login page User ID input (placeholder 'e.g. 123456') is visible
+     * and returns it.  Use after logout to confirm the session has ended.
+     *
+     * @param customWait a caller-supplied WebDriverWait (e.g. {@code new WebDriverWait(driver, Duration.ofSeconds(15))})
+     * @return the visible User ID input element
+     */
+    public WebElement waitForLoginPageUserId(WebDriverWait customWait) {
+        return customWait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector("input[placeholder='e.g. 123456']")));
+    }
 }

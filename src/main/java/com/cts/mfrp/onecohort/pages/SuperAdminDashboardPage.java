@@ -4,6 +4,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,10 +43,33 @@ public class SuperAdminDashboardPage extends BasePage {
     private final By kpiNumbers       = By.cssSelector("p.kpi-number");
 
     // KPI card headings
-    private final By totalCohortsCard = By.xpath("//h3[contains(text(),'Total Cohorts')]");
-    private final By activeCard       = By.xpath("//h3[contains(text(),'Active')]");
-    private final By completedCard    = By.xpath("//h3[contains(text(),'Completed')]");
-    private final By upcomingCard     = By.xpath("//h3[contains(text(),'Upcoming')]");
+    private final By totalCohortsCard  = By.xpath("//h3[contains(text(),'Total Cohorts')]");
+    private final By activeCard        = By.xpath("//h3[contains(text(),'Active')]");
+    private final By completedCard     = By.xpath("//h3[contains(text(),'Completed')]");
+    private final By upcomingCard      = By.xpath("//h3[contains(text(),'Upcoming')]");
+
+    // ── Chart / dashboard section locators (FRD 2.1.5) ────────────────────────
+
+    private final By dashboardContainer = By.cssSelector("div.dashboard-container");
+    private final By dashboardHeading   = By.xpath(
+            "//*[self::h1 or self::h2 or self::h3 or self::h4]" +
+            "[contains(normalize-space(),'Super Admin Dashboard') " +
+            "or contains(normalize-space(),'One Cohort')]");
+    private final By superUserBadge     = By.xpath(
+            "//*[self::span or self::div or self::p][normalize-space()='Super User']");
+    private final By sectionTitles      = By.cssSelector("div.section-title");
+    private final By kpiCards           = By.cssSelector(".kpi-card");
+    private final By kpiCardTitles      = By.cssSelector(".kpi-card .kpi-info h3");
+    private final By kpiCardNumbers     = By.cssSelector(".kpi-card .kpi-info .kpi-number");
+    private final By statCards          = By.cssSelector(".stat-card");
+    private final By statLabels         = By.cssSelector(".stat-card .stat-label");
+    private final By statValues         = By.cssSelector(".stat-card .stat-value");
+    private final By statFills          = By.cssSelector(".stat-card .stat-fill");
+
+    // ── Logout locators (FRD 2.1.3) ───────────────────────────────────────────
+
+    private final By avatarBtn          = By.cssSelector("div.w-10.h-10.bg-blue-600");
+    private final By logoutOption       = By.cssSelector("a[routerlink='/login'], a[href='/login']");
 
     public SuperAdminDashboardPage(WebDriver driver) {
         super(driver);
@@ -170,5 +194,101 @@ public class SuperAdminDashboardPage extends BasePage {
         } catch (Exception e) {
             return Collections.emptyList();
         }
+    }
+
+    // ── Dashboard container (FRD 2.1.5) ──────────────────────────────────────
+
+    public WebElement getDashboardContainerElement() {
+        return driver.findElement(dashboardContainer);
+    }
+
+    public boolean isDashboardContainerVisible() {
+        return isDisplayed(dashboardContainer);
+    }
+
+    public void waitForDashboardContainer() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(dashboardContainer));
+    }
+
+    // ── Dashboard heading & badge (FRD 2.1.5) ────────────────────────────────
+
+    public WebElement getDashboardHeadingElement() {
+        return waitForVisible(dashboardHeading);
+    }
+
+    public String getDashboardHeadingText() {
+        try { return getText(dashboardHeading); } catch (Exception e) { return ""; }
+    }
+
+    public WebElement getSuperUserBadgeElement() {
+        return driver.findElement(superUserBadge);
+    }
+
+    public String getSuperUserBadgeText() {
+        try { return getText(superUserBadge); } catch (Exception e) { return ""; }
+    }
+
+    // ── Section titles (FRD 2.1.5) ───────────────────────────────────────────
+
+    public List<WebElement> getSectionTitles() {
+        try { return driver.findElements(sectionTitles); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    // ── KPI cards (FRD 2.1.5.1) ──────────────────────────────────────────────
+
+    public List<WebElement> getKpiCards() {
+        try { return driver.findElements(kpiCards); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public List<WebElement> getKpiCardTitles() {
+        try { return driver.findElements(kpiCardTitles); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public List<WebElement> getKpiCardNumbers() {
+        try { return driver.findElements(kpiCardNumbers); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    // ── Stat cards (FRD 2.1.5) ───────────────────────────────────────────────
+
+    public List<WebElement> getStatCards() {
+        try { return driver.findElements(statCards); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public List<WebElement> getStatLabels() {
+        try { return driver.findElements(statLabels); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public List<WebElement> getStatValues() {
+        try { return driver.findElements(statValues); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public List<WebElement> getStatFills() {
+        try { return driver.findElements(statFills); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    // ── Logout (FRD 2.1.3) ───────────────────────────────────────────────────
+
+    public void clickAvatar() {
+        waitForClickable(avatarBtn).click();
+    }
+
+    public WebElement getLogoutOptionElement() {
+        return waitForVisible(logoutOption);
+    }
+
+    public boolean isLogoutOptionVisible() {
+        return isDisplayed(logoutOption);
+    }
+
+    public void clickLogout() {
+        waitForVisible(logoutOption).click();
     }
 }

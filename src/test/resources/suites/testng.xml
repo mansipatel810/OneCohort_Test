@@ -1,31 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <!--
-  ╔══════════════════════════════════════════════════════════════════════╗
-  ║           OneCohort — Complete Regression Test Suite                ║
-  ║           Runs ALL 32 test classes organised by feature area        ║
-  ╠══════════════════════════════════════════════════════════════════════╣
-  ║  Run full suite      :  mvn test                                    ║
-  ║  Run by group        :  mvn test -Dgroups=<group>                   ║
-  ║                                                                      ║
-  ║  Available groups                                                   ║
-  ║  ─────────────────                                                  ║
-  ║  smoke        Critical-path tests (~10 classes, fast gate check)    ║
-  ║  regression   Full suite (all tests)                                ║
-  ║  sanity       Bare-minimum: login only                              ║
-  ║  negative     Input-validation / error-path tests (4 classes)       ║
-  ║  functional   Feature CRUD & interaction tests                      ║
-  ║  auth         Login, logout and negative-login tests                ║
-  ║  dashboard    All dashboard-verification tests                      ║
-  ║  navigation   Left-nav panel tests                                  ║
-  ║  cohort       Cohort management tests                               ║
-  ║  analytics    Training-analytics tests                              ║
-  ║  superadmin   Tests executed under the Super Admin role             ║
-  ║  manager      Tests executed under / about the Manager role         ║
-  ║  leader       Tests executed under / about the Leader role          ║
-  ║  batchowner   Tests executed under / about the Batch Owner role     ║
-  ║  cr           Tests executed under / about the CR role              ║
-  ╚══════════════════════════════════════════════════════════════════════╝
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║           OneCohort — Complete Regression Test Suite                    ║
+  ║           Runs ALL 32 test classes organised by feature area            ║
+  ╠══════════════════════════════════════════════════════════════════════════╣
+  ║  Run full suite          :  mvn test                                    ║
+  ║  Run smoke tests only    :  mvn test -Dgroups=smoke                     ║
+  ║  Run regression only     :  mvn test -Dgroups=regression                ║
+  ║  Run negative tests only :  mvn test -Dgroups=negative                  ║
+  ║  Run by role             :  mvn test -Dgroups=batchowner                ║
+  ║  Run combined groups     :  mvn test "-Dgroups=smoke,dashboard"         ║
+  ║  Run a specific suite    :  mvn test -DsuiteXmlFile=smoke-suite.xml     ║
+  ║                                                                          ║
+  ║  Dedicated suite files (src/test/resources/suites/)                     ║
+  ║  ─────────────────────────────────────────────────────                  ║
+  ║  smoke-suite.xml    Critical-path gate — smoke-tagged methods only      ║
+  ║  sanity-suite.xml   Bare-minimum smoke — LoginTest only                 ║
+  ║                                                                          ║
+  ║  Available @Test groups                                                  ║
+  ║  ─────────────────────                                                   ║
+  ║  smoke        Critical-path tests (~10 classes, fast gate check)        ║
+  ║  regression   Full suite (all tests)                                    ║
+  ║  sanity       Bare-minimum: login only                                  ║
+  ║  negative     Input-validation / error-path tests (4 classes)           ║
+  ║  functional   Feature CRUD & interaction tests                          ║
+  ║  auth         Login, logout and negative-login tests                    ║
+  ║  dashboard    All dashboard-verification tests                          ║
+  ║  navigation   Left-nav panel tests                                      ║
+  ║  cohort       Cohort management tests                                   ║
+  ║  analytics    Training-analytics tests                                  ║
+  ║  superadmin   Tests executed under the Super Admin role                 ║
+  ║  manager      Tests executed under / about the Manager role             ║
+  ║  leader       Tests executed under / about the Leader role              ║
+  ║  batchowner   Tests executed under / about the Batch Owner role         ║
+  ║  cr           Tests executed under / about the CR role                  ║
+  ╚══════════════════════════════════════════════════════════════════════════╝
 -->
 <suite name="OneCohort Complete Test Suite" verbose="1">
 

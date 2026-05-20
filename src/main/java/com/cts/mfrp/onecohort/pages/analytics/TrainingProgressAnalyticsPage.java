@@ -29,11 +29,11 @@ public class TrainingProgressAnalyticsPage extends BasePage {
             "or contains(normalize-space(),'Analytics') " +
             "or contains(normalize-space(),'Progress')]");
 
-    // Completion percentage elements
+    // Completion percentage elements — container-check via self or direct parent (no ancestor::*)
     private final By percentageInCards = By.xpath(
-            "//*[contains(text(),'%') and (contains(@class,'card') " +
-            "or contains(@class,'cohort') or contains(@class,'stat') " +
-            "or ancestor::*[contains(@class,'card')])]");
+            "//*[contains(text(),'%') and " +
+            "(contains(@class,'card') or contains(@class,'cohort') or contains(@class,'stat') " +
+            "or parent::*[contains(@class,'card') or contains(@class,'cohort') or contains(@class,'stat')])]");
     private final By anyPercentage = By.xpath("//*[contains(text(),'%')]");
 
     // Service Line filter dropdown (multiple selector fallbacks)

@@ -5,6 +5,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +19,8 @@ public class ManagersLeadershipPage extends BasePage {
             "or contains(normalize-space(),'Leadership')]");
 
     private final By profileCards = By.cssSelector(
-            "[class*='card'], [class*='manager-card'], [class*='profile-card']");
+            "[class*='manager-card'], [class*='profile-card'], " +
+            "div[class*='card']:not(.modal-content):not(.modal-card)");
 
     private final By cardNames = By.cssSelector(
             "[class*='card'] h3, [class*='card'] h4, " +
@@ -38,6 +40,27 @@ public class ManagersLeadershipPage extends BasePage {
             "[class*='tab'], [role='tab'], button[class*='tab']");
 
     private final By modalOverlay = By.cssSelector("[class*='modal'], [role='dialog']");
+
+    // ── Edit Manager modal locators (FRD 2.3) ─────────────────────────────────
+    private final By managerCards        = By.cssSelector(".card-grid .card");
+    private final By editButtons         = By.cssSelector(".card-grid .card button.btn-edit");
+    private final By editModalOverlay    = By.cssSelector("div.modal-overlay");
+    private final By editModalTitle      = By.cssSelector("div.modal-overlay div.modal h2");
+    private final By editModalFullName   = By.cssSelector(
+            "div.modal-overlay div.modal input[placeholder='Enter full name']");
+    private final By editModalEmail      = By.cssSelector(
+            "div.modal-overlay div.modal input[type='email']");
+    private final By editModalUserIdDis  = By.cssSelector(
+            "div.modal-overlay div.modal input[disabled]");
+    private final By editModalCancelBtn  = By.cssSelector(
+            "div.modal-overlay div.modal button.btn-cancel");
+    private final By editModalSubmitBtn  = By.cssSelector(
+            "div.modal-overlay div.modal button.btn-primary");
+    private final By successNotif        = By.cssSelector(
+            ".toast, .alert-success, [class*='success'], [class*='toast']");
+    private final By deleteButton        = By.cssSelector(
+            "div.card-grid div.card button.btn-delete, " +
+            "div.card-grid div.card button.btn-danger");
 
     // ── Constructor ───────────────────────────────────────────────────────────
     public ManagersLeadershipPage(WebDriver driver) {
@@ -153,5 +176,79 @@ public class ManagersLeadershipPage extends BasePage {
             ((JavascriptExecutor) driver).executeScript(
                     "document.dispatchEvent(new KeyboardEvent('keydown',{'key':'Escape','bubbles':true}))");
         } catch (Exception ignored) {}
+    }
+
+    // ── Manager cards & edit buttons (FRD 2.3) ───────────────────────────────
+
+    public List<WebElement> getManagerCards() {
+        try { return driver.findElements(managerCards); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public List<WebElement> getEditButtons() {
+        try { return driver.findElements(editButtons); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public void clickFirstEditButton() {
+        List<WebElement> btns = getEditButtons();
+        if (!btns.isEmpty()) btns.get(0).click();
+    }
+
+    // ── Edit modal (FRD 2.3) ─────────────────────────────────────────────────
+
+    public boolean isEditModalOverlayVisible() {
+        return isDisplayed(editModalOverlay);
+    }
+
+    public String getEditModalTitleText() {
+        try { return getText(editModalTitle); } catch (Exception e) { return ""; }
+    }
+
+    public WebElement getEditModalFullNameInput() {
+        return waitForVisible(editModalFullName);
+    }
+
+    public WebElement getEditModalEmailInput() {
+        return waitForVisible(editModalEmail);
+    }
+
+    public WebElement getEditModalUserIdInput() {
+        return waitForVisible(editModalUserIdDis);
+    }
+
+    public boolean isEditModalUserIdDisabled() {
+        try {
+            WebElement el = driver.findElement(editModalUserIdDis);
+            return el.getAttribute("disabled") != null;
+        } catch (Exception e) { return false; }
+    }
+
+    public void clickEditModalCancel() {
+        waitForClickable(editModalCancelBtn).click();
+    }
+
+    public void clickEditModalSubmit() {
+        waitForClickable(editModalSubmitBtn).click();
+    }
+
+    public boolean isSuccessNotifVisible() {
+        try {
+            List<WebElement> notifs = driver.findElements(successNotif);
+            return notifs.stream().anyMatch(WebElement::isDisplayed);
+        } catch (Exception e) { return false; }
+    }
+
+    public List<WebElement> getDeleteButtons() {
+        try { return driver.findElements(deleteButton); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public void waitForEditModalVisible() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(editModalOverlay));
+    }
+
+    public void waitForEditModalInvisible() {
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(editModalOverlay));
     }
 }

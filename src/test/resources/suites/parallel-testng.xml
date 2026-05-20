@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <!--
-  ╔══════════════════════════════════════════════════════════════════════╗
-  ║           OneCohort — Parallel Test Suite                           ║
-  ╠══════════════════════════════════════════════════════════════════════╣
-  ║  parallel="tests" — each <test> block runs in its own thread.      ║
-  ║  thread-count="6"  — 6 concurrent threads maximum.                 ║
-  ║                                                                      ║
-  ║  Thread assignment                                                  ║
-  ║  ─────────────────                                                  ║
-  ║  Thread 1  Super Admin tests  (sequential within — SA tests share   ║
-  ║                                browser session and app data)        ║
-  ║  Thread 2  Manager role tests (login neg + dashboard)               ║
-  ║  Thread 3  Leader role tests  (login neg + dashboard)               ║
-  ║  Thread 4  Batch Owner tests  (login neg + dashboard)               ║
-  ║  Thread 5  CR role tests      (login neg + dashboard)               ║
-  ║  Thread 6  Login + Employee tests                                   ║
-  ║                                                                      ║
-  ║  NOTE: SA tests are intentionally sequential within Thread 1 to     ║
-  ║  avoid data conflicts (e.g. EditDeleteCohort vs CohortManagement).  ║
-  ║  Threads 2-6 are independent and run in parallel against their own  ║
-  ║  role-specific pages.                                               ║
-  ╚══════════════════════════════════════════════════════════════════════╝
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║           OneCohort — Parallel Test Suite                               ║
+  ╠══════════════════════════════════════════════════════════════════════════╣
+  ║  parallel="tests" — each <test> block runs in its own thread.          ║
+  ║  thread-count="6"  — 6 concurrent threads maximum.                     ║
+  ║                                                                          ║
+  ║  Thread assignment                                                       ║
+  ║  ─────────────────                                                       ║
+  ║  Thread 1  Super Admin tests  (sequential within — SA tests share       ║
+  ║                                browser session and app data)            ║
+  ║  Thread 2  Manager role tests (login neg + dashboard)                   ║
+  ║  Thread 3  Leader role tests  (login neg + dashboard)                   ║
+  ║  Thread 4  Batch Owner tests  (login neg + dashboard)                   ║
+  ║  Thread 5  CR role tests      (login neg + dashboard)                   ║
+  ║  Thread 6  Login + Employee tests                                       ║
+  ║                                                                          ║
+  ║  NOTE: SA tests are intentionally sequential within Thread 1 to         ║
+  ║  avoid data conflicts (e.g. EditDeleteCohort vs CohortManagement).      ║
+  ║  Threads 2-6 are independent and run in parallel against their own      ║
+  ║  role-specific pages.                                                   ║
+  ║                                                                          ║
+  ║  Dynamic group filtering (override via Maven):                          ║
+  ║    mvn test -Dgroups=smoke                                              ║
+  ║    mvn test -Dgroups=regression                                         ║
+  ║    mvn test -Dgroups=negative                                           ║
+  ║    mvn test "-Dgroups=smoke,negative"                                   ║
+  ╚══════════════════════════════════════════════════════════════════════════╝
 -->
 <suite name="OneCohort Parallel Test Suite" verbose="1"
        parallel="tests" thread-count="6">

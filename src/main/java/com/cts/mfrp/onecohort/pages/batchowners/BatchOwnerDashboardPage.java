@@ -30,71 +30,69 @@ public class BatchOwnerDashboardPage extends BasePage {
             "or contains(@class,'pill') or contains(@class,'tag'))]");
 
     private final By dashboardHeading = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'batch owner dashboard') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'poc dashboard')]");
+            "//*[contains(normalize-space(),'Batch Owner Dashboard') " +
+            "or contains(normalize-space(),'POC Dashboard')]");
 
-    // FRD 13.3.1: Cohorts Summary cards
+    // FRD 13.3.1: Cohorts Summary cards — container-first pattern (no ancestor::* traversal)
     private final By totalCohortsCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'total cohort')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Total Cohort')]]");
     private final By activeCohortsCard = By.xpath(
-            "//*[normalize-space(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'))='active']" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[normalize-space()='Active']]");
     private final By completedCohortsCard = By.xpath(
-            "//*[normalize-space(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'))='completed']" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[normalize-space()='Completed']]");
     private final By upcomingCohortsCard = By.xpath(
-            "//*[normalize-space(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'))='upcoming']" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[normalize-space()='Upcoming']]");
 
     // FRD 13.3.2: People Summary cards
     private final By totalInternsCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'total intern')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Total Intern')]]");
     private final By internsInTrainingCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'interns in training') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'in training')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Interns in Training') or contains(normalize-space(),'In Training')]]");
     private final By trainersCard = By.xpath(
-            "//*[normalize-space(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'))='trainers']" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[normalize-space()='Trainers']]");
     private final By pocsCard = By.xpath(
-            "//*[normalize-space(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'))='pocs']" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[normalize-space()='POCs']]");
 
     // FRD 13.3.3: Catalog & Rates cards
     private final By serviceLinesCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'service line')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Service Line')]]");
     private final By learningPathsCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'learning path')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Learning Path')]]");
     private final By avgCompletionCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'avg') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'completion rate') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'average')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Avg') or contains(normalize-space(),'Completion Rate') " +
+            "or contains(normalize-space(),'Average')]]");
 
     // FRD 13.3.3/13.3.4: Stats sections
     private final By cohortsPerServiceLineSection = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'cohorts per service line') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'per service')]");
+            "//*[contains(normalize-space(),'Cohorts per Service Line') " +
+            "or contains(normalize-space(),'Per Service')]");
     private final By cohortsPerLearningPathSection = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'cohorts per learning path') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'per learning path')]");
+            "//*[contains(normalize-space(),'Cohorts per Learning Path') " +
+            "or contains(normalize-space(),'Per Learning Path')]");
     private final By trainingCompletionDistribution = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'training completion') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'completion distribution')]");
+            "//*[contains(normalize-space(),'Training Completion') " +
+            "or contains(normalize-space(),'Completion Distribution')]");
 
     // FRD 13.7: Sidebar (Dashboard + Cohorts only)
     private final By sidebarDashboardLink = By.xpath(
             "//*[contains(@class,'sidebar') or contains(@class,'nav') or contains(@class,'side')]" +
-            "//a[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'dashboard')] " +
-            "| //nav//a[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'dashboard')]");
+            "//a[contains(normalize-space(),'Dashboard')] " +
+            "| //nav//a[contains(normalize-space(),'Dashboard')]");
     private final By sidebarCohortsLink = By.xpath(
             "//*[contains(@class,'sidebar') or contains(@class,'nav') or contains(@class,'side')]" +
-            "//a[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'cohort')] " +
-            "| //nav//a[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'cohort')]");
+            "//a[contains(normalize-space(),'Cohort')] " +
+            "| //nav//a[contains(normalize-space(),'Cohort')]");
 
     // FRD 13.4: Cohorts list page
     private final By cohortsSearchBar = By.cssSelector(
@@ -102,51 +100,84 @@ public class BatchOwnerDashboardPage extends BasePage {
             "input[placeholder*='Cohort'], input[placeholder*='cohort'], " +
             "[class*='search'] input");
     private final By filtersButton = By.xpath(
-            "//button[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'filter')]" +
-            "| //*[contains(@class,'filter')][self::button or self::a]");
+            "//button[contains(normalize-space(),'Filter')]" +
+            " | //*[contains(@class,'filter')][self::button or self::a]");
     private final By statusFilterDropdown = By.xpath(
-            "//select[preceding-sibling::*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'status')] " +
-            "or parent::*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'status')]]" +
-            "| //*[contains(@class,'status')]//select | //*[contains(@class,'filter')]//select[1]");
+            "//select[preceding-sibling::*[contains(normalize-space(),'Status')] " +
+            "or parent::*[contains(normalize-space(),'Status')]]" +
+            " | //*[contains(@class,'status')]//select | //*[contains(@class,'filter')]//select[1]");
     private final By learningPathFilterDropdown = By.xpath(
-            "//select[preceding-sibling::*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'learning')] " +
-            "or parent::*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'learning')]]" +
-            "| //*[contains(@class,'filter')]//select[2]");
-    private final By cohortsTable     = By.cssSelector("table");
-    private final By cohortsTableRows = By.cssSelector("table tbody tr");
-    private final By cohortIdLinks    = By.cssSelector("table tbody tr td:first-child a, table tbody tr td a");
+            "//select[preceding-sibling::*[contains(normalize-space(),'Learning')] " +
+            "or parent::*[contains(normalize-space(),'Learning')]]" +
+            " | //*[contains(@class,'filter')]//select[2]");
+    private final By cohortsTable     = By.cssSelector("table.table, .table-responsive table");
+    private final By cohortsTableRows = By.cssSelector("table.table tbody tr, .table-responsive table tbody tr");
+    private final By cohortIdLinks    = By.cssSelector(
+            "table.table tbody tr td:first-child a, table.table tbody tr td a, " +
+            ".table-responsive table tbody tr td:first-child a");
 
     // FRD 13.5: Cohort detail view
     private final By backToCohortsLink = By.cssSelector("button.btn-link.text-muted, button.btn.btn-link");
     private final By detailSummaryCards = By.cssSelector(
             "[class*='card'], [class*='summary'], [class*='stat'], [class*='metric'], [class*='header-card']");
     private final By detailTotalMembersCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'total member') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'members')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Total Member') or contains(normalize-space(),'Members')]]");
     private final By detailLearningPathCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'learning path')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Learning Path')]]");
     private final By detailStatusCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'status')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
-    private final By metadataBatchOwner = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'batch owner')]");
-    private final By metadataStartDate = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'start date')]");
-    private final By metadataTotalInterns = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'total intern') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'interns')]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Status')]]");
+    private final By metadataBatchOwner     = By.xpath("//*[contains(normalize-space(),'Batch Owner')]");
+    private final By metadataStartDate      = By.xpath("//*[contains(normalize-space(),'Start Date')]");
+    private final By metadataTotalInterns   = By.xpath(
+            "//*[contains(normalize-space(),'Total Intern') or contains(normalize-space(),'Interns')]");
     private final By trainingTimelineSection = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'training timeline') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'timeline')]");
-    private final By evaluationPanel = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'evaluation')]");
-    private final By overallProgressCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'overall progress') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'weeks remaining')]");
-    private final By traineesTable    = By.cssSelector("table");
-    private final By traineesRows     = By.cssSelector("table tbody tr");
+            "//*[contains(normalize-space(),'Training Timeline') or contains(normalize-space(),'Timeline')]");
+    private final By evaluationPanel         = By.xpath("//*[contains(normalize-space(),'Evaluation')]");
+    private final By overallProgressCard     = By.xpath(
+            "//*[contains(normalize-space(),'Overall Progress') or contains(normalize-space(),'Weeks Remaining')]");
+    private final By traineesTable = By.cssSelector("table.table, .table-responsive table");
+    private final By traineesRows  = By.cssSelector("table.table tbody tr, .table-responsive table tbody tr");
+
+    // FRD 13.5.1: Class Representative + Current Progress
+    private final By classRepresentativeField = By.xpath(
+            "//*[contains(normalize-space(),'Class Representative') " +
+            "or contains(normalize-space(),'Class Rep') " +
+            "or normalize-space()='CR']");
+    private final By currentProgressField = By.xpath(
+            "//*[contains(normalize-space(),'Current Progress') " +
+            "or contains(normalize-space(),'% Complete')]");
+
+    // FRD 13.6: Week buttons in Training Timeline
+    private final By weekButtons = By.xpath(
+            "//button[contains(normalize-space(),'Week')] | //*[contains(@class,'week')]");
+
+    // FRD 13.5: Individual evaluation milestones
+    private final By qualifierExam     = By.xpath("//*[contains(normalize-space(),'Qualifier')]");
+    private final By interimEvaluation = By.xpath("//*[contains(normalize-space(),'Interim')]");
+    private final By finalEvaluation   = By.xpath("//*[contains(normalize-space(),'Final')]");
+
+    // FRD 13.7: CRUD buttons (must not be present — read-only role)
+    private final By crudButtons = By.xpath(
+            "//button[contains(normalize-space(),'Create') " +
+            "or contains(normalize-space(),'Edit') " +
+            "or contains(normalize-space(),'Delete') " +
+            "or contains(normalize-space(),'Add Trainee') " +
+            "or contains(normalize-space(),'Add Batch Owner')]");
+
+    // FRD 13.7: Logout controls
+    private final By logoutDirect = By.xpath(
+            "//button[contains(normalize-space(),'Logout') " +
+            "or contains(normalize-space(),'Sign Out') " +
+            "or contains(normalize-space(),'Log Out')]" +
+            " | //a[contains(normalize-space(),'Logout') or contains(normalize-space(),'Sign Out')]" +
+            " | //*[@aria-label='Logout' or @aria-label='Sign out' or @title='Logout']" +
+            " | //*[contains(@class,'logout') or contains(@class,'signout')]");
+    private final By userMenuTrigger = By.cssSelector(
+            "[class*='user-menu'],[class*='avatar'],[class*='account'],[class*='profile-icon']," +
+            "[class*='user-icon'],[class*='dropdown-toggle'],[class*='user-btn']");
 
     public BatchOwnerDashboardPage(WebDriver driver) {
         super(driver);
@@ -175,6 +206,10 @@ public class BatchOwnerDashboardPage extends BasePage {
 
     public boolean isBatchOwnerRoleLabelVisible() {
         return elementExists(batchOwnerRoleLabel);
+    }
+
+    public WebElement getBatchOwnerRoleLabelElement() {
+        return driver.findElement(batchOwnerRoleLabel);
     }
 
     // ── Dashboard heading ─────────────────────────────────────────────────────
@@ -300,5 +335,134 @@ public class BatchOwnerDashboardPage extends BasePage {
     public void clickFirstCohortLink() {
         List<WebElement> links = getCohortIdLinks();
         if (!links.isEmpty()) links.get(0).click();
+    }
+
+    // ── Additional element getters ─────────────────────────────────────────────
+
+    /**
+     * Returns the text of the first cell in the first row of the cohorts table.
+     * Used by TC-BO-017 to extract a search term without inline By usage.
+     */
+    public String getFirstCohortRowFirstCellText() {
+        List<WebElement> rows = getCohortsTableRows();
+        if (rows.isEmpty()) return "";
+        try { return rows.get(0).findElement(By.cssSelector("td:first-child")).getText().trim(); }
+        catch (Exception e) { return ""; }
+    }
+
+    /** Returns both Cohort ID link cells and falls back to the first TD when no anchor tag found. */
+    public List<WebElement> getCohortIdLinksOrCells() {
+        List<WebElement> links = getCohortIdLinks();
+        if (!links.isEmpty()) return links;
+        return driver.findElements(By.cssSelector("table tbody tr td:first-child"));
+    }
+
+    public WebElement getSidebarDashboardLinkElement() { return driver.findElement(sidebarDashboardLink); }
+    public WebElement getSidebarCohortsLinkElement()   { return driver.findElement(sidebarCohortsLink); }
+
+    public void waitForSearchBarVisible() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(cohortsSearchBar));
+    }
+    public void waitForStatusFilterVisible() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(statusFilterDropdown));
+    }
+    public WebElement getStatusFilterElement()       { return driver.findElement(statusFilterDropdown); }
+    public WebElement getLearningPathFilterElement() { return driver.findElement(learningPathFilterDropdown); }
+
+    public WebElement getCohortsTableElement()           { return driver.findElement(cohortsTable); }
+    public List<WebElement> getCohortsTableHeaderCells() {
+        return driver.findElements(By.cssSelector("table thead th, table th"));
+    }
+    public void waitForCohortsTableToSettle(int seconds) {
+        By rows = cohortsTableRows;
+        new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(seconds))
+                .until(d -> !d.findElements(rows).isEmpty());
+    }
+
+    /**
+     * Multi-strategy Back-to-Cohorts finder:
+     * 1. CSS selector (btn-link)
+     * 2. JS scan for button containing "back"
+     * 3. JS text-node scan for any element containing "back"
+     * Returns null if none found (callers assert != null).
+     */
+    public WebElement getBackToCohortsElement() {
+        if (elementExists(backToCohortsLink)) return driver.findElement(backToCohortsLink);
+        org.openqa.selenium.JavascriptExecutor js = (org.openqa.selenium.JavascriptExecutor) driver;
+        WebElement el = (WebElement) js.executeScript(
+                "var btns=document.querySelectorAll('button');" +
+                "for(var i=0;i<btns.length;i++){" +
+                "  if(btns[i].innerText&&btns[i].innerText.toLowerCase().indexOf('back')>=0) return btns[i];}" +
+                "var all=document.querySelectorAll('*');" +
+                "for(var i=0;i<all.length;i++){var t=all[i].childNodes;" +
+                "  for(var j=0;j<t.length;j++){" +
+                "    if(t[j].nodeType===3&&t[j].nodeValue&&t[j].nodeValue.toLowerCase().indexOf('back')>=0) return all[i];}" +
+                "}" +
+                "return null;");
+        return el; // may be null
+    }
+
+    public List<WebElement> getDetailSummaryCardsList() { return driver.findElements(detailSummaryCards); }
+    public WebElement getDetailTotalMembersElement()    { return driver.findElement(detailTotalMembersCard); }
+    public WebElement getDetailLearningPathElement()    { return driver.findElement(detailLearningPathCard); }
+    public WebElement getDetailStatusElement()          { return driver.findElement(detailStatusCard); }
+
+    public boolean isClassRepresentativeFieldVisible() { return elementExists(classRepresentativeField); }
+    public WebElement getClassRepresentativeElement()  { return driver.findElement(classRepresentativeField); }
+    public boolean isCurrentProgressVisible()          { return elementExists(currentProgressField); }
+    public WebElement getCurrentProgressElement()      { return driver.findElement(currentProgressField); }
+
+    public WebElement getMetadataBatchOwnerElement()   { return driver.findElement(metadataBatchOwner); }
+    public WebElement getMetadataStartDateElement()    { return driver.findElement(metadataStartDate); }
+    public WebElement getMetadataTotalInternsElement() { return driver.findElement(metadataTotalInterns); }
+
+    public WebElement getTrainingTimelineElement() { return driver.findElement(trainingTimelineSection); }
+    public List<WebElement> getWeekButtons() {
+        try { return driver.findElements(weekButtons); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public boolean isQualifierExamVisible()     { return elementExists(qualifierExam); }
+    public WebElement getQualifierExamElement() { return driver.findElement(qualifierExam); }
+    public boolean isInterimEvaluationVisible()     { return elementExists(interimEvaluation); }
+    public WebElement getInterimEvaluationElement() { return driver.findElement(interimEvaluation); }
+    public boolean isFinalEvaluationVisible()     { return elementExists(finalEvaluation); }
+    public WebElement getFinalEvaluationElement() { return driver.findElement(finalEvaluation); }
+
+    public WebElement getEvaluationPanelElement() { return driver.findElement(evaluationPanel); }
+
+    public WebElement getOverallProgressElement() {
+        if (elementExists(overallProgressCard)) return driver.findElement(overallProgressCard);
+        return driver.findElement(By.cssSelector("canvas,[class*='progress'],[role='progressbar'],[class*='bar']"));
+    }
+
+    public WebElement getTraineesTableElement()      { return driver.findElement(traineesTable); }
+    public List<WebElement> getTraineesTableHeaders() {
+        return driver.findElements(By.cssSelector("table thead th, table th"));
+    }
+
+    public boolean isCrudButtonsPresent() { return elementExists(crudButtons); }
+    public List<WebElement> getCrudButtonElements() {
+        try { return driver.findElements(crudButtons); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public boolean isLogoutDirectlyVisible() { return elementExists(logoutDirect); }
+    public List<WebElement> getLogoutDirectElements() {
+        try { return driver.findElements(logoutDirect); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+    public void clickLogout() { driver.findElement(logoutDirect).click(); }
+
+    public boolean isUserMenuTriggerVisible() { return elementExists(userMenuTrigger); }
+    public List<WebElement> getUserMenuTriggerElements() {
+        try { return driver.findElements(userMenuTrigger); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+    public void clickFirstUserMenuTrigger() { driver.findElement(userMenuTrigger).click(); }
+    public boolean isLogoutVisibleAfterMenuOpen() { return elementExists(logoutDirect); }
+
+    public String getPageBodyText() {
+        return driver.findElement(By.tagName("body")).getText();
     }
 }
