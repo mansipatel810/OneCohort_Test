@@ -4,7 +4,10 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Select;
+
+import java.time.Duration;
 
 public class LoginPage extends BasePage {
 
@@ -51,16 +54,14 @@ public class LoginPage extends BasePage {
         org.openqa.selenium.WebElement dropdownEl = waitForVisible(serviceLineDropdown);
 
         // Poll until at least one real option appears (handles render.com cold start)
-        long deadline = System.currentTimeMillis() + 30_000;
-        Select select = new Select(dropdownEl);
-        while (System.currentTimeMillis() < deadline) {
-            long real = select.getOptions().stream()
-                    .filter(o -> !o.getAttribute("value").trim().isEmpty())
-                    .count();
-            if (real > 0) break;
-            try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
-            select = new Select(waitForVisible(serviceLineDropdown));
-        }
+        new FluentWait<>(driver)
+                .withTimeout(Duration.ofSeconds(30))
+                .pollingEvery(Duration.ofMillis(500))
+                .ignoring(Exception.class)
+                .until(d -> new Select(d.findElement(serviceLineDropdown))
+                        .getOptions().stream()
+                        .anyMatch(o -> !o.getAttribute("value").trim().isEmpty()));
+        Select select = new Select(waitForVisible(serviceLineDropdown));
 
         // 1. Exact value attribute
         try { select.selectByValue(serviceLineId); return this; }

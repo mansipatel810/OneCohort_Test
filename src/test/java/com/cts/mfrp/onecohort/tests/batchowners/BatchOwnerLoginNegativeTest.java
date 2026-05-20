@@ -93,7 +93,6 @@ public class BatchOwnerLoginNegativeTest extends BaseTest {
                             "arguments[0].style.transition = 'all 0.2s ease';" +
                             "arguments[0].setAttribute('title', 'TESTING: " + label + "');",
                     element);
-            Thread.sleep(400);
         } catch (Exception ignored) {}
     }
 
@@ -133,8 +132,6 @@ public class BatchOwnerLoginNegativeTest extends BaseTest {
      * Uses the same XPath locator strategy as BatchOwnerDashboardTest which works correctly.
      */
     private WebElement selectServiceLine(String value) throws InterruptedException {
-        Thread.sleep(500);
-
         // Primary locator: find the select that is near a "Service Line" label
         By serviceLineDropdown = By.xpath(
                 "//select[preceding-sibling::*[contains(text(),'Service Line')] " +
@@ -195,7 +192,6 @@ public class BatchOwnerLoginNegativeTest extends BaseTest {
 
     /** Enters text into the POC ID field. */
     private WebElement enterPocId(String value) throws InterruptedException {
-        Thread.sleep(400);
         WebElement pocEl = null;
         By locator = By.xpath(
                 "//input[contains(@placeholder,'USR') or contains(@placeholder,'POC') " +

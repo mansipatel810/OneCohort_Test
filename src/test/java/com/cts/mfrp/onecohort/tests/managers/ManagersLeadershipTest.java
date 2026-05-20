@@ -163,8 +163,9 @@ public class ManagersLeadershipTest extends BaseClassTest {
         String urlBefore = driver.getCurrentUrl();
         viewBtns.get(0).click();
 
-        // Allow short wait for either modal or navigation
-        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(d -> managersPage.isModalVisible() || !d.getCurrentUrl().equals(urlBefore));
+        } catch (Exception ignored) {}
         String urlAfter = driver.getCurrentUrl();
 
         boolean modalOpened  = managersPage.isModalVisible();

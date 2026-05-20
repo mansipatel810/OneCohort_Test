@@ -184,8 +184,11 @@ public class CreateManagerTest extends BaseClassTest {
         CreateManagerModal modal = openCreateManagerModal();
         modal.clickSubmit();
 
-        // Give Angular validation a moment to render error messages
-        try { Thread.sleep(800); } catch (InterruptedException ignored) {}
+        // Wait for Angular validation to render error messages or modal to close
+        try {
+            wait.until(d -> !managersPage.isModalVisible() ||
+                    !d.findElements(By.cssSelector("[class*='error'], [class*='invalid'], .ng-invalid ~ .error-msg, .mat-error, [class*='validation']")).isEmpty());
+        } catch (Exception ignored) {}
 
         // Modal must still be open (form should NOT submit with empty fields)
         boolean modalStillOpen = managersPage.isModalVisible();
@@ -276,7 +279,10 @@ public class CreateManagerTest extends BaseClassTest {
             }
 
             modal.clickSubmit();
-            Thread.sleep(800);
+            try {
+                wait.until(d -> !managersPage.isModalVisible() ||
+                        !d.findElements(By.cssSelector("[class*='error'], [class*='invalid'], .mat-error, .ng-invalid ~ .error-msg, [class*='validation']")).isEmpty());
+            } catch (Exception ignored) {}
 
             boolean modalOpen = managersPage.isModalVisible();
             List<WebElement> errors = driver.findElements(By.cssSelector(

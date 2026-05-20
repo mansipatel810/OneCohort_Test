@@ -244,7 +244,10 @@ public class TrainingProgressAnalyticsTest extends BaseClassTest {
                         .selectByIndex(1);
             } catch (Exception ignored) {}
         }
-        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(
+                    By.cssSelector("[class*='card'], [class*='cohort']"), 0));
+        } catch (Exception ignored) {}
 
         // Check that some data is still visible (filter applied, not empty)
         List<WebElement> cardsAfter = driver.findElements(By.cssSelector(
