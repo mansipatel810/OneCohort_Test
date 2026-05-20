@@ -39,6 +39,7 @@ import java.util.List;
  * TC-BO-FILTER-007  FRD 2.4.1  Selecting Learning Path filters profile cards
  * ─────────────────────────────────────────────────────────────────────────────
  */
+@Test(groups = {"regression", "functional", "batchowner", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class BatchOwnerFilterTest extends BaseClassTest {
 

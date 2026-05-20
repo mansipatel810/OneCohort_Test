@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+@Test(groups = {"smoke", "regression", "dashboard", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class SuperAdminDashboardChartsTest extends BaseClassTest {
 

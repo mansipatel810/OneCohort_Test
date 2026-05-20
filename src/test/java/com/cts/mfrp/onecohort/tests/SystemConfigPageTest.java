@@ -12,6 +12,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+@Test(groups = {"regression", "functional", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class SystemConfigPageTest extends BaseClassTest {
 

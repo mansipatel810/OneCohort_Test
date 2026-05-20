@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import java.time.Duration;
 
+@Test(groups = {"regression", "auth", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class SuperAdminLogoutTest extends BaseTest {
 

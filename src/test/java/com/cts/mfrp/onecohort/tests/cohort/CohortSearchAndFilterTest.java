@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
  * TC-FILTER-008  FRD 2.2.5  Learning Path filter exists (GAP documented if absent)
  * ─────────────────────────────────────────────────────────────────────────────
  */
+@Test(groups = {"regression", "functional", "cohort", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class CohortSearchAndFilterTest extends BaseClassTest {
 

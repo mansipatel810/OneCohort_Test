@@ -48,6 +48,7 @@ import java.util.List;
  * Login: Batch Owner role — credentials from ConfigReader
  */
 @Listeners(ExtentReportListener.class)
+@Test(groups = {"smoke", "regression", "dashboard", "batchowner"})
 public class BatchOwnerDashboardTest extends BaseClassTest {
 
     // ── LOGIN LOCATORS (FRD 13.2) ─────────────────────────────────────────────

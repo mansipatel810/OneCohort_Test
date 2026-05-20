@@ -10,6 +10,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+@Test(groups = {"smoke", "regression", "navigation", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class LeftNavPanelTest extends BaseClassTest {
 

@@ -29,6 +29,7 @@ import java.util.List;
  *   Catalog & Rates       → 3 cards  (Service Lines, Learning Paths, Avg. Completion Rate)
  *   Stats grids           → 3 grids  (Cohorts per Service Line / Learning Path / Completion Distribution)
  */
+@Test(groups = {"smoke", "regression", "dashboard", "leader"})
 @Listeners(ExtentReportListener.class)
 public class LeaderDashboardTest extends BaseClassTest {
 

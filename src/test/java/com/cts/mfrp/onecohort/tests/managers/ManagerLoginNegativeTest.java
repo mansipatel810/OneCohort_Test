@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import java.time.Duration;
 import java.util.List;
 
+@Test(groups = {"regression", "negative", "auth", "manager"})
 @Listeners(ExtentReportListener.class)
 public class ManagerLoginNegativeTest extends BaseTest {
 

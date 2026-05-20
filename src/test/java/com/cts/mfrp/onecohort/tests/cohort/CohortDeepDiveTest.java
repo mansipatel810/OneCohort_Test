@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
  * TC-DEEPDIVE-010  FRD 2.2.3  Back button navigates to Cohort Management page
  * ─────────────────────────────────────────────────────────────────────────────
  */
+@Test(groups = {"regression", "functional", "cohort", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class CohortDeepDiveTest extends BaseClassTest {
 

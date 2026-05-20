@@ -37,6 +37,7 @@ import java.util.List;
  * TC-BO-CARD-007  FRD 2.4.2  Back navigation returns to Batch Owners list
  * ─────────────────────────────────────────────────────────────────────────────
  */
+@Test(groups = {"regression", "functional", "batchowner", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class BatchOwnerProfileCardTest extends BaseClassTest {
 
