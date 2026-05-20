@@ -152,7 +152,9 @@ public class BatchOwnerFilterTest extends BaseClassTest {
     @Test(priority = 5)
     public void verifyServiceLineSelectionFiltersCards() {
         batchOwnerPage.selectServiceLine(ConfigReader.getValidServiceLineId());
-        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(d -> batchOwnerPage.areProfileCardsVisible() || batchOwnerPage.isLearningPathDropdownVisible());
+        } catch (Exception ignored) {}
 
         // After selecting a service line, either profile cards appear OR
         // a dependent Learning Path dropdown appears (both are valid)
@@ -221,7 +223,9 @@ public class BatchOwnerFilterTest extends BaseClassTest {
 
         String lpValue = firstRealOption.getText().trim();
         lpSelect.selectByVisibleText(lpValue);
-        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(d -> batchOwnerPage.areProfileCardsVisible());
+        } catch (Exception ignored) {}
 
         boolean cardsVisible = batchOwnerPage.areProfileCardsVisible();
         Assert.assertTrue(

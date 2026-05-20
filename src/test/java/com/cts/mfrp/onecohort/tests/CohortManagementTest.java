@@ -6,6 +6,7 @@ import com.cts.mfrp.onecohort.pages.cohort.CohortManagementPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExcelUtils;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
+import com.cts.mfrp.onecohort.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -132,7 +133,7 @@ public class CohortManagementTest extends BaseClassTest {
             highlight(search);
             search.clear();
             search.sendKeys(keyword);
-            Thread.sleep(700);
+            WaitUtils.waitForResultsToSettle(driver, By.cssSelector("tbody tr.align-middle"), 5);
 
             int resultCount = page.getAlignedRows().size();
             System.out.println("INFO - Keyword: '" + keyword + "' | Results: " + resultCount
@@ -147,7 +148,7 @@ public class CohortManagementTest extends BaseClassTest {
                     + "' returned " + resultCount + " result(s)");
 
             search.clear();
-            Thread.sleep(500);
+            WaitUtils.waitForResultsToSettle(driver, By.cssSelector("tbody tr.align-middle"), 5);
             page.waitForTableToLoad();
         } catch (AssertionError ae) {
             System.out.println("FAIL - TEST 4 [" + keyword + "]: " + ae.getMessage()); throw ae;
@@ -191,13 +192,13 @@ public class CohortManagementTest extends BaseClassTest {
             WebElement btn = page.getFiltersBtnElement();
             highlight(btn);
             btn.click();
-            Thread.sleep(600);
+            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("select.form-select"), 0));
             List<WebElement> dropdowns = page.getFilterSelectElements();
             Assert.assertFalse(dropdowns.isEmpty(),
                     "Filter panel did not open. No select.form-select found. GAP: FR-012");
             System.out.println("PASS - Filter panel opened with " + dropdowns.size() + " filter(s)");
             btn.click();
-            Thread.sleep(400);
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("select.form-select")));
         } catch (AssertionError ae) {
             System.out.println("FAIL - TEST 6: " + ae.getMessage()); throw ae;
         } catch (Exception e) {
@@ -692,7 +693,6 @@ public class CohortManagementTest extends BaseClassTest {
             // Wait for modal AND the disabled input to fully render
             page.waitForModalVisible();
             page.waitForEditSLLockedPresent();
-            Thread.sleep(500);
 
             WebElement slField = page.getEditServiceLineLockedElement();
             highlight(slField);
@@ -755,7 +755,6 @@ public class CohortManagementTest extends BaseClassTest {
             List<WebElement> deleteBtns = page.getDeleteButtons();
             highlight(deleteBtns.get(0));
             page.clickFirstDeleteBtn();
-            Thread.sleep(700);
 
             try {
                 wait.until(ExpectedConditions.alertIsPresent());

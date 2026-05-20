@@ -84,7 +84,6 @@ public abstract class BasePage {
                     "arguments[0].style.transition = 'all 0.2s ease';" +
                     "arguments[0].setAttribute('title', 'TESTING: " + label + "');",
                     element);
-            Thread.sleep(400);
         } catch (Exception ignored) {}
     }
 

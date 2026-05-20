@@ -7,6 +7,7 @@ import com.cts.mfrp.onecohort.pages.cohort.CohortManagementPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExcelUtils;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
+import com.cts.mfrp.onecohort.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -113,7 +114,7 @@ public class CohortSearchAndFilterTest extends BaseClassTest {
 
         String searchTerm = cohortName.length() > 4 ? cohortName.substring(0, 4) : cohortName;
         filterComponent.search(searchTerm);
-        try { Thread.sleep(800); } catch (InterruptedException ignored) {}
+        WaitUtils.waitForResultsToSettle(driver, By.cssSelector("table tbody tr"), 5);
 
         List<WebElement> filteredRows = cohortPage.getTableRows();
         Assert.assertFalse(
@@ -132,7 +133,7 @@ public class CohortSearchAndFilterTest extends BaseClassTest {
                 filteredRows.size() + " row(s)");
 
         filterComponent.clearSearch();
-        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        WaitUtils.waitForResultsToSettle(driver, By.cssSelector("table tbody tr"), 5);
     }
 
     // -------------------------------------------------------
@@ -155,7 +156,7 @@ public class CohortSearchAndFilterTest extends BaseClassTest {
         }
 
         filterComponent.search(cohortId);
-        try { Thread.sleep(800); } catch (InterruptedException ignored) {}
+        WaitUtils.waitForResultsToSettle(driver, By.cssSelector("table tbody tr"), 5);
 
         List<WebElement> filteredRows = cohortPage.getTableRows();
         Assert.assertFalse(
@@ -173,7 +174,7 @@ public class CohortSearchAndFilterTest extends BaseClassTest {
         System.out.println("PASS - Cohort ID search '" + cohortId + "' returned correct result");
 
         filterComponent.clearSearch();
-        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        WaitUtils.waitForResultsToSettle(driver, By.cssSelector("table tbody tr"), 5);
     }
 
     // -------------------------------------------------------
@@ -189,10 +190,10 @@ public class CohortSearchAndFilterTest extends BaseClassTest {
         }
 
         filterComponent.search("COH-");
-        try { Thread.sleep(800); } catch (InterruptedException ignored) {}
+        WaitUtils.waitForResultsToSettle(driver, By.cssSelector("table tbody tr"), 5);
 
         filterComponent.clearSearch();
-        try { Thread.sleep(800); } catch (InterruptedException ignored) {}
+        WaitUtils.waitForResultsToSettle(driver, By.cssSelector("table tbody tr"), 5);
 
         int totalRowsAfter = cohortPage.getTableRows().size();
         Assert.assertEquals(
@@ -272,7 +273,7 @@ public class CohortSearchAndFilterTest extends BaseClassTest {
 
         System.out.println("\n--- TC-FILTER-006/007 [" + statusValue + "] ---");
         filterComponent.selectStatus(statusValue);
-        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+        WaitUtils.waitForResultsToSettle(driver, By.cssSelector("table tbody tr"), 5);
 
         List<WebElement> rows = cohortPage.getTableRows();
         if (rows.isEmpty()) {
@@ -307,7 +308,11 @@ public class CohortSearchAndFilterTest extends BaseClassTest {
 
         if (!visible && filterComponent.isServiceLineDropdownVisible()) {
             filterComponent.selectServiceLine(ConfigReader.getValidServiceLineId());
-            try { Thread.sleep(800); } catch (InterruptedException ignored) {}
+            try {
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(
+                        "select[name='learningPath'], select#learningPathFilter, " +
+                        "select[formcontrolname='learningPath']")));
+            } catch (Exception ignored) {}
             visible = filterComponent.isLearningPathDropdownVisible();
         }
 
@@ -327,7 +332,7 @@ public class CohortSearchAndFilterTest extends BaseClassTest {
                     "select[name='status'], select#statusFilter, " +
                     "select[formcontrolname='status']")))
                     .selectByIndex(0);
-            Thread.sleep(400);
+            WaitUtils.waitForResultsToSettle(driver, By.cssSelector("table tbody tr"), 3);
         } catch (Exception ignored) {}
     }
 }

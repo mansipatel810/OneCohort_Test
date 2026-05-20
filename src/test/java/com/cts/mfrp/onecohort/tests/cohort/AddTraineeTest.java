@@ -140,7 +140,7 @@ public class AddTraineeTest extends BaseClassTest {
             description = "TC-AT-004 [FRD 2.2.8]: Clicking 'Add Trainee' opens the modal dialog")
     public void verifyModalOpens() {
         deepDivePage.clickAddTraineeButton();
-        try { Thread.sleep(600); } catch (InterruptedException ignored) {}
+        wait.until(d -> deepDivePage.isTraineeIdInputVisible());
         Assert.assertTrue(deepDivePage.isTraineeIdInputVisible(),
                 "FAIL [FRD 2.2.8] — After clicking 'Add Trainee', modal did not open " +
                         "(Trainee ID input not found).");
@@ -271,7 +271,12 @@ public class AddTraineeTest extends BaseClassTest {
         WebElement submitBtn = wait.until(ExpectedConditions.elementToBeClickable(addTraineeSubmitBtn));
         submitBtn.click();
 
-        try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(ExpectedConditions.or(
+                    ExpectedConditions.visibilityOfElementLocated(successNotification),
+                    d -> driver.findElements(traineesTableRows).size() > 0
+            ));
+        } catch (Exception ignored) {}
 
         boolean successShown = false;
         List<WebElement> notifications = driver.findElements(successNotification);
@@ -297,12 +302,12 @@ public class AddTraineeTest extends BaseClassTest {
             description = "TC-AT-014 [FRD 2.2.8]: Clicking Add without filling fields shows validation")
     public void verifyEmptyFormValidation() {
         deepDivePage.clickAddTraineeButton();
-        try { Thread.sleep(600); } catch (InterruptedException ignored) {}
+        wait.until(d -> deepDivePage.isTraineeIdInputVisible());
 
         List<WebElement> submitBtns = driver.findElements(addTraineeSubmitBtn);
         if (!submitBtns.isEmpty()) {
             submitBtns.get(0).click();
-            try { Thread.sleep(600); } catch (InterruptedException ignored) {}
+            try { wait.until(ExpectedConditions.alertIsPresent()); } catch (Exception ignored) {}
 
             boolean alertPresent = false;
             try {
@@ -330,7 +335,7 @@ public class AddTraineeTest extends BaseClassTest {
             description = "TC-AT-015 [FRD 2.2.8]: All 4 modal fields are marked as required (red asterisk *)")
     public void verifyRequiredFieldMarkings() {
         deepDivePage.clickAddTraineeButton();
-        try { Thread.sleep(600); } catch (InterruptedException ignored) {}
+        wait.until(d -> deepDivePage.isTraineeIdInputVisible());
 
         By requiredMarkers = By.xpath(
                 "//*[contains(@class,'modal') or @role='dialog']//*[text()='*' " +

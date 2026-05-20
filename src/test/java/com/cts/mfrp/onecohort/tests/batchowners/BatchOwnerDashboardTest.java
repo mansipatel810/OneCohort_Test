@@ -4,6 +4,7 @@ import com.cts.mfrp.onecohort.base.BaseClassTest;
 import com.cts.mfrp.onecohort.pages.LoginPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
+import com.cts.mfrp.onecohort.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -603,7 +604,7 @@ public class BatchOwnerDashboardTest extends BaseClassTest {
         WebElement cohortsLink = driver.findElement(sidebarCohortsLink);
         highlight(cohortsLink, "yellow", "Cohorts Sidebar Link [FRD 13.4]");
         cohortsLink.click();
-        Thread.sleep(1500);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(cohortsSearchBar));
         highlight(driver.findElement(By.tagName("body")), "green", "Cohorts List Page — navigated");
         System.out.println("TC-BO-013 PASSED. URL = " + driver.getCurrentUrl());
     }
@@ -641,7 +642,7 @@ public class BatchOwnerDashboardTest extends BaseClassTest {
         WebElement filterBtn = driver.findElement(filtersButton);
         highlight(filterBtn, "yellow", "Filters Button [FRD 13.4.1]");
         filterBtn.click();
-        Thread.sleep(800);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(statusFilterDropdown));
         highlight(filterBtn, "green", "Filters Button — clicked");
 
         boolean statusFound = elementExists(statusFilterDropdown);
@@ -722,7 +723,7 @@ public class BatchOwnerDashboardTest extends BaseClassTest {
         highlight(search, "yellow", "Search Bar — typing [FRD 13.4.1]");
         search.clear();
         search.sendKeys(searchTerm);
-        Thread.sleep(1000);
+        WaitUtils.waitForResultsToSettle(driver, cohortsTableRows, 5);
         List<WebElement> rowsAfter = driver.findElements(cohortsTableRows);
         highlight(search, "green", "Search Bar — filter applied");
         System.out.println("TC-BO-017: Rows after search = " + rowsAfter.size());
@@ -731,7 +732,7 @@ public class BatchOwnerDashboardTest extends BaseClassTest {
 
         // Clear search and verify rows restore
         search.clear();
-        Thread.sleep(800);
+        WaitUtils.waitForResultsToSettle(driver, cohortsTableRows, 5);
         List<WebElement> rowsRestored = driver.findElements(cohortsTableRows);
         Assert.assertFalse(rowsRestored.isEmpty(), "FRD 13.4.1: Clearing search should restore the full list.");
         System.out.println("TC-BO-017 PASSED. Rows restored = " + rowsRestored.size());
@@ -762,7 +763,7 @@ public class BatchOwnerDashboardTest extends BaseClassTest {
         highlight(firstLink, "yellow", "Cohort ID Link [FRD 13.5]");
         String urlBefore = driver.getCurrentUrl();
         firstLink.click();
-        Thread.sleep(1500);
+        wait.until(d -> !d.getCurrentUrl().equals(urlBefore));
 
         boolean navigated = !driver.getCurrentUrl().equals(urlBefore);
         Assert.assertTrue(navigated, "FRD 13.5: Clicking Cohort ID did not navigate to detail page.");
@@ -1080,7 +1081,7 @@ public class BatchOwnerDashboardTest extends BaseClassTest {
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         if (!directBtns.isEmpty()) {
             highlight(directBtns.get(0), "yellow", "Logout Button [FRD 13.7]");
-            try { directBtns.get(0).click(); loggedOut = true; Thread.sleep(1000); }
+            try { directBtns.get(0).click(); loggedOut = true; wait(10).until(ExpectedConditions.visibilityOfElementLocated(userIdInput)); }
             catch (Exception e) { System.out.println("TC-BO-027: Direct logout click failed."); }
         }
 
@@ -1092,13 +1093,13 @@ public class BatchOwnerDashboardTest extends BaseClassTest {
             for (WebElement menu : menus) {
                 try {
                     highlight(menu, "yellow", "User Menu Trigger [FRD 13.7]");
-                    menu.click(); Thread.sleep(600);
+                    menu.click(); wait(5).until(ExpectedConditions.visibilityOfElementLocated(logoutDirect));
                     driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
                     List<WebElement> btns = driver.findElements(logoutDirect);
                     driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
                     if (!btns.isEmpty()) {
                         highlight(btns.get(0), "yellow", "Logout in Menu [FRD 13.7]");
-                        btns.get(0).click(); loggedOut = true; Thread.sleep(1000); break;
+                        btns.get(0).click(); loggedOut = true; wait(10).until(ExpectedConditions.visibilityOfElementLocated(userIdInput)); break;
                     }
                 } catch (Exception ignored) {}
             }
@@ -1108,7 +1109,7 @@ public class BatchOwnerDashboardTest extends BaseClassTest {
         if (!loggedOut) {
             System.out.println("TC-BO-027: Logout button not found. Navigating to base URL.");
             driver.get(ConfigReader.getBaseUrl());
-            Thread.sleep(1000);
+            wait(10).until(ExpectedConditions.visibilityOfElementLocated(userIdInput));
         }
 
         try {

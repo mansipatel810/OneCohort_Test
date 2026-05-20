@@ -188,7 +188,10 @@ public class AddBatchOwnerModalTest extends BaseClassTest {
     public void verifyEmptyFormValidation() {
         AddBatchOwnerModal modal = openModal();
         modal.clickSubmit();
-        try { Thread.sleep(800); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(d -> !batchOwnerPage.isModalVisible() ||
+                    !d.findElements(By.cssSelector("[class*='error'], [class*='invalid'], input:invalid, .mat-error")).isEmpty());
+        } catch (Exception ignored) {}
 
         boolean modalStillOpen = batchOwnerPage.isModalVisible();
         List<WebElement> errors = driver.findElements(By.cssSelector(
@@ -268,7 +271,10 @@ public class AddBatchOwnerModalTest extends BaseClassTest {
                     "//button[contains(normalize-space(),'Create Entry')" +
                     " or contains(normalize-space(),'Submit')" +
                     " or contains(normalize-space(),'Save')]")).click();
-            Thread.sleep(800);
+            try {
+                wait.until(d -> !batchOwnerPage.isModalVisible() ||
+                        !d.findElements(By.cssSelector("[class*='error'], [class*='invalid'], input:invalid, .mat-error")).isEmpty());
+            } catch (Exception ignored) {}
 
             boolean modalOpen = batchOwnerPage.isModalVisible();
             List<WebElement> errors = driver.findElements(By.cssSelector(

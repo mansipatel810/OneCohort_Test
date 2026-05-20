@@ -361,7 +361,6 @@ public class CohortManagementPage extends BasePage {
         try {
             wait.until(ExpectedConditions.visibilityOfElementLocated(specificTable));
             wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(tableRowsAligned, 0));
-            Thread.sleep(400);
         } catch (Exception ignored) {}
     }
 
