@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+@Test(groups = {"regression", "functional", "batchowner", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class EditDeleteBatchOwnerTest extends BaseClassTest {
 

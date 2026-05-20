@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+@Test(groups = {"regression", "functional", "manager", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class EditDeleteManagerTest extends BaseClassTest {
 

@@ -1,83 +1,186 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
-<suite name="OneCohort Test Suite" verbose="1" parallel="classes" thread-count="3">
+<!--
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║           OneCohort — Complete Regression Test Suite                ║
+  ║           Runs ALL 32 test classes organised by feature area        ║
+  ╠══════════════════════════════════════════════════════════════════════╣
+  ║  Run full suite      :  mvn test                                    ║
+  ║  Run by group        :  mvn test -Dgroups=<group>                   ║
+  ║                                                                      ║
+  ║  Available groups                                                   ║
+  ║  ─────────────────                                                  ║
+  ║  smoke        Critical-path tests (~10 classes, fast gate check)    ║
+  ║  regression   Full suite (all tests)                                ║
+  ║  sanity       Bare-minimum: login only                              ║
+  ║  negative     Input-validation / error-path tests (4 classes)       ║
+  ║  functional   Feature CRUD & interaction tests                      ║
+  ║  auth         Login, logout and negative-login tests                ║
+  ║  dashboard    All dashboard-verification tests                      ║
+  ║  navigation   Left-nav panel tests                                  ║
+  ║  cohort       Cohort management tests                               ║
+  ║  analytics    Training-analytics tests                              ║
+  ║  superadmin   Tests executed under the Super Admin role             ║
+  ║  manager      Tests executed under / about the Manager role         ║
+  ║  leader       Tests executed under / about the Leader role          ║
+  ║  batchowner   Tests executed under / about the Batch Owner role     ║
+  ║  cr           Tests executed under / about the CR role              ║
+  ╚══════════════════════════════════════════════════════════════════════╝
+-->
+<suite name="OneCohort Complete Test Suite" verbose="1">
 
     <listeners>
         <listener class-name="com.cts.mfrp.onecohort.utils.ExtentReportListener"/>
         <listener class-name="com.cts.mfrp.onecohort.listeners.TestListener"/>
     </listeners>
 
-    <test name="Smoke Tests">
-        <groups>
-            <run>
-                <include name="smoke"/>
-            </run>
-        </groups>
+    <!-- ════════════════════════════════════════════════════════════════
+         AUTHENTICATION & LOGIN
+         Groups covered: sanity, smoke, regression, auth
+         ════════════════════════════════════════════════════════════════ -->
+
+    <!-- Sanity/Smoke — positive login for all supported roles -->
+    <test name="Login - Positive (All Roles)">
         <classes>
             <class name="com.cts.mfrp.onecohort.tests.LoginTest"/>
-            <class name="com.cts.mfrp.onecohort.tests.HomePageTest"/>
         </classes>
     </test>
 
-    <test name="Regression Tests">
-        <groups>
-            <run>
-                <include name="regression"/>
-            </run>
-        </groups>
+    <!-- Negative login — all four roles grouped together -->
+    <test name="Login - Negative (All Roles)">
         <classes>
-            <class name="com.cts.mfrp.onecohort.tests.LoginTest"/>
-            <class name="com.cts.mfrp.onecohort.tests.HomePageTest"/>
-            <class name="com.cts.mfrp.onecohort.tests.EmployeeTest"/>
-            <class name="com.cts.mfrp.onecohort.tests.LeaveTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.managers.ManagerLoginNegativeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.leader.LeaderLoginNegativeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerLoginNegativeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.cr.CRLoginNegativeTest"/>
         </classes>
     </test>
 
-    <test name="Cohort Management Tests">
+    <!-- ════════════════════════════════════════════════════════════════
+         SUPER ADMIN ROLE
+         Groups covered: superadmin, smoke, regression, dashboard,
+                         navigation, functional, cohort, analytics, auth
+         ════════════════════════════════════════════════════════════════ -->
+
+    <!-- Smoke: SA dashboard KPI cards, heading, sidebar items -->
+    <test name="Super Admin - Dashboard and Navigation">
         <classes>
+            <class name="com.cts.mfrp.onecohort.tests.HomePageTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.LeftNavPanelTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.SuperAdminDashboardChartsTest"/>
+        </classes>
+    </test>
+
+    <!-- Functional: System-config page cards and create-modal buttons -->
+    <test name="Super Admin - System Configuration">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.SystemConfigPageTest"/>
+        </classes>
+    </test>
+
+    <!-- Functional/Smoke: Cohort grid, search, deep-dive, add trainee, edit/delete -->
+    <test name="Super Admin - Cohort Management">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.CohortManagementTest"/>
             <class name="com.cts.mfrp.onecohort.tests.cohort.CohortManagementGridTest"/>
             <class name="com.cts.mfrp.onecohort.tests.cohort.CohortSearchAndFilterTest"/>
             <class name="com.cts.mfrp.onecohort.tests.cohort.CohortDeepDiveTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.cohort.AddTraineeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.cohort.EditDeleteCohortTest"/>
         </classes>
     </test>
 
-    <test name="Managers and Leadership Tests">
+    <!-- Smoke/Functional: Manager profile cards, create, edit/delete -->
+    <test name="Super Admin - Managers and Leadership">
         <classes>
             <class name="com.cts.mfrp.onecohort.tests.managers.ManagersLeadershipTest"/>
             <class name="com.cts.mfrp.onecohort.tests.managers.CreateManagerTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.managers.EditDeleteManagerTest"/>
         </classes>
     </test>
 
-    <test name="CR Dashboard Tests">
+    <!-- Functional: Batch-owner filter, profile cards, add/edit/delete modal -->
+    <test name="Super Admin - Batch Owners">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerFilterTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerProfileCardTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.AddBatchOwnerModalTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.EditDeleteBatchOwnerTest"/>
+        </classes>
+    </test>
+
+    <!-- Analytics: Training progress chart, cohort cards, Behind-schedule indicator -->
+    <test name="Super Admin - Training Analytics">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.analytics.TrainingProgressAnalyticsTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.analytics.TrainingAnalyticsBehindTest"/>
+        </classes>
+    </test>
+
+    <!-- Auth: SA logout flow and back-button guard -->
+    <test name="Super Admin - Logout">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.SuperAdminLogoutTest"/>
+        </classes>
+    </test>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         MANAGER ROLE
+         Groups covered: manager, smoke, regression, dashboard
+         ════════════════════════════════════════════════════════════════ -->
+
+    <!-- Smoke: Manager dashboard KPI cards, sidebar nav, stat cards -->
+    <test name="Manager - Dashboard">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.managers.ManagerDashboardTest"/>
+        </classes>
+    </test>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         LEADER ROLE
+         Groups covered: leader, smoke, regression, dashboard
+         ════════════════════════════════════════════════════════════════ -->
+
+    <!-- Smoke: Leader dashboard cards, sidebar, service-line stats -->
+    <test name="Leader - Dashboard">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.leader.LeaderDashboardTest"/>
+        </classes>
+    </test>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         BATCH OWNER ROLE
+         Groups covered: batchowner, smoke, regression, dashboard
+         ════════════════════════════════════════════════════════════════ -->
+
+    <!-- Smoke: Batch Owner dashboard, cohort list, detail page, logout -->
+    <test name="Batch Owner - Dashboard and Cohorts">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerDashboardTest"/>
+        </classes>
+    </test>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         CR ROLE
+         Groups covered: cr, smoke, regression, dashboard
+         ════════════════════════════════════════════════════════════════ -->
+
+    <!-- Smoke: CR dashboard, trainees table, evaluations panel, logout -->
+    <test name="CR - Dashboard">
         <classes>
             <class name="com.cts.mfrp.onecohort.tests.cr.CRDashboardTest"/>
         </classes>
     </test>
 
-    <test name="CR Login Negative Tests">
-        <classes>
-            <class name="com.cts.mfrp.onecohort.tests.cr.CRLoginNegativeTest"/>
-        </classes>
-    </test>
+    <!-- ════════════════════════════════════════════════════════════════
+         EMPLOYEE ROLE
+         Groups covered: smoke, regression
+         ════════════════════════════════════════════════════════════════ -->
 
-    <test name="Batch Owner Login Negative Tests">
+    <test name="Employee Role Tests">
         <classes>
-            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerLoginNegativeTest"/>
-        </classes>
-    </test>
-
-    <test name="Batch Owners and POC Tests">
-        <classes>
-            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerDashboardTest"/>
-            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerFilterTest"/>
-            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerProfileCardTest"/>
-            <class name="com.cts.mfrp.onecohort.tests.batchowners.AddBatchOwnerModalTest"/>
-        </classes>
-    </test>
-
-    <test name="Training Progress Analytics Tests">
-        <classes>
-            <class name="com.cts.mfrp.onecohort.tests.analytics.TrainingProgressAnalyticsTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.EmployeeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.LeaveTest"/>
         </classes>
     </test>
 

@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Map;
 
+@Test(groups = {"regression", "functional", "cohort", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class CohortManagementTest extends BaseClassTest {
 

@@ -1,12 +1,117 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
-<suite name="OneCohort Parallel Suite" parallel="classes" thread-count="3" verbose="1">
+<!--
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║           OneCohort — Parallel Test Suite                           ║
+  ╠══════════════════════════════════════════════════════════════════════╣
+  ║  parallel="tests" — each <test> block runs in its own thread.      ║
+  ║  thread-count="6"  — 6 concurrent threads maximum.                 ║
+  ║                                                                      ║
+  ║  Thread assignment                                                  ║
+  ║  ─────────────────                                                  ║
+  ║  Thread 1  Super Admin tests  (sequential within — SA tests share   ║
+  ║                                browser session and app data)        ║
+  ║  Thread 2  Manager role tests (login neg + dashboard)               ║
+  ║  Thread 3  Leader role tests  (login neg + dashboard)               ║
+  ║  Thread 4  Batch Owner tests  (login neg + dashboard)               ║
+  ║  Thread 5  CR role tests      (login neg + dashboard)               ║
+  ║  Thread 6  Login + Employee tests                                   ║
+  ║                                                                      ║
+  ║  NOTE: SA tests are intentionally sequential within Thread 1 to     ║
+  ║  avoid data conflicts (e.g. EditDeleteCohort vs CohortManagement).  ║
+  ║  Threads 2-6 are independent and run in parallel against their own  ║
+  ║  role-specific pages.                                               ║
+  ╚══════════════════════════════════════════════════════════════════════╝
+-->
+<suite name="OneCohort Parallel Test Suite" verbose="1"
+       parallel="tests" thread-count="6">
 
     <listeners>
         <listener class-name="com.cts.mfrp.onecohort.utils.ExtentReportListener"/>
+        <listener class-name="com.cts.mfrp.onecohort.listeners.TestListener"/>
     </listeners>
 
-    <test name="Parallel Execution">
+    <!-- ── Thread 1 : Super Admin ───────────────────────────────────────
+         All SA-role classes run sequentially inside this single thread
+         to prevent create/edit/delete tests from conflicting with each
+         other on shared cohort, manager, and batch-owner data.
+    ──────────────────────────────────────────────────────────────────── -->
+    <test name="Super Admin Tests" preserve-order="true">
+        <classes>
+            <!-- Dashboard & Navigation -->
+            <class name="com.cts.mfrp.onecohort.tests.HomePageTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.LeftNavPanelTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.SuperAdminDashboardChartsTest"/>
+            <!-- System Configuration -->
+            <class name="com.cts.mfrp.onecohort.tests.SystemConfigPageTest"/>
+            <!-- Cohort Management -->
+            <class name="com.cts.mfrp.onecohort.tests.CohortManagementTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.cohort.CohortManagementGridTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.cohort.CohortSearchAndFilterTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.cohort.CohortDeepDiveTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.cohort.AddTraineeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.cohort.EditDeleteCohortTest"/>
+            <!-- Managers and Leadership -->
+            <class name="com.cts.mfrp.onecohort.tests.managers.ManagersLeadershipTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.managers.CreateManagerTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.managers.EditDeleteManagerTest"/>
+            <!-- Batch Owners -->
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerFilterTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerProfileCardTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.AddBatchOwnerModalTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.EditDeleteBatchOwnerTest"/>
+            <!-- Analytics -->
+            <class name="com.cts.mfrp.onecohort.tests.analytics.TrainingProgressAnalyticsTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.analytics.TrainingAnalyticsBehindTest"/>
+            <!-- Logout (must be last for SA) -->
+            <class name="com.cts.mfrp.onecohort.tests.SuperAdminLogoutTest"/>
+        </classes>
+    </test>
+
+    <!-- ── Thread 2 : Manager Role ──────────────────────────────────────
+         Negative login tests first, then full dashboard verification.
+    ──────────────────────────────────────────────────────────────────── -->
+    <test name="Manager Role Tests" preserve-order="true">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.managers.ManagerLoginNegativeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.managers.ManagerDashboardTest"/>
+        </classes>
+    </test>
+
+    <!-- ── Thread 3 : Leader Role ───────────────────────────────────────
+         Negative login tests first, then full dashboard verification.
+    ──────────────────────────────────────────────────────────────────── -->
+    <test name="Leader Role Tests" preserve-order="true">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.leader.LeaderLoginNegativeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.leader.LeaderDashboardTest"/>
+        </classes>
+    </test>
+
+    <!-- ── Thread 4 : Batch Owner Role ─────────────────────────────────
+         Negative login tests first, then full dashboard + cohort flow.
+    ──────────────────────────────────────────────────────────────────── -->
+    <test name="Batch Owner Role Tests" preserve-order="true">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerLoginNegativeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerDashboardTest"/>
+        </classes>
+    </test>
+
+    <!-- ── Thread 5 : CR Role ───────────────────────────────────────────
+         Negative login tests first, then full dashboard verification.
+    ──────────────────────────────────────────────────────────────────── -->
+    <test name="CR Role Tests" preserve-order="true">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.cr.CRLoginNegativeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.cr.CRDashboardTest"/>
+        </classes>
+    </test>
+
+    <!-- ── Thread 6 : Login & Employee ─────────────────────────────────
+         Positive login suite + Employee/Leave analytics tests.
+    ──────────────────────────────────────────────────────────────────── -->
+    <test name="Login and Employee Tests" preserve-order="true">
         <classes>
             <class name="com.cts.mfrp.onecohort.tests.LoginTest"/>
             <class name="com.cts.mfrp.onecohort.tests.EmployeeTest"/>

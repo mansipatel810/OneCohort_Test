@@ -34,6 +34,7 @@ import java.util.List;
  * TC-MGR-008  FRD 2.3    Role filter tabs (Managers / Leaders) are present
  * ─────────────────────────────────────────────────────────────────────────────
  */
+@Test(groups = {"smoke", "regression", "functional", "manager", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class ManagersLeadershipTest extends BaseClassTest {
 

@@ -35,6 +35,7 @@ import java.util.List;
  * TC-ANALYTICS-008  FRD 2.5.3  Selecting a Service Line updates the displayed data
  * ─────────────────────────────────────────────────────────────────────────────
  */
+@Test(groups = {"regression", "functional", "analytics", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class TrainingProgressAnalyticsTest extends BaseClassTest {
 
