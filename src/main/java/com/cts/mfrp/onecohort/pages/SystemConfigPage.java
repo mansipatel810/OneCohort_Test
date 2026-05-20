@@ -4,97 +4,43 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
-/**
- * Page Object for the Super Admin System Configuration page.
- *
- * URL     : /super-admin/system-config
- * FRD ref : Section 2.6 — System Configuration
- *
- * Page layout (FRD 2.6):
- *   Header  : "System Configuration"
- *   Subtitle: "Manage cohorts, service lines, and learning paths"
- *   Body    : 2×2 grid of 4 configuration tiles:
- *     1. Cohort Management         → "+ Create Cohort" button
- *     2. Service Line Management   → "+ Create Service Line" button
- *     3. Learning Path Management  → "+ Create Learning Path" button
- *     4. POC Management            → "+ Create POC" button
- *
- * NOTE FOR BEGINNERS:
- *   The selectors below are based on common Angular card layouts.
- *   If a test fails with "element not found", right-click the element in
- *   Chrome → Inspect, then copy the actual class name and update the selector.
- */
 public class SystemConfigPage extends BasePage {
 
-    // ── Page header ───────────────────────────────────────────────────────────
-    // FRD 2.6: Page heading = "System Configuration"
-    private final By pageHeading = By.xpath(
-            "//*[contains(@class,'heading') or contains(@class,'title') or self::h1 or self::h2]" +
-                    "[contains(text(),'System Configuration')]"
-    );
+    private final By pageHeading = By.cssSelector("div.page-header h2");
+    private final By pageSubtitle = By.cssSelector("div.page-header p");
+    private final By allConfigCards = By.cssSelector(".config-card");
+    private final By cohortCardTitle       = By.xpath("//h3[normalize-space()='Cohort Management']");
+    private final By serviceLineCardTitle  = By.xpath("//h3[normalize-space()='Service Line Management']");
+    private final By learningPathCardTitle = By.xpath("//h3[normalize-space()='Learning Path Management']");
+    private final By pocCardTitle          = By.xpath("//h3[normalize-space()='POC Management']");
+    private final By allCreateButtons = By.cssSelector("button.btn-create");
+    private final By createCohortBtn       = By.xpath("//button[normalize-space()='+ Create Cohort']");
+    private final By createServiceLineBtn  = By.xpath("//button[normalize-space()='+ Create Service Line']");
+    private final By createLearningPathBtn = By.xpath("//button[normalize-space()='+ Create Learning Path']");
+    private final By createPocBtn          = By.xpath("//button[normalize-space()='+ Create POC']");
+    private final By modalOverlay  = By.cssSelector("div.modal-overlay, div[class*='modal'], div[class*='overlay']");
+    private final By modalCancelBtn = By.xpath("//button[normalize-space()='Cancel']");
 
-    // FRD 2.6: Subtitle = "Manage cohorts, service lines, and learning paths"
-    private final By pageSubtitle = By.xpath(
-            "//*[contains(text(),'Manage cohorts') or contains(text(),'service lines') " +
-                    "or contains(text(),'learning paths')]"
-    );
-
-    // ── Configuration tiles (4 cards in 2×2 grid) ────────────────────────────
-    // Angular apps commonly use class names like "config-card", "card", "tile"
-    // for card-based layouts. We target all of them to find the right one.
-    private final By allConfigTiles = By.cssSelector(
-            "div.config-card, div.tile, div.card, div.config-tile"
-    );
-
-    // ── Individual tile headings (by exact text) ──────────────────────────────
-    // FRD 2.6: Each tile has a visible heading
-    private final By cohortMgmtTile     = By.xpath("//*[contains(text(),'Cohort Management')]");
-    private final By serviceLineMgmtTile = By.xpath("//*[contains(text(),'Service Line Management')]");
-    private final By learningPathMgmtTile = By.xpath("//*[contains(text(),'Learning Path Management')]");
-    private final By pocMgmtTile         = By.xpath("//*[contains(text(),'POC Management')]");
-
-    // ── Action buttons on each tile ───────────────────────────────────────────
-    // FRD 2.6: Each tile has a "+ Create X" button
-    private final By createCohortBtn      = By.xpath("//button[contains(text(),'Create Cohort')]");
-    private final By createServiceLineBtn = By.xpath("//button[contains(text(),'Create Service Line')]");
-    private final By createLearningPathBtn = By.xpath("//button[contains(text(),'Create Learning Path')]");
-    private final By createPocBtn         = By.xpath("//button[contains(text(),'Create POC')]");
-
-    // ── Modal containers (appear when a Create button is clicked) ────────────
-    // FRD 2.6: Clicking a button opens a modal with form fields
-    private final By anyModalOverlay = By.cssSelector(
-            "div.modal, div.modal-overlay, div[role='dialog'], div.overlay"
-    );
-    private final By modalCancelBtn  = By.xpath("//button[normalize-space()='Cancel']");
-
-    // ── Constructor ───────────────────────────────────────────────────────────
     public SystemConfigPage(WebDriver driver) {
         super(driver);
     }
 
-    // ── Wait for page to load ─────────────────────────────────────────────────
-
-    /**
-     * Waits until the page heading is visible.
-     * Call this right after navigating to /system-config.
-     */
-    public SystemConfigPage waitForPageLoad() {
+    public void waitForPageLoad() {
         wait.until(ExpectedConditions.visibilityOfElementLocated(pageHeading));
-        return this;
     }
 
-    // ── Header content ────────────────────────────────────────────────────────
+    public boolean isOnSystemConfigPage() {
+        return driver.getCurrentUrl().contains("/system-config");
+    }
 
     public boolean isPageHeadingVisible() {
         return isDisplayed(pageHeading);
     }
 
     public String getPageHeadingText() {
-        return getText(pageHeading);
+        return driver.findElement(pageHeading).getText().trim();
     }
 
     public boolean isPageSubtitleVisible() {
@@ -102,32 +48,32 @@ public class SystemConfigPage extends BasePage {
     }
 
     public String getPageSubtitleText() {
-        return getText(pageSubtitle);
+        return driver.findElement(pageSubtitle).getText().trim();
     }
 
-    // ── Tile presence checks ──────────────────────────────────────────────────
-
-    public int getTileCount() {
-        return driver.findElements(allConfigTiles).size();
+    public int getConfigCardCount() {
+        return driver.findElements(allConfigCards).size();
     }
 
-    public boolean isCohortManagementTileVisible() {
-        return isDisplayed(cohortMgmtTile);
+    public boolean isCohortCardVisible() {
+        return isDisplayed(cohortCardTitle);
     }
 
-    public boolean isServiceLineMgmtTileVisible() {
-        return isDisplayed(serviceLineMgmtTile);
+    public boolean isServiceLineCardVisible() {
+        return isDisplayed(serviceLineCardTitle);
     }
 
-    public boolean isLearningPathMgmtTileVisible() {
-        return isDisplayed(learningPathMgmtTile);
+    public boolean isLearningPathCardVisible() {
+        return isDisplayed(learningPathCardTitle);
     }
 
-    public boolean isPocMgmtTileVisible() {
-        return isDisplayed(pocMgmtTile);
+    public boolean isPocCardVisible() {
+        return isDisplayed(pocCardTitle);
     }
 
-    // ── Action button checks ──────────────────────────────────────────────────
+    public int getCreateButtonCount() {
+        return driver.findElements(allCreateButtons).size();
+    }
 
     public boolean isCreateCohortButtonVisible() {
         return isDisplayed(createCohortBtn);
@@ -145,46 +91,30 @@ public class SystemConfigPage extends BasePage {
         return isDisplayed(createPocBtn);
     }
 
-    // ── Modal interaction ─────────────────────────────────────────────────────
-
-    /** Opens the Create Cohort modal by clicking its button. */
-    public SystemConfigPage clickCreateCohort() {
-        click(createCohortBtn);
-        return this;
+    public void clickCreateCohort() {
+        driver.findElement(createCohortBtn).click();
     }
 
-    /** Opens the Create Service Line modal. */
-    public SystemConfigPage clickCreateServiceLine() {
-        click(createServiceLineBtn);
-        return this;
+    public void clickCreateServiceLine() {
+        driver.findElement(createServiceLineBtn).click();
     }
 
-    /** Opens the Create Learning Path modal. */
-    public SystemConfigPage clickCreateLearningPath() {
-        click(createLearningPathBtn);
-        return this;
+    public void clickCreateLearningPath() {
+        driver.findElement(createLearningPathBtn).click();
     }
 
-    /** Opens the Create POC modal. */
-    public SystemConfigPage clickCreatePoc() {
-        click(createPocBtn);
-        return this;
+    public void clickCreatePoc() {
+        driver.findElement(createPocBtn).click();
     }
 
-    /** Returns true if any modal overlay is currently visible. */
     public boolean isModalVisible() {
-        return isDisplayed(anyModalOverlay);
+        List<WebElement> modals = driver.findElements(modalOverlay);
+        return modals.stream().anyMatch(WebElement::isDisplayed);
     }
 
-    /** Closes the currently open modal by clicking Cancel. */
-    public SystemConfigPage cancelModal() {
-        click(modalCancelBtn);
-        return this;
+    public void cancelModal() {
+        driver.findElement(modalCancelBtn).click();
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(modalOverlay));
     }
 
-    // ── URL check ─────────────────────────────────────────────────────────────
-
-    public boolean isOnSystemConfigPage() {
-        return driver.getCurrentUrl().contains("/system-config");
-    }
 }

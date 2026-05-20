@@ -18,35 +18,15 @@ import org.testng.annotations.Test;
 import java.time.Duration;
 import java.util.List;
 
-/**
- * Leader Login — Negative Test Suite
- *
- * FRD Reference: Section 11.1 — Leader Role Login
- *
- * Leader login requires:
- *   1. User ID      (FRD 11.1 — required text field)
- *   2. Role         = "Leader" (FRD 11.1 — dropdown, required)
- *   3. Service Line (FRD 11.1 — dropdown, appears ONLY after Leader selected, required)
- *
- * Negative test cases:
- *   TC-NEG-LDR-001  Empty User ID                   → alert "Please enter a User ID"
- *   TC-NEG-LDR-002  User ID + Leader role, no SL    → alert "Please select a Service Line"
- *   TC-NEG-LDR-003  Service Line field hidden        → NOT visible before Leader is selected
- *   TC-NEG-LDR-004  All fields blank + click Login   → alert fires, stay on login page
- *
- * UI Highlighting: 🟡 Yellow=locating | 🟢 Green=passed | 🔴 Red=violation
- */
 @Listeners(ExtentReportListener.class)
 public class LeaderLoginNegativeTest extends BaseTest {
 
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     @BeforeMethod(alwaysRun = true)
     public void navigateToLogin() {
         getDriver().get(ConfigReader.getBaseUrl());
     }
 
-    // ── Private Helpers ───────────────────────────────────────────────────────
 
     private WebDriverWait wait(int seconds) {
         return new WebDriverWait(getDriver(), Duration.ofSeconds(seconds));
@@ -115,15 +95,6 @@ public class LeaderLoginNegativeTest extends BaseTest {
         btn.click();
     }
 
-    // ── TEST CASES ────────────────────────────────────────────────────────────
-
-    /**
-     * TC-NEG-LDR-001: Empty User ID → alert + stay on login
-     *
-     * FRD 11.1: "User ID is required"
-     * Steps: Leave User ID blank → Select Leader → Click Login
-     * Expected: Alert "Please enter a User ID" | page stays on login
-     */
     @Test(priority = 1,
             groups = {"negative", "regression"},
             description = "TC-NEG-LDR-001 [FRD 11.1]: Empty User ID — alert fires and page stays on login")
@@ -149,20 +120,12 @@ public class LeaderLoginNegativeTest extends BaseTest {
         System.out.println("TC-NEG-LDR-001 PASSED.");
     }
 
-    /**
-     * TC-NEG-LDR-002: User ID + Leader role, no Service Line → alert
-     *
-     * FRD 11.1: "Service Line is required for Leader role"
-     * Steps: Enter User ID → Select Leader → Skip Service Line → Click Login
-     * Expected: Alert "Please select a Service Line" | page stays on login
-     */
     @Test(priority = 2,
             groups = {"negative", "regression"},
             description = "TC-NEG-LDR-002 [FRD 11.1]: Leader role with no Service Line — alert fires")
     public void tc_neg_ldr_002_noServiceLine() {
         enterUserId(ConfigReader.getLeaderUserId());
         selectLeaderRole();
-        // intentionally DO NOT select a service line
         clickLogin();
 
         String alert = getAlertText();
@@ -175,13 +138,6 @@ public class LeaderLoginNegativeTest extends BaseTest {
         System.out.println("TC-NEG-LDR-002 PASSED.");
     }
 
-    /**
-     * TC-NEG-LDR-003: Service Line dropdown is hidden before Leader role is selected
-     *
-     * FRD 11.1: "Service Line field appears ONLY after Leader is selected"
-     * Steps: Load login page → Do NOT change role → Check if Service Line dropdown exists
-     * Expected: Service Line dropdown is NOT visible
-     */
     @Test(priority = 3,
             groups = {"negative", "regression"},
             description = "TC-NEG-LDR-003 [FRD 11.1]: Service Line dropdown hidden before Leader role selected")
@@ -193,7 +149,6 @@ public class LeaderLoginNegativeTest extends BaseTest {
         WebElement roleEl = getDriver().findElement(By.cssSelector("div.space-y-5 select"));
         highlight(roleEl, "yellow", "Role Dropdown — DEFAULT (not Leader) [FRD 11.1]");
 
-        // Turn off implicit wait so we can check for element absence quickly
         getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
         List<WebElement> allSelects = getDriver().findElements(By.cssSelector("select"));
         boolean serviceLineVisible = allSelects.stream()
@@ -214,13 +169,6 @@ public class LeaderLoginNegativeTest extends BaseTest {
         System.out.println("TC-NEG-LDR-003 PASSED. Service Line correctly hidden before role selection.");
     }
 
-    /**
-     * TC-NEG-LDR-004: All fields blank → alert fires
-     *
-     * FRD 11.1: All fields required — Login with nothing filled must show alert
-     * Steps: Click Login without filling any field
-     * Expected: Alert fires | page stays on login
-     */
     @Test(priority = 4,
             groups = {"negative", "regression"},
             description = "TC-NEG-LDR-004 [FRD 11.1]: All fields blank — clicking Login shows validation alert")
