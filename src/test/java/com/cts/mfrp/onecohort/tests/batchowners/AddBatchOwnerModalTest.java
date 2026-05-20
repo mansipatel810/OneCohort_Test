@@ -73,6 +73,17 @@ public class AddBatchOwnerModalTest extends BaseClassTest {
 
     // ── Helper — open modal and return page object ────────────────────────────
     private AddBatchOwnerModal openModal() {
+        // Guard: if a previous test left the modal open (e.g. closeModal() failed silently),
+        // dismiss it first so the "Add Batch Owner" button is not blocked by the overlay.
+        driver.manage().timeouts().implicitlyWait(java.time.Duration.ofSeconds(0));
+        boolean modalAlreadyOpen = !driver.findElements(
+                By.cssSelector("[class*='modal'], [role='dialog']")).isEmpty();
+        driver.manage().timeouts().implicitlyWait(
+                java.time.Duration.ofSeconds(com.cts.mfrp.onecohort.utils.ConfigReader.getImplicitWait()));
+        if (modalAlreadyOpen) {
+            closeModal();
+        }
+
         AddBatchOwnerModal modal = batchOwnerPage.clickAddBatchOwner();
         wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.cssSelector("[class*='modal'], [role='dialog']")));
