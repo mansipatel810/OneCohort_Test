@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+@Test(groups = {"smoke", "regression", "dashboard", "manager"})
 @Listeners(ExtentReportListener.class)
 public class ManagerDashboardTest extends BaseClassTest {
 

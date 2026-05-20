@@ -33,6 +33,7 @@ import java.util.List;
  * Login: CR role — userId from ConfigReader | cohortId from ConfigReader
  */
 @Listeners(ExtentReportListener.class)
+@Test(groups = {"smoke", "regression", "dashboard", "cr"})
 public class CRDashboardTest extends BaseClassTest {
 
     // ── Credentials ──────────────────────────────────────────────────────────

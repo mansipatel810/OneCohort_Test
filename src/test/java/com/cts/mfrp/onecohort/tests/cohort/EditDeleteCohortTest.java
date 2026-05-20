@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+@Test(groups = {"regression", "functional", "cohort", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class EditDeleteCohortTest extends BaseClassTest {
 

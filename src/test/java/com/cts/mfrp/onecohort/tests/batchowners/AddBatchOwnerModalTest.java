@@ -46,6 +46,7 @@ import java.util.Map;
  * Login: Super Admin — all tests share one browser session.
  * Pre-condition: at least one Service Line must be selectable in the modal.
  */
+@Test(groups = {"regression", "functional", "batchowner", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class AddBatchOwnerModalTest extends BaseClassTest {
 

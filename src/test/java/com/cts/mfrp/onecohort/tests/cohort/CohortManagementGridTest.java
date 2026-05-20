@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
  * TC-COHORT-012  FRD 2.2.2       Create Cohort modal contains required fields
  * ─────────────────────────────────────────────────────────────────────────────
  */
+@Test(groups = {"smoke", "regression", "cohort", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class CohortManagementGridTest extends BaseClassTest {
 

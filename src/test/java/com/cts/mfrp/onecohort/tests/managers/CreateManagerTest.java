@@ -39,6 +39,7 @@ import java.util.Map;
  * TC-CREATE-MGR-007  FRD 2.3.2  Cancel button closes the modal
  * ─────────────────────────────────────────────────────────────────────────────
  */
+@Test(groups = {"regression", "functional", "manager", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class CreateManagerTest extends BaseClassTest {
 

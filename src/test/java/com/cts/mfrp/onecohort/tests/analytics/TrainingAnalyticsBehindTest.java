@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+@Test(groups = {"regression", "functional", "analytics", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class TrainingAnalyticsBehindTest extends BaseClassTest {
 
