@@ -28,68 +28,57 @@ public class CRDashboardPage extends BasePage {
             "[class*='card'], [class*='summary'], [class*='stat'], [class*='metric'], [class*='header-card']");
 
     private final By totalMembersCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'total member') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'members')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Total Member') or contains(normalize-space(),'Members')]]");
 
     private final By learningPathCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'learning path')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Learning Path')]]");
 
     private final By statusCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'status')]" +
-            "/ancestor::*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')][1]");
+            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
+            "[.//*[contains(normalize-space(),'Status')]]");
 
-    private final By batchOwnerField = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'batch owner')]");
+    private final By batchOwnerField = By.xpath("//*[contains(normalize-space(),'Batch Owner')]");
 
-    private final By startDateField = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'start date')]");
+    private final By startDateField = By.xpath("//*[contains(normalize-space(),'Start Date')]");
 
     private final By totalInternsField = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'total intern') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'interns')]");
+            "//*[contains(normalize-space(),'Total Intern') or contains(normalize-space(),'Interns')]");
 
     private final By currentProgressField = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'current progress') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'% complete')]");
+            "//*[contains(normalize-space(),'Current Progress') or contains(normalize-space(),'% Complete')]");
 
     private final By trainingTimelineSection = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'training timeline') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'timeline')]");
+            "//*[contains(normalize-space(),'Training Timeline') or contains(normalize-space(),'Timeline')]");
 
     private final By weekButtons = By.xpath(
-            "//button[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'week')] " +
-            "| //*[contains(@class,'week')]");
+            "//button[contains(normalize-space(),'Week')] | //*[contains(@class,'week')]");
 
-    private final By qualifierExam = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'qualifier')]");
+    private final By qualifierExam = By.xpath("//*[contains(normalize-space(),'Qualifier')]");
 
-    private final By interimEvaluation = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'interim')]");
+    private final By interimEvaluation = By.xpath("//*[contains(normalize-space(),'Interim')]");
 
-    private final By finalEvaluation = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'final')]");
+    private final By finalEvaluation = By.xpath("//*[contains(normalize-space(),'Final')]");
 
     private final By overallProgressCard = By.xpath(
-            "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'overall progress') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'weeks remaining')]");
+            "//*[contains(normalize-space(),'Overall Progress') or contains(normalize-space(),'Weeks Remaining')]");
 
-    private final By traineesTable = By.cssSelector("table");
-    private final By traineesRows  = By.cssSelector("table tbody tr");
+    private final By traineesTable = By.cssSelector("table.table, .table-responsive table");
+    private final By traineesRows  = By.cssSelector("table.table tbody tr, .table-responsive table tbody tr");
 
     private final By crudButtons = By.xpath(
-            "//button[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'create') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'edit') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'delete') " +
-            "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'add trainee')]");
+            "//button[contains(normalize-space(),'Create') " +
+            "or contains(normalize-space(),'Edit') " +
+            "or contains(normalize-space(),'Delete') " +
+            "or contains(normalize-space(),'Add Trainee')]");
 
     private final By logoutDirect = By.xpath(
-            "//button[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'logout')" +
-            " or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'sign out')" +
-            " or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'log out')]" +
-            "|//a[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'logout')]" +
-            "|//*[@aria-label='Logout' or @aria-label='Sign out' or @title='Logout']");
+            "//button[contains(normalize-space(),'Logout') " +
+            "or contains(normalize-space(),'Sign Out') " +
+            "or contains(normalize-space(),'Log Out')]" +
+            " | //a[contains(normalize-space(),'Logout')]" +
+            " | //*[@aria-label='Logout' or @aria-label='Sign out' or @title='Logout']");
 
     private final By userMenuTrigger = By.cssSelector(
             "[class*='user-menu'],[class*='avatar'],[class*='account'],[class*='profile-icon']," +
@@ -162,16 +151,14 @@ public class CRDashboardPage extends BasePage {
     public boolean isTotalMembersCardVisible() {
         if (elementExists(totalMembersCard)) return true;
         By fallback = By.xpath(
-                "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'member') " +
-                "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'intern')]");
+                "//*[contains(normalize-space(),'Member') or contains(normalize-space(),'Intern')]");
         return elementExists(fallback);
     }
 
     public WebElement getTotalMembersCardElement() {
         if (elementExists(totalMembersCard)) return driver.findElement(totalMembersCard);
         return driver.findElement(By.xpath(
-                "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'member') " +
-                "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'intern')]"));
+                "//*[contains(normalize-space(),'Member') or contains(normalize-space(),'Intern')]"));
     }
 
     public boolean isLearningPathCardVisible() {
@@ -279,4 +266,46 @@ public class CRDashboardPage extends BasePage {
     public void clickLogout() {
         driver.findElement(logoutDirect).click();
     }
+
+    // ── Additional element getters ─────────────────────────────────────────────
+
+    public WebElement getBatchOwnerFieldElement()       { return driver.findElement(batchOwnerField); }
+    public WebElement getStartDateFieldElement()        { return driver.findElement(startDateField); }
+    public WebElement getTotalInternsFieldElement()     { return driver.findElement(totalInternsField); }
+    public WebElement getCurrentProgressFieldElement()  { return driver.findElement(currentProgressField); }
+
+    public WebElement getQualifierExamElement()     { return driver.findElement(qualifierExam); }
+    public WebElement getInterimEvaluationElement() { return driver.findElement(interimEvaluation); }
+    public WebElement getFinalEvaluationElement()   { return driver.findElement(finalEvaluation); }
+
+    public WebElement getOverallProgressCardElement() {
+        if (elementExists(overallProgressCard)) return driver.findElement(overallProgressCard);
+        return driver.findElement(By.cssSelector("canvas,[class*='progress'],[role='progressbar'],[class*='bar']"));
+    }
+
+    public boolean isOverallProgressFallbackVisible() {
+        return elementExists(By.cssSelector("canvas,[class*='progress'],[role='progressbar'],[class*='bar']"));
+    }
+
+    public WebElement getTraineesTableElement()       { return driver.findElement(traineesTable); }
+    public List<WebElement> getTraineesTableHeaders() {
+        return driver.findElements(By.cssSelector("table thead th, table th"));
+    }
+
+    public List<WebElement> getCrudButtonElements() {
+        try { return driver.findElements(crudButtons); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public List<WebElement> getLogoutDirectElements() {
+        try { return driver.findElements(logoutDirect); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public List<WebElement> getUserMenuTriggerElements() {
+        try { return driver.findElements(userMenuTrigger); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+//    public boolean isLogoutVisibleAfterMenuOpen() { return elementExists(logoutDirect); }
 }

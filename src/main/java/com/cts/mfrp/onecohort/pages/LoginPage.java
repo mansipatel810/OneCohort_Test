@@ -3,6 +3,7 @@ package com.cts.mfrp.onecohort.pages;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Select;
@@ -15,7 +16,10 @@ public class LoginPage extends BasePage {
     private final By userIdInput         = By.cssSelector("input[placeholder='e.g. 123456']");
     private final By roleDropdown        = By.cssSelector("div.space-y-5 select");
     // *ngIf fields — only injected into the DOM once the matching role is selected
-    private final By serviceLineDropdown = By.xpath("(//select)[2]");
+    private final By serviceLineDropdown = By.cssSelector(
+            "select[formcontrolname='serviceLineId'], " +
+            "select[formcontrolname='serviceLine'], " +
+            "div.space-y-5 select + select");
     private final By pocIdInput          = By.cssSelector("input[placeholder='e.g. USR-40002']");
     private final By cohortIdInput       = By.cssSelector("input[placeholder='e.g. COH-10001']");
     private final By loginButton         = By.xpath("//button[normalize-space()='Login']");
@@ -183,5 +187,60 @@ public class LoginPage extends BasePage {
         selectRole("CR");
         enterCohortId(cohortId);
         clickLoginButton();
+    }
+
+    // ── Element visibility helpers (used by negative-login tests) ────────────
+
+    public boolean isUserIdInputVisible() {
+        return isDisplayed(userIdInput);
+    }
+
+    public boolean isRoleDropdownVisible() {
+        return isDisplayed(roleDropdown);
+    }
+
+    public boolean isServiceLineDropdownVisible() {
+        return isDisplayed(serviceLineDropdown);
+    }
+
+    public boolean isPocIdInputVisible() {
+        return isDisplayed(pocIdInput);
+    }
+
+    public boolean isCohortIdInputVisible() {
+        return isDisplayed(cohortIdInput);
+    }
+
+    public boolean isLoginButtonVisible() {
+        return isDisplayed(loginButton);
+    }
+
+    /** Returns the User ID input element (for tests that need to highlight it). */
+    public WebElement getUserIdInputElement() {
+        return waitForVisible(userIdInput);
+    }
+
+    /** Returns the Role dropdown element. */
+    public WebElement getRoleDropdownElement() {
+        return waitForVisible(roleDropdown);
+    }
+
+    /** Returns all select elements visible on the page. */
+    public java.util.List<org.openqa.selenium.WebElement> getAllSelectElements() {
+        return driver.findElements(By.cssSelector("select"));
+    }
+
+    /** Returns all input elements matching the POC ID placeholder. */
+    public java.util.List<org.openqa.selenium.WebElement> getPocIdCandidates() {
+        return driver.findElements(By.xpath(
+                "//input[contains(@placeholder,'USR') or contains(@placeholder,'POC') " +
+                "or contains(@placeholder,'poc')]"));
+    }
+
+    /** Returns all input elements matching the Cohort ID placeholder. */
+    public java.util.List<org.openqa.selenium.WebElement> getCohortIdCandidates() {
+        return driver.findElements(By.xpath(
+                "//input[contains(@placeholder,'COH') or contains(@placeholder,'cohort') " +
+                "or contains(@placeholder,'Cohort') or contains(@placeholder,'INTCLD')]"));
     }
 }

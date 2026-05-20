@@ -10,7 +10,6 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
@@ -25,27 +24,16 @@ public class EditDeleteCohortTest extends BaseClassTest {
     private CohortManagementPage cohortPage;
     private SuperAdminDashboardPage dashPage;
 
-    private final By editBatchOwnerDd = By.name("batchOwner");
-    private final By editTrainerDd    = By.name("trainer");
-    private final By updateCohortBtn  = By.className("btn-modal-primary");
-    private final By modalTitle       = By.cssSelector(".modal-header h5");
-    private final By disabledInputs   = By.cssSelector(".modal-body input[disabled]");
-
     @BeforeClass(alwaysRun = true, dependsOnMethods = "setUpDriver")
     public void loginAndNavigateToCohortManagement() {
         driver.get(ConfigReader.getBaseUrl());
-
         new LoginPage(driver).loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
         wait.until(ExpectedConditions.urlContains("/super-admin"));
         dashPage = new SuperAdminDashboardPage(driver);
-        WebElement cohortNavItem = dashPage.getMenuItemElement("Cohort Management");
-        cohortNavItem.click();
+        dashPage.getMenuItemElement("Cohort Management").click();
 
         cohortPage = new CohortManagementPage(driver);
-        try {
-            cohortPage.waitForTableToLoad();
-        } catch (Exception ignored) {
-        }
+        try { cohortPage.waitForTableToLoad(); } catch (Exception ignored) {}
     }
 
     @Test(priority = 1, description = "Verify that the Cohort management table is visible on the screen")
@@ -74,91 +62,92 @@ public class EditDeleteCohortTest extends BaseClassTest {
 
     @Test(priority = 5, description = "Verify that the header label displays 'Edit Cohort'")
     public void verifyEditModalTitle() {
-        WebElement headerTitle = driver.findElement(modalTitle);
-        String titleText = headerTitle.getText().trim();
+        String titleText = cohortPage.getModalTitleText().trim();
         Assert.assertEquals(titleText, "Edit Cohort", "The modal window header title does not match.");
     }
 
     @Test(priority = 6, description = "Verify that locked properties are configured as read-only/disabled fields")
     public void verifyReadOnlyFieldsAreDisabled() {
-        List<WebElement> disabledFields = driver.findElements(disabledInputs);
-        Assert.assertTrue(disabledFields.size() >= 3, "Expected system read-only input elements are not disabled.");
+        List<WebElement> disabledFields = cohortPage.getDisabledModalInputs();
+        Assert.assertTrue(disabledFields.size() >= 3,
+                "Expected system read-only input elements are not disabled.");
     }
 
     @Test(priority = 7, description = "Verify that the Batch Owner selection dropdown is enabled and interactive")
     public void verifyBatchOwnerDropdownEditable() {
-        WebElement batchOwnerSelect = driver.findElement(editBatchOwnerDd);
-        Assert.assertTrue(batchOwnerSelect.isEnabled(), "The Batch Owner dropdown is unexpectedly locked/disabled.");
+        WebElement batchOwnerSelect = cohortPage.getEditBatchOwnerDropdown();
+        Assert.assertTrue(batchOwnerSelect.isEnabled(),
+                "The Batch Owner dropdown is unexpectedly locked/disabled.");
     }
 
     @Test(priority = 8, description = "Verify that the Trainer selection dropdown is enabled and interactive")
     public void verifyTrainerDropdownEditable() {
-        WebElement trainerSelect = driver.findElement(editTrainerDd);
-        Assert.assertTrue(trainerSelect.isEnabled(), "The Trainer dropdown is unexpectedly locked/disabled.");
+        WebElement trainerSelect = cohortPage.getEditTrainerDropdown();
+        Assert.assertTrue(trainerSelect.isEnabled(),
+                "The Trainer dropdown is unexpectedly locked/disabled.");
     }
 
     @Test(priority = 9, description = "Verify that the 'Update Cohort' action execution button is present")
     public void verifyUpdateCohortButtonPresent() {
-        WebElement updateBtn = driver.findElement(updateCohortBtn);
-        Assert.assertTrue(updateBtn.isDisplayed() && updateBtn.isEnabled(), "The Update Cohort submission button is missing or disabled.");
+        WebElement updateBtn = cohortPage.getUpdateCohortButton();
+        Assert.assertTrue(updateBtn.isDisplayed() && updateBtn.isEnabled(),
+                "The Update Cohort submission button is missing or disabled.");
     }
 
     @Test(priority = 10, description = "Verify that clicking the Cancel button safely closes the active modal view")
     public void verifyCancelButtonClosesModal() {
         cohortPage.closeModal();
-
         wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className("modal-card")));
-
-        boolean isModalPresent = cohortPage.isModalCardVisible();
-        Assert.assertFalse(isModalPresent, "The edit modal overlay remained open after clicking Cancel.");
+        Assert.assertFalse(cohortPage.isModalCardVisible(),
+                "The edit modal overlay remained open after clicking Cancel.");
     }
 
     @Test(priority = 11, description = "Re-open the configuration modal to run subsequent functional tests")
     public void openEditModalForSubmission() {
         cohortPage.clickFirstEditBtn();
         cohortPage.waitForModalVisible();
-        Assert.assertTrue(cohortPage.isModalCardVisible(), "Failed to open edit modal configuration window context.");
+        Assert.assertTrue(cohortPage.isModalCardVisible(),
+                "Failed to open edit modal configuration window context.");
     }
 
     @Test(priority = 12, description = "Change the selection index on the Trainer dropdown menu input target")
     public void changeTrainerDropdownValue() {
-        WebElement trainerElement = driver.findElement(editTrainerDd);
-        Select trainerSelect = new Select(trainerElement);
-
+        WebElement trainerElement = cohortPage.getEditTrainerDropdown();
+        org.openqa.selenium.support.ui.Select trainerSelect =
+                new org.openqa.selenium.support.ui.Select(trainerElement);
         trainerSelect.selectByIndex(1);
         String selectedValue = trainerSelect.getFirstSelectedOption().getText();
-
-        Assert.assertFalse(selectedValue.isEmpty(), "Trainer element drop-down selection failed to populate.");
+        Assert.assertFalse(selectedValue.isEmpty(),
+                "Trainer element drop-down selection failed to populate.");
     }
 
     @Test(priority = 13, description = "Execute form changes via the submit button element target click")
     public void clickUpdateCohortButton() {
-        WebElement updateBtn = driver.findElement(updateCohortBtn);
-        updateBtn.click();
+        cohortPage.clickUpdateCohort();
     }
 
     @Test(priority = 14, description = "Verify that the popup window automatically dismisses post submission processing")
     public void verifyEditSuccessToast() {
         wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className("modal-card")));
-        boolean isModalOpen = cohortPage.isModalCardVisible();
-        Assert.assertFalse(isModalOpen, "The configuration edit modal did not automatically close after form submission.");
+        Assert.assertFalse(cohortPage.isModalCardVisible(),
+                "The configuration edit modal did not automatically close after form submission.");
     }
 
     @Test(priority = 15, description = "Verify that the delete tool element incorporates standard visual warning alert styles")
     public void verifyDeleteButtonIsRed() {
         List<WebElement> deleteBtns = cohortPage.getDeleteButtons();
         WebElement firstDeleteBtn = deleteBtns.get(0);
-
         String styleClass = firstDeleteBtn.getAttribute("class");
-        Assert.assertTrue(styleClass.contains("text-danger"), "The table row delete execution option does not feature red danger warning styles.");
+        Assert.assertTrue(styleClass.contains("text-danger"),
+                "The table row delete execution option does not feature red danger warning styles.");
     }
 
     @Test(priority = 16, description = "Verify that clicking the delete option pops open a browser window alert confirmation prompt")
     public void verifyDeleteConfirmationAppears() {
         cohortPage.clickFirstDeleteBtn();
         Alert navigationAlert = wait.until(ExpectedConditions.alertIsPresent());
-        Assert.assertNotNull(navigationAlert, "No confirmation prompt message alert layout box showed up upon selecting data row delete options.");
-
+        Assert.assertNotNull(navigationAlert,
+                "No confirmation prompt message alert layout box showed up upon selecting data row delete options.");
         navigationAlert.dismiss();
     }
 }

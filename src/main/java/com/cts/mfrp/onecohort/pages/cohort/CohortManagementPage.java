@@ -15,11 +15,11 @@ public class CohortManagementPage extends BasePage {
     // ── Locators ──────────────────────────────────────────────────────────────
 
     // Table / grid
-    private final By dataTable           = By.cssSelector("table");
+    private final By dataTable           = By.cssSelector("table.table, .table-responsive table");
     private final By specificTable       = By.cssSelector("table.table.table-hover.align-middle");
-    private final By tableHeaders        = By.cssSelector("table thead th, table thead td");
+    private final By tableHeaders        = By.cssSelector("table.table thead th, table.table thead td");
     private final By tableHeaderLight    = By.cssSelector("thead.table-light");
-    private final By tableRows           = By.cssSelector("table tbody tr");
+    private final By tableRows           = By.cssSelector("table.table tbody tr, .table-responsive table tbody tr");
     private final By tableRowsAligned    = By.cssSelector("tbody tr.align-middle");
     private final By cohortIdSpan        = By.cssSelector("span.fw-bold.text-primary");
     private final By statusBadge         = By.cssSelector("span.badge.rounded-pill");
@@ -66,6 +66,11 @@ public class CohortManagementPage extends BasePage {
     // ── EDIT modal form fields ─────────────────────────────────────────────────
     // Service Line in EDIT = disabled text input (locked after creation per FRD FR-017)
     private final By editSLLocked        = By.cssSelector("input.form-control-disabled");
+    // Edit-only fields exposed for EditDeleteCohortTest
+    private final By editBatchOwnerDd    = By.name("batchOwner");
+    private final By editTrainerDd       = By.name("trainer");
+    private final By updateCohortBtn     = By.cssSelector("button.btn-modal-primary");
+    private final By disabledModalInputs = By.cssSelector(".modal-body input[disabled]");
 
     // Empty state
     private final By emptyState          = By.xpath(
@@ -399,5 +404,27 @@ public class CohortManagementPage extends BasePage {
     /** JS-clicks the cohort-ID span inside the given row — navigates to the detail page. */
     public void clickCohortIdSpanInRow(WebElement row) {
         jsClick(row.findElement(cohortIdSpan));
+    }
+
+    // ── Edit modal dropdown/button getters ────────────────────────────────────
+
+    public WebElement getEditBatchOwnerDropdown()    { return driver.findElement(editBatchOwnerDd); }
+    public WebElement getEditTrainerDropdown()       { return driver.findElement(editTrainerDd); }
+    public WebElement getUpdateCohortButton()        { return driver.findElement(updateCohortBtn); }
+    public List<WebElement> getDisabledModalInputs() { return driver.findElements(disabledModalInputs); }
+
+    public void selectTrainerByIndex(int index) {
+        try {
+            new org.openqa.selenium.support.ui.Select(driver.findElement(editTrainerDd))
+                    .selectByIndex(index);
+        } catch (Exception ignored) {}
+    }
+
+    public void clickUpdateCohort() {
+        jsClick(driver.findElement(updateCohortBtn));
+    }
+
+    public boolean isUpdateCohortButtonPresent() {
+        return isDisplayed(updateCohortBtn);
     }
 }

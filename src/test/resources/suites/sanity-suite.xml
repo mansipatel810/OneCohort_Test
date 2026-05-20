@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!--
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║           OneCohort — Sanity Test Suite                                 ║
+  ║           Bare-minimum: "Is the app up and can all roles log in?"       ║
+  ╠══════════════════════════════════════════════════════════════════════════╣
+  ║  Purpose : Fastest possible health-check — run after each deployment   ║
+  ║            to confirm the app is reachable, the login page renders,    ║
+  ║            and at least one role can authenticate successfully.        ║
+  ║            Typical run time: <60 seconds.                              ║
+  ║                                                                          ║
+  ║  Run via Maven                                                           ║
+  ║  ─────────────                                                           ║
+  ║  mvn test -DsuiteXmlFile=src/test/resources/suites/sanity-suite.xml    ║
+  ║                                                                          ║
+  ║  What runs                                                               ║
+  ║  ──────────                                                              ║
+  ║  LoginTest — positive login flow for all supported roles.               ║
+  ║  (Super Admin, Manager, Leader, Batch Owner, CR)                        ║
+  ║  No dashboard navigation, no CRUD operations, no logout verification.  ║
+  ║                                                                          ║
+  ║  When to escalate to smoke-suite.xml                                     ║
+  ║  ───────────────────────────────────                                     ║
+  ║  If sanity passes but you need dashboard + logout coverage, run        ║
+  ║  smoke-suite.xml next.  For full regression, run testng.xml.           ║
+  ╚══════════════════════════════════════════════════════════════════════════╝
+-->
+<suite name="OneCohort Sanity Suite" verbose="1">
+
+    <listeners>
+        <listener class-name="com.cts.mfrp.onecohort.utils.ExtentReportListener"/>
+        <listener class-name="com.cts.mfrp.onecohort.listeners.TestListener"/>
+    </listeners>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         SANITY — Positive login for all roles
+         Only LoginTest runs; no group filter needed since the class
+         itself represents the entire sanity boundary.
+         ════════════════════════════════════════════════════════════════ -->
+
+    <test name="Sanity - Login All Roles">
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.LoginTest"/>
+        </classes>
+    </test>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         OPTIONAL: Negative login validation (smoke gate for the form)
+         Uncomment to include negative-login checks in the sanity pass.
+         ════════════════════════════════════════════════════════════════ -->
+
+    <!--
+    <test name="Sanity - Login Validation (Negative)">
+        <groups>
+            <run>
+                <include name="negative"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.managers.ManagerLoginNegativeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.leader.LeaderLoginNegativeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerLoginNegativeTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.cr.CRLoginNegativeTest"/>
+        </classes>
+    </test>
+    -->
+
+</suite>

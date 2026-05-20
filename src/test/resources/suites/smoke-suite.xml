@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!--
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║           OneCohort — Smoke Test Suite                                  ║
+  ║           Critical-path gate: only @Test(groups={"smoke",...}) methods  ║
+  ╠══════════════════════════════════════════════════════════════════════════╣
+  ║  Purpose : Fast pre-commit / pre-release sanity gate.                  ║
+  ║            Verifies login, dashboard load, and logout for every role.  ║
+  ║            Runs in ~3–5 min (vs ~25 min for the full regression suite).║
+  ║                                                                          ║
+  ║  Run via Maven                                                           ║
+  ║  ─────────────                                                           ║
+  ║  mvn test -DsuiteXmlFile=src/test/resources/suites/smoke-suite.xml     ║
+  ║                                                                          ║
+  ║  Or via command-line group override (uses testng.xml as base):         ║
+  ║  mvn test -Dgroups=smoke                                                ║
+  ║                                                                          ║
+  ║  Smoke-tagged test methods (examples)                                   ║
+  ║  ─────────────────────────────────────                                  ║
+  ║  LoginTest.*                         (positive login — all roles)       ║
+  ║  BatchOwnerDashboardTest             tc_bo_001, tc_bo_002, tc_bo_003,  ║
+  ║                                      tc_bo_027 (login + logout)        ║
+  ║  CRDashboardTest                     tc_cr_001, tc_cr_002, tc_cr_003,  ║
+  ║                                      tc_cr_020 (login + logout)        ║
+  ║  ManagerDashboardTest                smoke-tagged methods               ║
+  ║  LeaderDashboardTest                 smoke-tagged methods               ║
+  ╚══════════════════════════════════════════════════════════════════════════╝
+-->
+<suite name="OneCohort Smoke Suite" verbose="1">
+
+    <listeners>
+        <listener class-name="com.cts.mfrp.onecohort.utils.ExtentReportListener"/>
+        <listener class-name="com.cts.mfrp.onecohort.listeners.TestListener"/>
+    </listeners>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         POSITIVE LOGIN — all roles (smoke methods only)
+         ════════════════════════════════════════════════════════════════ -->
+
+    <test name="Smoke - Login (All Roles)">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.LoginTest"/>
+        </classes>
+    </test>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         MANAGER ROLE — smoke-tagged methods (login + dashboard)
+         ════════════════════════════════════════════════════════════════ -->
+
+    <test name="Smoke - Manager Dashboard">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.managers.ManagerDashboardTest"/>
+        </classes>
+    </test>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         LEADER ROLE — smoke-tagged methods (login + dashboard)
+         ════════════════════════════════════════════════════════════════ -->
+
+    <test name="Smoke - Leader Dashboard">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.leader.LeaderDashboardTest"/>
+        </classes>
+    </test>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         BATCH OWNER ROLE — smoke-tagged methods (login + greeting + logout)
+         ════════════════════════════════════════════════════════════════ -->
+
+    <test name="Smoke - Batch Owner Dashboard">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerDashboardTest"/>
+        </classes>
+    </test>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         CR ROLE — smoke-tagged methods (login + greeting + logout)
+         ════════════════════════════════════════════════════════════════ -->
+
+    <test name="Smoke - CR Dashboard">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.cr.CRDashboardTest"/>
+        </classes>
+    </test>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         SUPER ADMIN — smoke-tagged methods (dashboard load + logout)
+         ════════════════════════════════════════════════════════════════ -->
+
+    <test name="Smoke - Super Admin Dashboard">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.cts.mfrp.onecohort.tests.HomePageTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.SuperAdminDashboardChartsTest"/>
+            <class name="com.cts.mfrp.onecohort.tests.SuperAdminLogoutTest"/>
+        </classes>
+    </test>
+
+</suite>
