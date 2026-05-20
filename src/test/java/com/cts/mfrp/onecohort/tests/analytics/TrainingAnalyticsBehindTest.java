@@ -82,7 +82,7 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
         for (WebElement bar : bars) {
             scrollIntoView(bar);
             actions.moveToElement(bar).perform();
-            try { Thread.sleep(500); } catch (InterruptedException ignored) { }
+            try { wait.until(ExpectedConditions.visibilityOfElementLocated(barTooltip)); } catch (Exception ignored) {}
             List<WebElement> tooltips = driver.findElements(barTooltip);
             if (!tooltips.isEmpty() && tooltips.get(0).isDisplayed()) {
                 String tooltipText = tooltips.get(0).getText().trim();

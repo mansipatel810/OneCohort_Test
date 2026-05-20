@@ -611,7 +611,7 @@ public class CRDashboardTest extends BaseClassTest {
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         if (!directBtns.isEmpty()) {
             highlight(directBtns.get(0), "yellow", "Logout Button [FRD 12.3]");
-            try { directBtns.get(0).click(); loggedOut = true; Thread.sleep(1000); }
+            try { directBtns.get(0).click(); loggedOut = true; wait(10).until(ExpectedConditions.visibilityOfElementLocated(userIdInput)); }
             catch (Exception e) { System.out.println("TC-CR-020: Direct logout click failed."); }
         }
 
@@ -623,20 +623,20 @@ public class CRDashboardTest extends BaseClassTest {
             for (WebElement menu : menus) {
                 try {
                     highlight(menu, "yellow", "User Menu Trigger [FRD 12.3]");
-                    menu.click(); Thread.sleep(600);
+                    menu.click(); wait(5).until(ExpectedConditions.visibilityOfElementLocated(logoutDirect));
                     driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
                     List<WebElement> btns = driver.findElements(logoutDirect);
                     driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
                     if (!btns.isEmpty()) {
                         highlight(btns.get(0), "yellow", "Logout in Menu [FRD 12.3]");
-                        btns.get(0).click(); loggedOut = true; Thread.sleep(1000); break;
+                        btns.get(0).click(); loggedOut = true; wait(10).until(ExpectedConditions.visibilityOfElementLocated(userIdInput)); break;
                     }
                     for (WebElement el : driver.findElements(By.xpath(
                             "//*[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'logout')" +
                                     " or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'sign out')]"))) {
                         if (el.isDisplayed()) {
                             highlight(el, "yellow", "Logout Link [FRD 12.3]");
-                            el.click(); loggedOut = true; Thread.sleep(1000); break;
+                            el.click(); loggedOut = true; wait(10).until(ExpectedConditions.visibilityOfElementLocated(userIdInput)); break;
                         }
                     }
                     if (loggedOut) break;
@@ -648,7 +648,7 @@ public class CRDashboardTest extends BaseClassTest {
         if (!loggedOut) {
             System.out.println("TC-CR-020: Logout button not found. Navigating to base URL as fallback.");
             driver.get(ConfigReader.getBaseUrl());
-            Thread.sleep(1000);
+            wait(10).until(ExpectedConditions.visibilityOfElementLocated(userIdInput));
         }
 
         // Verify login page

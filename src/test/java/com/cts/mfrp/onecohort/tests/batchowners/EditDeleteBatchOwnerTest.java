@@ -97,7 +97,11 @@ public class EditDeleteBatchOwnerTest extends BaseClassTest {
 
         select.selectByValue("SRV-10002");
 
-        try { Thread.sleep(1500); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(ExpectedConditions.or(
+                    ExpectedConditions.visibilityOfElementLocated(batchOwnerCards),
+                    ExpectedConditions.numberOfElementsToBeMoreThan(batchOwnerCards, 0)));
+        } catch (Exception ignored) {}
 
         String selectedText = select.getFirstSelectedOption().getText().trim();
         Assert.assertEquals(selectedText, "Cloud & Data Enterprise", "FAIL [FRD 2.4] - Service Line filter selection label text does not match.");
@@ -123,7 +127,11 @@ public class EditDeleteBatchOwnerTest extends BaseClassTest {
         Select select = new Select(element);
         select.selectByValue("");
 
-        try { Thread.sleep(1500); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(ExpectedConditions.or(
+                    ExpectedConditions.visibilityOfElementLocated(batchOwnerCards),
+                    ExpectedConditions.numberOfElementsToBeMoreThan(batchOwnerCards, 0)));
+        } catch (Exception ignored) {}
 
         String selectedText = select.getFirstSelectedOption().getText().trim();
         Assert.assertEquals(selectedText, "Select Service Line", "FAIL [FRD 2.4] - Service Line filter did not reset to default.");
@@ -232,7 +240,11 @@ public class EditDeleteBatchOwnerTest extends BaseClassTest {
 
     @Test(priority = 16, description = "TC-EBO-016 [FRD 2.4]: Success notification appears or modal closes after edit")
     public void verifyEditSuccess() {
-        try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(ExpectedConditions.or(
+                    ExpectedConditions.visibilityOfElementLocated(successNotif),
+                    ExpectedConditions.invisibilityOfElementLocated(modalOverlay)));
+        } catch (Exception ignored) {}
 
         boolean notifShown = false;
         List<WebElement> notifs = driver.findElements(successNotif);

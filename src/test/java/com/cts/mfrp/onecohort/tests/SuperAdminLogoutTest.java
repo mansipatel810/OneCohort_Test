@@ -111,7 +111,9 @@ public class SuperAdminLogoutTest extends BaseTest {
 
         getDriver().navigate().back();
 
-        try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(userIdInput));
+        } catch (Exception ignored) {}
 
         String urlAfterBack = getDriver().getCurrentUrl();
         System.out.println("URL after Back: " + urlAfterBack);

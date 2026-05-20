@@ -60,7 +60,9 @@ public class BatchOwnerProfileCardTest extends BaseClassTest {
         // Apply the Service Line filter so profile cards are loaded
         if (batchOwnerPage.isServiceLineDropdownVisible()) {
             batchOwnerPage.selectServiceLine(ConfigReader.getValidServiceLineId());
-            try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+            try {
+                wait.until(d -> batchOwnerPage.areProfileCardsVisible() || batchOwnerPage.isLearningPathDropdownVisible());
+            } catch (Exception ignored) {}
         }
 
         // If a Learning Path dropdown appeared, select the first real option
@@ -77,7 +79,7 @@ public class BatchOwnerProfileCardTest extends BaseClassTest {
                         break;
                     }
                 }
-                Thread.sleep(1000);
+                wait.until(d -> batchOwnerPage.areProfileCardsVisible());
             } catch (Exception ignored) {}
         }
 
@@ -220,7 +222,9 @@ public class BatchOwnerProfileCardTest extends BaseClassTest {
         }
         String urlBefore = driver.getCurrentUrl();
         viewBtns.get(0).click();
-        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(d -> batchOwnerPage.isModalVisible() || !d.getCurrentUrl().equals(urlBefore));
+        } catch (Exception ignored) {}
         String urlAfter = driver.getCurrentUrl();
 
         boolean modalOpened = batchOwnerPage.isModalVisible();
@@ -256,7 +260,9 @@ public class BatchOwnerProfileCardTest extends BaseClassTest {
         }
         String urlBefore = driver.getCurrentUrl();
         viewBtns.get(0).click();
-        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(d -> batchOwnerPage.isModalVisible() || !d.getCurrentUrl().equals(urlBefore));
+        } catch (Exception ignored) {}
 
         // Check if we navigated or a modal opened
         if (batchOwnerPage.isModalVisible()) {

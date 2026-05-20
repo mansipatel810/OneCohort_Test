@@ -99,7 +99,6 @@ public class CRLoginNegativeTest extends BaseTest {
                             "arguments[0].setAttribute('title', 'TESTING: " + label + "');",
                     element
             );
-            Thread.sleep(400);
         } catch (Exception ignored) {}
     }
 
@@ -139,7 +138,6 @@ public class CRLoginNegativeTest extends BaseTest {
      * FRD 12.1.2: field is injected by Angular *ngIf after CR role is selected.
      */
     private void enterCohortId(String value) throws InterruptedException {
-        Thread.sleep(400);
         WebElement el = null;
         try {
             el = wait(8).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
@@ -244,7 +242,6 @@ public class CRLoginNegativeTest extends BaseTest {
         selectCRRole();
 
         // Locate Cohort ID field and show it's being left blank
-        Thread.sleep(400);
         WebElement cohortEl = null;
         try {
             cohortEl = wait(8).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(

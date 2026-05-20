@@ -192,7 +192,11 @@ public class EditDeleteManagerTest extends BaseClassTest {
     @Test(priority = 14,
             description = "TC-EMD-014 [FRD 2.3]: Success notification appears or modal closes after edit")
     public void verifyEditSuccess() {
-        try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+        try {
+            wait.until(ExpectedConditions.or(
+                    ExpectedConditions.visibilityOfElementLocated(successNotif),
+                    ExpectedConditions.invisibilityOfElementLocated(modalOverlay)));
+        } catch (Exception ignored) {}
 
         boolean notifShown = false;
         List<WebElement> notifs = driver.findElements(successNotif);
