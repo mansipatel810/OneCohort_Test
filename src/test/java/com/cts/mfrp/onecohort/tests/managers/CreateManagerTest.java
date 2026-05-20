@@ -61,7 +61,9 @@ public class CreateManagerTest extends BaseClassTest {
                          "and contains(text(),'Leadership')]" +
                          " | //nav[contains(@class,'menu')]" +
                          "//*[contains(text(),'Managers & Leadership')]"))).click();
-        wait.until(ExpectedConditions.urlContains("manager"));
+        // The app routes to /super-admin/leadership — accept both "manager" and "leadership"
+        wait.until(d -> d.getCurrentUrl().contains("manager")
+                     || d.getCurrentUrl().contains("leadership"));
         managersPage = new ManagersLeadershipPage(driver);
         System.out.println("Setup complete — URL: " + driver.getCurrentUrl());
     }

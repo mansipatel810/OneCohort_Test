@@ -45,6 +45,11 @@ public class BaseClassTest {
     public void setUpDriver() {
         WebDriverManager.chromedriver().setup();
         ChromeOptions opts = new ChromeOptions();
+        // Read headless flag from config.properties — set headless=true for silent CI runs,
+        // headless=false (default) to see the browser UI during local execution.
+        if (ConfigReader.isHeadless()) {
+            opts.addArguments("--headless", "--disable-gpu");
+        }
         opts.addArguments("--window-size=1920,1080", "--no-sandbox");
         driver = new ChromeDriver(opts);
         driver.manage().window().maximize();

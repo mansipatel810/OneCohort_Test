@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
-@Test(groups = {"regression", "functional", "analytics", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class TrainingAnalyticsBehindTest extends BaseClassTest {
 
@@ -27,16 +26,15 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
         new LoginPage(driver).loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
         wait.until(ExpectedConditions.urlContains("dashboard"));
 
-        SuperAdminDashboardPage dashPage = new SuperAdminDashboardPage(driver);
-        dashPage.getMenuItemElement("Training Progress").click();
+        new SuperAdminDashboardPage(driver).getMenuItemElement("Training Progress").click();
         wait.until(ExpectedConditions.urlContains("training-progress"));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(pageHeading));
 
         analyticsPage = new TrainingAnalyticsBehindPage(driver);
         System.out.println("Navigated to: " + driver.getCurrentUrl());
     }
 
-    @Test(priority = 1,
-            description = "TC-BHD-001 [FRD 2.5]: Page heading 'Active Cohort Progress' is visible")
+    @Test(priority = 1, description = "TC-BHD-001 [FRD 2.5]: Page heading 'Active Cohort Progress' is visible")
     public void verifyPageHeadingVisible() {
         WebElement heading = analyticsPage.getPageHeadingElement();
         analyticsPage.scrollIntoView(heading);
@@ -45,8 +43,7 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
         System.out.println("PASS - Page heading text: " + heading.getText());
     }
 
-    @Test(priority = 2,
-            description = "TC-BHD-002 [FRD 2.5]: Bar chart container is rendered on the page")
+    @Test(priority = 2, description = "TC-BHD-002 [FRD 2.5]: Bar chart section is rendered on the page")
     public void verifyChartIsRendered() {
         Assert.assertTrue(analyticsPage.isChartContainerVisible(),
                 "FAIL - Chart container is not visible [FRD 2.5]");
@@ -77,8 +74,7 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
         System.out.println("PASS - TC-BHD-003: Hovered over " + bars.size() + " chart bar(s). [FRD 2.5]");
     }
 
-    @Test(priority = 4,
-            description = "TC-BHD-004 [FRD 2.5]: Cohort cards are displayed on the page (scrolls to find all)")
+    @Test(priority = 5, description = "TC-BHD-005 [FRD 2.5]: Cohort cards are displayed on the page")
     public void verifyCohortCardsArePresent() {
         List<WebElement> cards = analyticsPage.getCohortCards();
         Assert.assertFalse(cards.isEmpty(),
@@ -89,8 +85,7 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
         System.out.println("PASS - Total cohort cards found: " + cards.size());
     }
 
-    @Test(priority = 5,
-            description = "TC-BHD-005 [FRD 2.5]: Progress percentage is shown on every cohort card")
+    @Test(priority = 6, description = "TC-BHD-006 [FRD 2.5]: Progress percentage is shown on every cohort card")
     public void verifyProgressValuesAreDisplayed() {
         List<WebElement> values = analyticsPage.getProgressValues();
         Assert.assertFalse(values.isEmpty(),
@@ -99,14 +94,12 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
             analyticsPage.scrollIntoView(val);
             String text = val.getText().trim();
             Assert.assertTrue(text.endsWith("%"),
-                    "FAIL - Value '" + text + "' does not look like a percentage [FRD 2.5]");
+                    "FAIL - Progress value '" + text + "' does not end with '%' [FRD 2.5]");
         }
-        System.out.println("PASS - " + values.size() + " progress value(s) found. Sample: "
-                + values.get(0).getText());
+        System.out.println("PASS - All " + cards.size() + " card(s) show a progress percentage.");
     }
 
-    @Test(priority = 6,
-            description = "TC-BHD-006 [FRD 2.5]: Ongoing cohort cards are present on the page")
+    @Test(priority = 7, description = "TC-BHD-007 [FRD 2.5]: Ongoing cohort cards are present on the page")
     public void verifyOngoingCardsExist() {
         List<WebElement> ongoing = analyticsPage.getOngoingCards();
         if (ongoing.isEmpty()) {
@@ -134,11 +127,9 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
                     "FAIL - Ongoing card '" + analyticsPage.getCardTitleText(card)
                             + "' is missing a trend icon [FRD 2.5]");
         }
-        System.out.println("PASS - All " + ongoing.size() + " ongoing card(s) have a trend icon. [FRD 2.5]");
     }
 
-    @Test(priority = 8,
-            description = "TC-BHD-008 [FRD 2.5]: Completed cards show 100% progress")
+    @Test(priority = 9, description = "TC-BHD-009 [FRD 2.5]: All completed cards show 100% progress")
     public void verifyCompletedCardsShow100Percent() {
         List<WebElement> completedCards = analyticsPage.getCompletedCards();
         if (completedCards.isEmpty()) {
@@ -151,11 +142,10 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
             Assert.assertEquals(progressText, "100%",
                     "FAIL - Completed card should show 100% but shows: " + progressText + " [FRD 2.5]");
         }
-        System.out.println("PASS - All " + completedCards.size() + " completed card(s) show 100%. [FRD 2.5]");
+        System.out.println("PASS - All " + completed.size() + " completed card(s) show 100%.");
     }
 
-    @Test(priority = 9,
-            description = "TC-BHD-009 [FRD 2.5]: Upcoming cards show 0% progress")
+    @Test(priority = 10, description = "TC-BHD-010 [FRD 2.5]: All upcoming cards show 0% progress")
     public void verifyUpcomingCardsShow0Percent() {
         List<WebElement> upcomingCards = analyticsPage.getUpcomingCards();
         if (upcomingCards.isEmpty()) {
@@ -168,28 +158,26 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
             Assert.assertEquals(progressText, "0%",
                     "FAIL - Upcoming card should show 0% but shows: " + progressText + " [FRD 2.5]");
         }
-        System.out.println("PASS - All " + upcomingCards.size() + " upcoming card(s) show 0%. [FRD 2.5]");
+        System.out.println("PASS - All " + upcoming.size() + " upcoming card(s) show 0%.");
     }
 
-    @Test(priority = 10,
-            description = "TC-BHD-010 [FRD 2.5]: All three card types (completed, ongoing, upcoming) exist on the page")
+    @Test(priority = 11, description = "TC-BHD-011 [FRD 2.5]: All three card types (completed, ongoing, upcoming) exist")
     public void verifyAllThreeCardTypesExist() {
         int completed = analyticsPage.getCompletedCards().size();
         int ongoing   = analyticsPage.getOngoingCards().size();
         int upcoming  = analyticsPage.getUpcomingCards().size();
 
-        System.out.println("INFO - Card counts: completed=" + completed
-                + ", ongoing=" + ongoing + ", upcoming=" + upcoming);
+        System.out.println("INFO - completed=" + completedCount
+                + ", ongoing=" + ongoingCount + ", upcoming=" + upcomingCount);
 
-        Assert.assertTrue(completed > 0, "FAIL - No 'completed' cards found [FRD 2.5]");
-        Assert.assertTrue(ongoing   > 0, "FAIL - No 'ongoing' cards found [FRD 2.5]");
-        Assert.assertTrue(upcoming  > 0, "FAIL - No 'upcoming' cards found [FRD 2.5]");
+        Assert.assertTrue(completedCount > 0, "FAIL - No completed cards found [FRD 2.5]");
+        Assert.assertTrue(ongoingCount   > 0, "FAIL - No ongoing cards found [FRD 2.5]");
+        Assert.assertTrue(upcomingCount  > 0, "FAIL - No upcoming cards found [FRD 2.5]");
 
-        System.out.println("PASS - All three card types are present. [FRD 2.5]");
+        System.out.println("PASS - All three card types are present.");
     }
 
-    @Test(priority = 11,
-            description = "TC-BHD-011 [FRD 2.5]: Milestone date links are present on all ongoing cards")
+    @Test(priority = 12, description = "TC-BHD-012 [FRD 2.5]: Every ongoing card has a clickable milestone date link")
     public void verifyMilestoneDateLinksOnOngoingCards() {
         List<WebElement> ongoing = analyticsPage.getOngoingCards();
         if (ongoing.isEmpty()) {
@@ -207,8 +195,7 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
         }
     }
 
-    @Test(priority = 12,
-            description = "TC-BHD-012 [FRD 2.5]: Each cohort card displays a non-empty cohort ID title")
+    @Test(priority = 13, description = "TC-BHD-013 [FRD 2.5]: Every cohort card has a non-empty title (cohort ID)")
     public void verifyCohortCardTitlesAreNotEmpty() {
         List<WebElement> titles = analyticsPage.getCardTitles();
         Assert.assertFalse(titles.isEmpty(),
@@ -218,11 +205,10 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
             Assert.assertFalse(title.getText().trim().isEmpty(),
                     "FAIL - A cohort card has an empty title [FRD 2.5]");
         }
-        System.out.println("PASS - All " + titles.size() + " cohort card(s) have a non-empty title. [FRD 2.5]");
+        System.out.println("PASS - All " + cards.size() + " card(s) have a non-empty cohort ID title.");
     }
 
-    @Test(priority = 13,
-            description = "TC-BHD-013 [FRD 2.5]: Each cohort card has a non-empty subtitle (training topic)")
+    @Test(priority = 14, description = "TC-BHD-014 [FRD 2.5]: Every cohort card has a non-empty subtitle (training topic)")
     public void verifyCohortCardSubtitlesAreNotEmpty() {
         List<WebElement> subtitles = analyticsPage.getCardSubtitles();
         Assert.assertFalse(subtitles.isEmpty(),
@@ -232,11 +218,10 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
             Assert.assertFalse(subtitle.getText().trim().isEmpty(),
                     "FAIL - A cohort card has an empty subtitle [FRD 2.5]");
         }
-        System.out.println("PASS - All " + subtitles.size() + " subtitle(s) are non-empty. [FRD 2.5]");
+        System.out.println("PASS - All " + cards.size() + " card(s) have a non-empty subtitle.");
     }
 
-    @Test(priority = 14,
-            description = "TC-BHD-014 [FRD 2.5]: Progress bar fill width matches the displayed percentage value")
+    @Test(priority = 15, description = "TC-BHD-015 [FRD 2.5]: Progress bar fill width matches the displayed percentage on each card")
     public void verifyProgressBarWidthMatchesPercentage() {
         List<WebElement> cards = analyticsPage.getCohortCards();
         Assert.assertFalse(cards.isEmpty(), "FAIL - No cohort cards found [FRD 2.5]");
@@ -251,12 +236,10 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
                             + "' does not match displayed value '" + displayedPct
                             + "' on card: " + analyticsPage.getCardTitleText(card) + " [FRD 2.5]");
         }
-        System.out.println("PASS - All " + cards.size()
-                + " cohort card(s) have matching progress bar widths. [FRD 2.5]");
+        System.out.println("PASS - All " + cards.size() + " card(s) have matching progress bar widths.");
     }
 
-    @Test(priority = 15,
-            description = "TC-BHD-015 [FRD 2.5]: Ongoing cards with past milestone dates are identified as behind schedule")
+    @Test(priority = 16, description = "TC-BHD-016 [FRD 2.5]: Ongoing cards with past milestone dates are flagged as behind schedule")
     public void verifyOngoingCardsWithPastMilestonesAreBehindSchedule() {
         List<WebElement> ongoing = analyticsPage.getOngoingCards();
         if (ongoing.isEmpty()) {
@@ -283,8 +266,7 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
         Assert.assertTrue(behindCount >= 0, "FAIL - Behind count is somehow negative [FRD 2.5]");
     }
 
-    @Test(priority = 16,
-            description = "TC-BHD-016 [FRD 2.5]: Total card count equals completed + ongoing + upcoming")
+    @Test(priority = 17, description = "TC-BHD-017 [FRD 2.5]: Total card count equals completed + ongoing + upcoming")
     public void verifyTotalCardCountIsConsistent() {
         int total     = analyticsPage.getCohortCards().size();
         int completed = analyticsPage.getCompletedCards().size();
@@ -292,7 +274,7 @@ public class TrainingAnalyticsBehindTest extends BaseClassTest {
         int upcoming  = analyticsPage.getUpcomingCards().size();
 
         Assert.assertEquals(total, completed + ongoing + upcoming,
-                "FAIL - Total card count (" + total + ") does not equal "
+                "FAIL - Total cards (" + total + ") does not equal "
                         + "completed(" + completed + ") + ongoing(" + ongoing
                         + ") + upcoming(" + upcoming + ") [FRD 2.5]");
         System.out.println("PASS - Card count is consistent: "

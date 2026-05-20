@@ -121,15 +121,18 @@ public class CohortManagementGridTest extends BaseClassTest {
                 "FAIL - No column headers found in the cohort grid. " +
                 "FRD 2.2.1 requires the grid to have defined column headers.");
 
+        // Normalise: trim whitespace, collapse all unicode-space chars (including  )
+        // and upper-case so the comparison is case-insensitive.
         List<String> headerTexts = headers.stream()
                 .map(WebElement::getText)
-                .map(String::trim)
+                .map(h -> h.replaceAll("[\\s\\u00A0]+", " ").trim().toUpperCase())
                 .collect(Collectors.toList());
-        System.out.println("INFO - Columns found: " + headerTexts);
+        System.out.println("INFO - Columns found (normalised): " + headerTexts);
 
         String[] requiredColumns = {"Cohort ID", "Cohort Name", "Status"};
         for (String col : requiredColumns) {
-            boolean found = headerTexts.stream().anyMatch(h -> h.contains(col));
+            final String colUpper = col.toUpperCase();
+            boolean found = headerTexts.stream().anyMatch(h -> h.contains(colUpper));
             Assert.assertTrue(
                     found,
                     "FAIL - Required column '" + col + "' not found in grid headers. " +
@@ -140,7 +143,8 @@ public class CohortManagementGridTest extends BaseClassTest {
 
         List<String> optionalCols = Arrays.asList("Service Line", "Start Date", "End Date", "Actions");
         for (String col : optionalCols) {
-            boolean found = headerTexts.stream().anyMatch(h -> h.contains(col));
+            final String colUpper = col.toUpperCase();
+            boolean found = headerTexts.stream().anyMatch(h -> h.contains(colUpper));
             System.out.println((found ? "PASS" : "GAP") +
                     " - Column '" + col + "': " +
                     (found ? "present" : "NOT found — FRD 2.2.1 expects this column"));
@@ -153,10 +157,20 @@ public class CohortManagementGridTest extends BaseClassTest {
     // -------------------------------------------------------
     @Test(priority = 5)
     public void verifyCohortGridHasRows() {
-        List<WebElement> rows = cohortPage.getTableRows();
+        // Wait up to explicit-wait seconds for the API response to populate the table.
+        // The app is hosted on render.com (free tier) which can have 30-60 s cold-start
+        // delays — rows arrive asynchronously and may not be present immediately.
+        List<WebElement> rows;
+        try {
+            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
+                    By.cssSelector("table tbody tr")));
+            rows = cohortPage.getTableRows();
+        } catch (Exception e) {
+            rows = cohortPage.getTableRows(); // fallback — return whatever is present
+        }
         Assert.assertFalse(
                 rows.isEmpty(),
-                "FAIL - Cohort grid has no data rows. " +
+                "FAIL - Cohort grid has no data rows after waiting. " +
                 "FRD 2.2.1 requires the grid to display all available cohorts. " +
                 "Verify the test database contains at least one cohort record.");
         System.out.println("PASS - Cohort grid has " + rows.size() + " row(s)");

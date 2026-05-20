@@ -50,8 +50,10 @@ public class CohortDeepDiveTest extends BaseClassTest {
     private CohortManagementPage cohortListPage;
     private CohortDeepDivePage deepDivePage;
 
-    /** Cohort ID captured from the grid before navigating to the detail page. */
-    private String selectedCohortId;
+    /** Cohort ID captured from the grid before navigating to the detail page.
+     *  Initialised to "" so url.contains(selectedCohortId) never throws NPE
+     *  when the grid was empty or navigation failed in @BeforeClass. */
+    private String selectedCohortId = "";
 
     @BeforeClass(alwaysRun = true, dependsOnMethods = "setUpDriver")
     public void setup() {
@@ -352,8 +354,10 @@ public class CohortDeepDiveTest extends BaseClassTest {
         wait.until(ExpectedConditions.urlContains("cohort"));
         String url = driver.getCurrentUrl();
 
+        // selectedCohortId may be "" if the grid was empty in @BeforeClass — guard against that
         boolean onListPage = url.contains("cohort-management") ||
-                             (url.contains("cohort") && !url.contains(selectedCohortId));
+                             (url.contains("cohort") &&
+                              (selectedCohortId.isEmpty() || !url.contains(selectedCohortId)));
         Assert.assertTrue(
                 onListPage,
                 "FAIL - After clicking Back, URL does not indicate Cohort Management list. " +

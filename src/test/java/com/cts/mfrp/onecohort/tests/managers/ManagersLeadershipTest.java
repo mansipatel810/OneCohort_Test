@@ -53,7 +53,10 @@ public class ManagersLeadershipTest extends BaseClassTest {
                          " | //nav[contains(@class,'menu')]" +
                          "//*[contains(text(),'Managers & Leadership')]"))).click();
 
-        wait.until(ExpectedConditions.urlContains("manager"));
+        // The app routes to /super-admin/leadership (not /manager/...) after clicking
+        // "Managers & Leadership" in the sidebar — accept either segment.
+        wait.until(d -> d.getCurrentUrl().contains("manager")
+                     || d.getCurrentUrl().contains("leadership"));
         managersPage = new ManagersLeadershipPage(driver);
         System.out.println("Setup complete — URL: " + driver.getCurrentUrl());
     }
@@ -184,7 +187,8 @@ public class ManagersLeadershipTest extends BaseClassTest {
             managersPage.closeModal();
         } else if (pageChanged) {
             driver.navigate().back();
-            wait.until(ExpectedConditions.urlContains("manager"));
+            wait.until(d -> d.getCurrentUrl().contains("manager")
+                         || d.getCurrentUrl().contains("leadership"));
         }
     }
 

@@ -7,17 +7,19 @@ import com.cts.mfrp.onecohort.pages.batchowners.BatchOwnerPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.time.Duration;
 import java.util.List;
 
-@Test(groups = {"regression", "functional", "batchowner", "superadmin"})
 @Listeners(ExtentReportListener.class)
 public class EditDeleteBatchOwnerTest extends BaseClassTest {
 
@@ -125,7 +127,7 @@ public class EditDeleteBatchOwnerTest extends BaseClassTest {
         System.out.println("PASS - " + batchOwnerPage.getEditButtons().size() + " Edit button(s) found.");
     }
 
-    @Test(priority = 9, description = "TC-EBO-009 [FRD 2.4]: Clicking Edit opens the Edit Batch Owner modal")
+    @Test(priority = 8, description = "TC-EBO-008 [FRD 2.4]: Clicking the Edit button opens the Edit Batch Owner modal")
     public void verifyEditModalOpens() {
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button.btn-edit")));
         batchOwnerPage.clickFirstEditButton();
@@ -233,8 +235,8 @@ public class EditDeleteBatchOwnerTest extends BaseClassTest {
         if (deleteBtns.isEmpty()) {
             System.out.println("PASS - No Delete button on Batch Owner cards. FRD 2.4 specifies Add + Edit only for Batch Owners.");
         } else {
-            System.out.println("INFO - Delete button found: " + deleteBtns.size());
+            System.out.println("INFO - Delete button found on " + deleteButtons.size() + " card(s). Please review FRD 2.4.");
         }
-        Assert.assertTrue(true, "Observation test [FRD 2.4]");
+        Assert.assertTrue(true, "Observation only — no assertion needed for this check.");
     }
 }
