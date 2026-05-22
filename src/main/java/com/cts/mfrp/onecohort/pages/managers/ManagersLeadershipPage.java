@@ -7,10 +7,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import java.util.Collections;
 import java.util.List;
-
-
 
 public class ManagersLeadershipPage extends BasePage {
 
@@ -20,52 +17,16 @@ public class ManagersLeadershipPage extends BasePage {
             "[contains(normalize-space(),'Manager') " +
             "or contains(normalize-space(),'Leadership')]");
 
-    private final By profileCards = By.cssSelector(
-            "[class*='manager-card'], [class*='profile-card'], " +
-            "div[class*='card']:not(.modal-content):not(.modal-card)");
-
-    private final By cardNames = By.cssSelector(
-            "[class*='card'] h3, [class*='card'] h4, " +
-            "[class*='card'] [class*='name'], [class*='card'] p.font-bold");
-
-    private final By viewDetailsButtons = By.xpath(
-            "//button[contains(normalize-space(),'View Details') " +
-            "or contains(normalize-space(),'View') " +
-            "or contains(normalize-space(),'Details')]");
-
     private final By createManagerBtn = By.xpath(
             "//button[contains(normalize-space(),'Create Manager') " +
             "or contains(normalize-space(),'Add Manager') " +
             "or contains(normalize-space(),'New Manager')]");
 
     // Actual HTML: <button class="tab-btn active">Managers</button> <button class="tab-btn">Leaders</button>
-    // Old selector [class*='tab'] was too broad — also matched div.tabs and span.tab-count.
     private final By filterTabs = By.cssSelector("button.tab-btn");
 
     // Actual HTML: <div class="modal-overlay"><div class="modal">...</div></div>
-    // Old [class*='modal'] matched 6 parts of the modal (overlay, header, body, footer, close btn).
     private final By modalOverlay = By.cssSelector("div.modal-overlay");
-
-    // ── Edit Manager modal locators (FRD 2.3) ─────────────────────────────────
-    private final By managerCards        = By.cssSelector(".card-grid .card");
-    private final By editButtons         = By.cssSelector(".card-grid .card button.btn-edit");
-    private final By editModalOverlay    = By.cssSelector("div.modal-overlay");
-    private final By editModalTitle      = By.cssSelector("div.modal-overlay div.modal h2");
-    private final By editModalFullName   = By.cssSelector(
-            "div.modal-overlay div.modal input[placeholder='Enter full name']");
-    private final By editModalEmail      = By.cssSelector(
-            "div.modal-overlay div.modal input[type='email']");
-    private final By editModalUserIdDis  = By.cssSelector(
-            "div.modal-overlay div.modal input[disabled]");
-    private final By editModalCancelBtn  = By.cssSelector(
-            "div.modal-overlay div.modal button.btn-cancel");
-    private final By editModalSubmitBtn  = By.cssSelector(
-            "div.modal-overlay div.modal button.btn-primary");
-    private final By successNotif        = By.cssSelector(
-            ".toast, .alert-success, [class*='success'], [class*='toast']");
-    private final By deleteButton        = By.cssSelector(
-            "div.card-grid div.card button.btn-delete, " +
-            "div.card-grid div.card button.btn-danger");
 
     // ── Constructor ───────────────────────────────────────────────────────────
     public ManagersLeadershipPage(WebDriver driver) {
@@ -76,7 +37,7 @@ public class ManagersLeadershipPage extends BasePage {
 
     /**
      * Waits for the page heading to be visible before returning.
-     * isDisplayed() alone relies only on implicit wait; explicit wait is safer for render.com.
+     * Uses explicit wait — safer for render.com's Angular rendering latency.
      */
     public boolean isPageHeadingVisible() {
         try {
@@ -87,61 +48,13 @@ public class ManagersLeadershipPage extends BasePage {
         }
     }
 
-    public WebElement getPageHeadingElement() {
-        return driver.findElement(pageHeading);
-    }
-
-    public boolean isCreateManagerBtnEnabled() {
-        try { return driver.findElement(createManagerBtn).isEnabled(); }
-        catch (Exception e) { return false; }
-    }
-
-    public WebElement getCreateManagerBtnElement() {
-        return driver.findElement(createManagerBtn);
-    }
-
-    // ── Profile cards ─────────────────────────────────────────────────────────
-
-    public boolean areProfileCardsVisible() {
-        try {
-            return !driver.findElements(profileCards).isEmpty();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public List<WebElement> getProfileCards() {
-        try {
-            return driver.findElements(profileCards);
-        } catch (Exception e) {
-            return Collections.emptyList();
-        }
-    }
-
-    public List<WebElement> getCardNames() {
-        try {
-            return driver.findElements(cardNames);
-        } catch (Exception e) {
-            return Collections.emptyList();
-        }
-    }
-
-    // ── View Details ──────────────────────────────────────────────────────────
-
-    public List<WebElement> getViewDetailsButtons() {
-        try {
-            return driver.findElements(viewDetailsButtons);
-        } catch (Exception e) {
-            return Collections.emptyList();
-        }
-    }
-
     // ── Create Manager ────────────────────────────────────────────────────────
 
     public boolean isCreateManagerBtnVisible() {
         return isDisplayed(createManagerBtn);
     }
 
+    /** Clicks Create Manager and returns the modal page object. */
     public CreateManagerModal clickCreateManager() {
         click(createManagerBtn);
         return new CreateManagerModal(driver);
@@ -150,9 +63,8 @@ public class ManagersLeadershipPage extends BasePage {
     // ── Role filter tabs ──────────────────────────────────────────────────────
 
     /**
-     * Returns true if the filter tabs (button.tab-btn) are visible.
-     * Uses explicit wait before findElements() — the tabs are rendered by Angular after
-     * page load and driver.findElements() returns empty immediately without waiting.
+     * Returns true if filter tabs (button.tab-btn) are visible.
+     * Uses explicit wait — tabs are rendered by Angular after page load.
      */
     public boolean areFilterTabsVisible() {
         try {
@@ -160,14 +72,6 @@ public class ManagersLeadershipPage extends BasePage {
             return !driver.findElements(filterTabs).isEmpty();
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    public List<WebElement> getFilterTabs() {
-        try {
-            return driver.findElements(filterTabs);
-        } catch (Exception e) {
-            return Collections.emptyList();
         }
     }
 
@@ -186,6 +90,7 @@ public class ManagersLeadershipPage extends BasePage {
         }
     }
 
+    /** Closes the modal — tries Cancel/Close button first, falls back to JS Escape. */
     public void closeModal() {
         try {
             List<WebElement> closeBtns = driver.findElements(By.xpath(
@@ -200,79 +105,5 @@ public class ManagersLeadershipPage extends BasePage {
             ((JavascriptExecutor) driver).executeScript(
                     "document.dispatchEvent(new KeyboardEvent('keydown',{'key':'Escape','bubbles':true}))");
         } catch (Exception ignored) {}
-    }
-
-    // ── Manager cards & edit buttons (FRD 2.3) ───────────────────────────────
-
-    public List<WebElement> getManagerCards() {
-        try { return driver.findElements(managerCards); }
-        catch (Exception e) { return Collections.emptyList(); }
-    }
-
-    public List<WebElement> getEditButtons() {
-        try { return driver.findElements(editButtons); }
-        catch (Exception e) { return Collections.emptyList(); }
-    }
-
-    public void clickFirstEditButton() {
-        List<WebElement> btns = getEditButtons();
-        if (!btns.isEmpty()) btns.get(0).click();
-    }
-
-    // ── Edit modal (FRD 2.3) ─────────────────────────────────────────────────
-
-    public boolean isEditModalOverlayVisible() {
-        return isDisplayed(editModalOverlay);
-    }
-
-    public String getEditModalTitleText() {
-        try { return getText(editModalTitle); } catch (Exception e) { return ""; }
-    }
-
-    public WebElement getEditModalFullNameInput() {
-        return waitForVisible(editModalFullName);
-    }
-
-    public WebElement getEditModalEmailInput() {
-        return waitForVisible(editModalEmail);
-    }
-
-    public WebElement getEditModalUserIdInput() {
-        return waitForVisible(editModalUserIdDis);
-    }
-
-    public boolean isEditModalUserIdDisabled() {
-        try {
-            WebElement el = driver.findElement(editModalUserIdDis);
-            return el.getAttribute("disabled") != null;
-        } catch (Exception e) { return false; }
-    }
-
-    public void clickEditModalCancel() {
-        waitForClickable(editModalCancelBtn).click();
-    }
-
-    public void clickEditModalSubmit() {
-        waitForClickable(editModalSubmitBtn).click();
-    }
-
-    public boolean isSuccessNotifVisible() {
-        try {
-            List<WebElement> notifs = driver.findElements(successNotif);
-            return notifs.stream().anyMatch(WebElement::isDisplayed);
-        } catch (Exception e) { return false; }
-    }
-
-    public List<WebElement> getDeleteButtons() {
-        try { return driver.findElements(deleteButton); }
-        catch (Exception e) { return Collections.emptyList(); }
-    }
-
-    public void waitForEditModalVisible() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(editModalOverlay));
-    }
-
-    public void waitForEditModalInvisible() {
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(editModalOverlay));
     }
 }
