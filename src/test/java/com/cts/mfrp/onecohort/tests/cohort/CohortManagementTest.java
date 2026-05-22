@@ -51,7 +51,8 @@ public class CohortManagementTest extends BaseClassTest {
 
         // Close the modal overlay if it is still visible
         try {
-            List<WebElement> overlays = driver.findElements(By.cssSelector("div.modal-overlay"));
+            List<WebElement> overlays = driver.findElements(
+                    By.xpath("//div[contains(@class,'modal-overlay')]"));
             if (!overlays.isEmpty() && overlays.get(0).isDisplayed()) {
                 if (cohortPage != null) {
                     cohortPage.closeModal();
@@ -60,7 +61,7 @@ public class CohortManagementTest extends BaseClassTest {
                             "document.dispatchEvent(new KeyboardEvent('keydown',{'key':'Escape','bubbles':true}))");
                 }
                 wait.until(ExpectedConditions.invisibilityOfElementLocated(
-                        By.cssSelector("div.modal-overlay")));
+                        By.xpath("//div[contains(@class,'modal-overlay')]")));
                 System.out.println("INFO - @AfterMethod closed a lingering modal overlay.");
             }
         } catch (Exception ignored) {}
@@ -138,7 +139,7 @@ public class CohortManagementTest extends BaseClassTest {
         List<WebElement> rows = cohortPage.getTableRows();
         String searchTerm = "INT"; // Default search term
         if (!rows.isEmpty()) {
-            String firstCellText = rows.get(0).findElement(By.cssSelector("td:first-child")).getText().trim();
+            String firstCellText = rows.get(0).findElement(By.xpath(".//td[1]")).getText().trim();
             if (firstCellText.length() >= 3) {
                 searchTerm = firstCellText.substring(0, 3);
             }
@@ -170,7 +171,7 @@ public class CohortManagementTest extends BaseClassTest {
 
         // Wait for the modal to appear
         WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.cssSelector("[class*='modal'], [role='dialog'], .modal-card")));
+                By.xpath("//*[contains(@class,'modal') or @role='dialog' or contains(@class,'modal-card')]")));
         Assert.assertTrue(modal.isDisplayed(),
                 "A modal dialog should appear after clicking Create Cohort");
         System.out.println("PASS - Create Cohort modal opened.");
@@ -185,28 +186,29 @@ public class CohortManagementTest extends BaseClassTest {
         // Open the Create Cohort modal
         cohortPage.clickCreateCohort();
         wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.cssSelector("[class*='modal'], [role='dialog'], .modal-card")));
+                By.xpath("//*[contains(@class,'modal') or @role='dialog' or contains(@class,'modal-card')]")));
 
         // Check for a text input (for the Cohort Name field).
         // Angular forms often render <input> without an explicit type="text" attribute,
         // so we search for all inputs that are NOT date / checkbox / radio / hidden.
-        List<WebElement> textInputs = driver.findElements(By.cssSelector(
-                "div.modal-overlay input:not([type='date']):not([type='checkbox'])" +
-                ":not([type='radio']):not([type='hidden']), " +
-                "[class*='modal'] input:not([type='date']):not([type='checkbox'])" +
-                ":not([type='radio']):not([type='hidden'])"));
+        List<WebElement> textInputs = driver.findElements(By.xpath(
+                "//div[contains(@class,'modal-overlay')]//input" +
+                "[not(@type='date') and not(@type='checkbox') and not(@type='radio') and not(@type='hidden')] | " +
+                "//*[contains(@class,'modal')]//input" +
+                "[not(@type='date') and not(@type='checkbox') and not(@type='radio') and not(@type='hidden')]"));
         Assert.assertFalse(textInputs.isEmpty(),
                 "Create Cohort modal should have a text input for Cohort Name");
 
         // Check for a dropdown (for the Service Line selection)
-        List<WebElement> dropdowns = driver.findElements(
-                By.cssSelector("[class*='modal'] select, .modal-card select"));
+        List<WebElement> dropdowns = driver.findElements(By.xpath(
+                "//*[contains(@class,'modal')]//select | //*[contains(@class,'modal-card')]//select"));
         Assert.assertFalse(dropdowns.isEmpty(),
                 "Create Cohort modal should have a dropdown for Service Line");
 
         // Check for date inputs (Start Date and End Date)
-        List<WebElement> dateInputs = driver.findElements(
-                By.cssSelector("[class*='modal'] input[type='date'], .modal-card input[type='date']"));
+        List<WebElement> dateInputs = driver.findElements(By.xpath(
+                "//*[contains(@class,'modal')]//input[@type='date'] | " +
+                "//*[contains(@class,'modal-card')]//input[@type='date']"));
         Assert.assertFalse(dateInputs.isEmpty(),
                 "Create Cohort modal should have date input fields");
 
@@ -227,7 +229,7 @@ public class CohortManagementTest extends BaseClassTest {
 
         // Verify the edit modal opened
         WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.cssSelector("[class*='modal'], [role='dialog'], .modal-card")));
+                By.xpath("//*[contains(@class,'modal') or @role='dialog' or contains(@class,'modal-card')]")));
         Assert.assertTrue(modal.isDisplayed(),
                 "Edit modal should appear after clicking the Edit button");
         System.out.println("PASS - Edit modal opened successfully.");
@@ -246,7 +248,7 @@ public class CohortManagementTest extends BaseClassTest {
         String urlBefore = driver.getCurrentUrl();
 
         // Click the first cell (Cohort ID) of the first row to open the detail page
-        WebElement firstCell = rows.get(0).findElement(By.cssSelector("td:first-child"));
+        WebElement firstCell = rows.get(0).findElement(By.xpath(".//td[1]"));
         firstCell.click();
 
         // Wait for the URL to change, confirming navigation to the detail page
