@@ -148,7 +148,18 @@ public class CohortManagementPage extends BasePage {
     }
 
     public void clickCreateCohort() {
-        click(createCohortBtn);
+        // If a previous modal's overlay is still fading out it intercepts normal clicks.
+        // Wait for it to disappear first, then fall back to a JS click if needed.
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                    By.cssSelector("div.modal-overlay")));
+        } catch (Exception ignored) {}
+
+        try {
+            click(createCohortBtn);
+        } catch (Exception e) {
+            jsClick(driver.findElement(createCohortBtn));
+        }
     }
 
     // ── Empty state ───────────────────────────────────────────────────────────
@@ -291,7 +302,9 @@ public class CohortManagementPage extends BasePage {
 
     // ── Modal ─────────────────────────────────────────────────────────────────
 
-    /** Closes any open modal — tries Cancel/Close button first, falls back to JS Escape. */
+    /** Closes any open modal — tries Cancel/Close button first, falls back to JS Escape.
+     *  Waits for the overlay to fully disappear before returning so callers are not
+     *  surprised by ElementClickInterceptedException from a fading Angular transition. */
     public void closeModal() {
         try {
             List<WebElement> closeBtns = driver.findElements(By.xpath(
@@ -301,11 +314,22 @@ public class CohortManagementPage extends BasePage {
                     "or contains(normalize-space(),'×')]"));
             if (!closeBtns.isEmpty()) {
                 closeBtns.get(0).click();
-                return;
+            } else {
+                // Fallback — dispatch Escape key via JavaScript
+                ((JavascriptExecutor) driver).executeScript(
+                        "document.dispatchEvent(new KeyboardEvent('keydown',{'key':'Escape','bubbles':true}))");
             }
-            // Fallback — dispatch Escape key via JavaScript
-            ((JavascriptExecutor) driver).executeScript(
-                    "document.dispatchEvent(new KeyboardEvent('keydown',{'key':'Escape','bubbles':true}))");
+        } catch (Exception ignored) {}
+
+        // Wait for the Angular CSS transition to complete — the overlay must be gone
+        // before the next click, otherwise ElementClickInterceptedException fires.
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                    By.cssSelector("div.modal-overlay")));
+        } catch (Exception ignored) {}
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                    By.cssSelector("[class*='modal'], [role='dialog']")));
         } catch (Exception ignored) {}
     }
 
