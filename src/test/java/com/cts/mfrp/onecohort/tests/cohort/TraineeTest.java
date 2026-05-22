@@ -61,6 +61,8 @@ public class TraineeTest extends BaseClassTest {
         // Wait for navigation to the cohort detail page
         wait.until(ExpectedConditions.not(ExpectedConditions.urlToBe(urlBefore)));
         deepDivePage = new CohortDeepDivePage(driver);
+        // Wait for the deep-dive page to fully render (Angular + render.com latency)
+        deepDivePage.waitForPageLoad();
         System.out.println("Setup complete. Cohort Deep Dive URL: " + driver.getCurrentUrl());
     }
 
@@ -90,9 +92,11 @@ public class TraineeTest extends BaseClassTest {
     // ── TC-TRAINEE-003 ───────────────────────────────────────────────────────
     @Test(priority = 3, description = "TC-TRAINEE-003: Add Trainee modal has all required form fields")
     public void testAddTraineeModalHasRequiredFields() {
-        // The modal should already be open from the previous test
-        // If not, open it again
-        if (!deepDivePage.isAddTraineeBtnVisible()) {
+        // The modal should already be open from TC-TRAINEE-002.
+        // Guard: if it has been closed (or a fresh run), re-open it.
+        // NOTE: isAddTraineeBtnVisible() was wrong here — the button stays visible even when
+        // the modal is open (it's just behind the backdrop). Use isAddTraineeModalOpen() instead.
+        if (!deepDivePage.isAddTraineeModalOpen()) {
             deepDivePage.clickAddTraineeOpen();
             deepDivePage.waitForModalToOpen();
         }

@@ -10,6 +10,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import java.util.Collections;
 import java.util.List;
 
+
+
 public class ManagersLeadershipPage extends BasePage {
 
     // ── Locators ──────────────────────────────────────────────────────────────
@@ -36,10 +38,13 @@ public class ManagersLeadershipPage extends BasePage {
             "or contains(normalize-space(),'Add Manager') " +
             "or contains(normalize-space(),'New Manager')]");
 
-    private final By filterTabs = By.cssSelector(
-            "[class*='tab'], [role='tab'], button[class*='tab']");
+    // Actual HTML: <button class="tab-btn active">Managers</button> <button class="tab-btn">Leaders</button>
+    // Old selector [class*='tab'] was too broad — also matched div.tabs and span.tab-count.
+    private final By filterTabs = By.cssSelector("button.tab-btn");
 
-    private final By modalOverlay = By.cssSelector("[class*='modal'], [role='dialog']");
+    // Actual HTML: <div class="modal-overlay"><div class="modal">...</div></div>
+    // Old [class*='modal'] matched 6 parts of the modal (overlay, header, body, footer, close btn).
+    private final By modalOverlay = By.cssSelector("div.modal-overlay");
 
     // ── Edit Manager modal locators (FRD 2.3) ─────────────────────────────────
     private final By managerCards        = By.cssSelector(".card-grid .card");
@@ -69,8 +74,17 @@ public class ManagersLeadershipPage extends BasePage {
 
     // ── Page heading ──────────────────────────────────────────────────────────
 
+    /**
+     * Waits for the page heading to be visible before returning.
+     * isDisplayed() alone relies only on implicit wait; explicit wait is safer for render.com.
+     */
     public boolean isPageHeadingVisible() {
-        return isDisplayed(pageHeading);
+        try {
+            waitForVisible(pageHeading);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public WebElement getPageHeadingElement() {
@@ -135,8 +149,14 @@ public class ManagersLeadershipPage extends BasePage {
 
     // ── Role filter tabs ──────────────────────────────────────────────────────
 
+    /**
+     * Returns true if the filter tabs (button.tab-btn) are visible.
+     * Uses explicit wait before findElements() — the tabs are rendered by Angular after
+     * page load and driver.findElements() returns empty immediately without waiting.
+     */
     public boolean areFilterTabsVisible() {
         try {
+            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(filterTabs));
             return !driver.findElements(filterTabs).isEmpty();
         } catch (Exception e) {
             return false;
@@ -153,10 +173,14 @@ public class ManagersLeadershipPage extends BasePage {
 
     // ── Modal ─────────────────────────────────────────────────────────────────
 
+    /**
+     * Returns true if the modal overlay (div.modal-overlay) is visible.
+     * Uses explicit wait — modal is injected by Angular *ngIf after button click.
+     */
     public boolean isModalVisible() {
         try {
-            List<WebElement> modals = driver.findElements(modalOverlay);
-            return modals.stream().anyMatch(WebElement::isDisplayed);
+            waitForVisible(modalOverlay);
+            return true;
         } catch (Exception e) {
             return false;
         }

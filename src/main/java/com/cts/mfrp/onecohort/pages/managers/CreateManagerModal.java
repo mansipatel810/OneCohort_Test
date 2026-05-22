@@ -11,21 +11,25 @@ import java.util.List;
 public class CreateManagerModal extends BasePage {
 
     // ── Locators ──────────────────────────────────────────────────────────────
-    private final By modalContainer = By.cssSelector("[class*='modal'], [role='dialog']");
+    // Actual HTML: <div class="modal-overlay"><div class="modal">...</div></div>
+    private final By modalContainer = By.cssSelector("div.modal-overlay");
 
+    // Actual HTML: <input type="text" placeholder="Enter full name">
+    // Old selector had placeholder*='Full' (capital F) — CSS attribute selectors are case-sensitive.
+    // formcontrolname is an Angular directive and is NOT emitted as a DOM attribute in this app.
     private final By fullNameInput = By.cssSelector(
-            "input[formcontrolname*='name'], input[formcontrolname*='Name'], " +
-            "input[placeholder*='Name'], input[placeholder*='Full']");
+            "div.modal input[placeholder='Enter full name']");
 
+    // Actual HTML: <input type="text" placeholder="e.g. USR-30010">
+    // The label says "User ID" in the UI, but the test calls it "Employee ID" — locator still matches.
     private final By employeeIdInput = By.cssSelector(
-            "input[placeholder*='USR'], input[placeholder*='Employee'], " +
-            "input[formcontrolname*='emp'], input[formcontrolname*='userId'], " +
-            "input[formcontrolname*='employeeId']");
+            "div.modal input[placeholder*='USR']");
 
+    // Actual HTML: The Service Line field is a custom div dropdown — NOT a <select>.
+    // <div class="sl-dropdown"><div class="sl-trigger">...</div></div>
+    // Old selector used select[formcontrolname*='service'] — both wrong (no select, no formcontrolname).
     private final By serviceLineDropdown = By.cssSelector(
-            "[class*='modal'] select[formcontrolname*='service'], " +
-            "[class*='modal'] select[formcontrolname*='serviceLine'], " +
-            "[role='dialog'] select");
+            "div.modal-overlay div.sl-dropdown");
 
     private final By roleDropdown = By.cssSelector(
             "[class*='modal'] select[formcontrolname*='role'], " +

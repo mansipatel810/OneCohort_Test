@@ -6,19 +6,23 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Select;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
 public class CohortDeepDivePage extends BasePage {
 
     // ── Locators ──────────────────────────────────────────────────────────────
-    private final By cohortNameHeading = By.cssSelector(
-            "h1, h2, [class*='cohort-title'], [class*='cohort-name'], [class*='page-title']");
+    // Actual HTML: <h2 class="fw-bold mb-1">SDET 210526</h2> inside a card div.
+    // The old broad "h1, h2" matched 6 elements; first was the header "Welcome, Admin." — wrong element.
+    private final By cohortNameHeading = By.cssSelector("h2.fw-bold.mb-1");
 
-    private final By summaryCards = By.cssSelector(
-            "[class*='card'], [class*='stat'], [class*='kpi'], [class*='metric'], [class*='summary']");
+    // Actual HTML: <div class="summary-card"> inside <div class="summary-cards mb-4">
+    // The old broad [class*='card'] matched 10 elements including cards from other sections.
+    private final By summaryCards = By.cssSelector("div.summary-card");
 
     private final By kpiNumbers = By.cssSelector(
             "[class*='kpi-number'], [class*='stat-value'], [class*='metric-value'], " +
@@ -80,6 +84,19 @@ public class CohortDeepDivePage extends BasePage {
 
     // ── Page load ─────────────────────────────────────────────────────────────
 
+    /**
+     * Waits until the cohort deep-dive page is fully loaded by polling for the
+     * Add Trainee button. Called in @BeforeClass after click-to-navigate.
+     * Uses FluentWait to handle render.com page-load latency.
+     */
+    public void waitForPageLoad() {
+        new FluentWait<>(driver)
+                .withTimeout(Duration.ofSeconds(30))
+                .pollingEvery(Duration.ofMillis(500))
+                .ignoring(Exception.class)
+                .until(d -> !d.findElements(addTraineeBtn).isEmpty());
+    }
+
     /** Returns true if the deep-dive page has loaded at least one identifiable element. */
     public boolean isPageLoaded() {
         return isDisplayed(cohortNameHeading) || isDisplayed(summaryCards);
@@ -93,8 +110,14 @@ public class CohortDeepDivePage extends BasePage {
 
     // ── KPI cards ─────────────────────────────────────────────────────────────
 
+    /**
+     * Returns the summary card elements.
+     * Waits for at least one card before returning — driver.findElements() returns
+     * empty immediately without waiting, which fails on render.com during Angular hydration.
+     */
     public List<WebElement> getSummaryCards() {
         try {
+            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(summaryCards));
             return driver.findElements(summaryCards);
         } catch (Exception e) {
             return Collections.emptyList();
@@ -208,9 +231,9 @@ public class CohortDeepDivePage extends BasePage {
         new Select(waitForVisible(atModalEmpTypeDd)).selectByValue(value);
     }
 
-    /** Returns all options of the Employment Type dropdown. */
+    /** Returns all options of the Employment Type dropdown. Waits for the dropdown to be visible first. */
     public List<WebElement> getEmploymentTypeOptions() {
-        try { return new Select(driver.findElement(atModalEmpTypeDd)).getOptions(); }
+        try { return new Select(waitForVisible(atModalEmpTypeDd)).getOptions(); }
         catch (Exception e) { return Collections.emptyList(); }
     }
 
@@ -219,9 +242,9 @@ public class CohortDeepDivePage extends BasePage {
         waitForClickable(atModalSubmitBtn).click();
     }
 
-    /** Returns true if the Submit button is enabled. */
+    /** Returns true if the Submit button is enabled. Waits for button to be present first. */
     public boolean isAddTraineeSubmitEnabled() {
-        try { return driver.findElement(atModalSubmitBtn).isEnabled(); }
+        try { return waitForVisible(atModalSubmitBtn).isEnabled(); }
         catch (Exception e) { return false; }
     }
 
@@ -258,6 +281,14 @@ public class CohortDeepDivePage extends BasePage {
     /** Waits until the Trainee ID input is visible (modal open). */
     public void waitForModalToOpen() {
         wait.until(ExpectedConditions.visibilityOfElementLocated(atModalIdInput));
+    }
+
+    /**
+     * Returns true if the Add Trainee modal is currently open.
+     * Checks DOM existence of the Trainee ID input (injected by Angular *ngIf when modal opens).
+     */
+    public boolean isAddTraineeModalOpen() {
+        return elementExists(atModalIdInput);
     }
 
     /** Returns the Add Trainee ID input element. */

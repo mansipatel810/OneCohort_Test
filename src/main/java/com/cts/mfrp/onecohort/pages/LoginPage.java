@@ -16,10 +16,11 @@ public class LoginPage extends BasePage {
     private final By userIdInput         = By.cssSelector("input[placeholder='e.g. 123456']");
     private final By roleDropdown        = By.cssSelector("div.space-y-5 select");
     // *ngIf fields — only injected into the DOM once the matching role is selected
-    private final By serviceLineDropdown = By.cssSelector(
-            "select[formcontrolname='serviceLineId'], " +
-            "select[formcontrolname='serviceLine'], " +
-            "div.space-y-5 select + select");
+    // The service line <select> is always the 2nd select inside div.space-y-5.
+    // CSS "select + select" fails because the two <select>s live in separate sibling <div>s.
+    // Angular does not render formcontrolname as a DOM attribute in this app, so those fail too.
+    private final By serviceLineDropdown = By.xpath(
+            "(//div[contains(@class,'space-y-5')]//select)[2]");
     private final By pocIdInput          = By.cssSelector("input[placeholder='e.g. USR-40002']");
     private final By cohortIdInput       = By.cssSelector("input[placeholder='e.g. COH-10001']");
     private final By loginButton         = By.xpath("//button[normalize-space()='Login']");

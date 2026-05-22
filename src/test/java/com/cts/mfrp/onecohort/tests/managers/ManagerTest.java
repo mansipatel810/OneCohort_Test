@@ -3,12 +3,13 @@ package com.cts.mfrp.onecohort.tests.managers;
 import com.cts.mfrp.onecohort.base.BaseClassTest;
 import com.cts.mfrp.onecohort.constants.AppConstants;
 import com.cts.mfrp.onecohort.pages.LoginPage;
+import com.cts.mfrp.onecohort.pages.SuperAdminDashboardPage;
 import com.cts.mfrp.onecohort.pages.managers.ManagerDashboardPage;
+import org.openqa.selenium.By;
 import com.cts.mfrp.onecohort.pages.managers.CreateManagerModal;
 import com.cts.mfrp.onecohort.pages.managers.ManagersLeadershipPage;
 import com.cts.mfrp.onecohort.utils.ConfigReader;
 import com.cts.mfrp.onecohort.utils.ExtentReportListener;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.Assert;
@@ -116,21 +117,34 @@ public class ManagerTest extends BaseClassTest {
         System.out.println("PASS - Manager sidebar has " + navLinks.size() + " navigation links.");
     }
 
+    // ── Navigation helper ─────────────────────────────────────────────────────
+    /**
+     * Logs in as Super Admin, navigates to Managers &amp; Leadership via sidebar,
+     * and returns the page object. Used by TC-MGR-004, 005, 010, 011 to avoid
+     * duplicating the login + sidebar-click sequence in every test.
+     */
+    private ManagersLeadershipPage navigateToManagersLeadershipPage() {
+        driver.get(ConfigReader.getBaseUrl());
+        new LoginPage(driver).loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
+        // Wait for Super Admin dashboard to fully load before interacting with sidebar
+        wait.until(ExpectedConditions.urlContains("/super-admin"));
+        SuperAdminDashboardPage sa = new SuperAdminDashboardPage(driver);
+        sa.waitForDashboardContainer();
+        // Click the Managers & Leadership sidebar link
+        WebElement link = wait.until(ExpectedConditions.elementToBeClickable(
+                sa.getMenuItemElement("Managers")));
+        link.click();
+        // Wait for URL AND page heading — render.com may be slow to render the content
+        wait.until(ExpectedConditions.urlContains("leadership"));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.cssSelector("h1.page-title")));
+        return new ManagersLeadershipPage(driver);
+    }
+
     // ── TC-MGR-004 ────────────────────────────────────────────────────────────
     @Test(priority = 4, description = "TC-MGR-004: Managers and Leadership page loads with heading and Create Manager button")
     public void testManagersLeadershipPageLoadsAsSuperAdmin() {
-        // Log in as Super Admin to access the Managers & Leadership page
-        driver.get(ConfigReader.getBaseUrl());
-        new LoginPage(driver).loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
-        wait.until(ExpectedConditions.urlContains("/super-admin"));
-
-        // Click the Managers link in the Super Admin sidebar
-        WebElement managersLink = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//nav[contains(@class,'menu')]//*[contains(text(),'Manager')]")));
-        managersLink.click();
-        wait.until(ExpectedConditions.urlContains("manager"));
-
-        ManagersLeadershipPage leadershipPage = new ManagersLeadershipPage(driver);
+        ManagersLeadershipPage leadershipPage = navigateToManagersLeadershipPage();
 
         // Verify the page heading is visible
         Assert.assertTrue(leadershipPage.isPageHeadingVisible(),
@@ -146,19 +160,7 @@ public class ManagerTest extends BaseClassTest {
     // ── TC-MGR-005 ────────────────────────────────────────────────────────────
     @Test(priority = 5, description = "TC-MGR-005: Create Manager button opens a modal dialog")
     public void testCreateManagerModalOpens() {
-        // We should still be on the Managers & Leadership page from TC-MGR-004
-        // If not, navigate there
-        if (!driver.getCurrentUrl().contains("manager")) {
-            driver.get(ConfigReader.getBaseUrl());
-            new LoginPage(driver).loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
-            wait.until(ExpectedConditions.urlContains("/super-admin"));
-            WebElement managersLink = wait.until(ExpectedConditions.elementToBeClickable(
-                    By.xpath("//nav[contains(@class,'menu')]//*[contains(text(),'Manager')]")));
-            managersLink.click();
-            wait.until(ExpectedConditions.urlContains("manager"));
-        }
-
-        ManagersLeadershipPage leadershipPage = new ManagersLeadershipPage(driver);
+        ManagersLeadershipPage leadershipPage = navigateToManagersLeadershipPage();
 
         // Click the Create Manager button
         leadershipPage.clickCreateManager();
@@ -218,8 +220,9 @@ public class ManagerTest extends BaseClassTest {
                 ConfigReader.getManagerUserId(),
                 ConfigReader.getValidServiceLineId());
         wait.until(ExpectedConditions.urlContains("/manager/"));
+        wait.until(ExpectedConditions.urlContains("/dashboard"));
         dashPage = new ManagerDashboardPage(driver);
-        dashPage.waitForDashboardLoad();
+        dashPage.waitForDashboardLoad(); // also waits for KPI cards (async API)
 
         // Verify KPI number values are not blank
         List<String> kpiNumbers = dashPage.getKpiNumbers();
@@ -240,19 +243,8 @@ public class ManagerTest extends BaseClassTest {
     // ── TC-MGR-010 ────────────────────────────────────────────────────────────
     @Test(priority = 10, description = "TC-MGR-010: Create Manager modal contains all required input fields")
     public void testCreateManagerModalHasRequiredFields() {
-        // Log in as Super Admin to access the Managers & Leadership page
-        driver.get(ConfigReader.getBaseUrl());
-        new LoginPage(driver).loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
-        wait.until(ExpectedConditions.urlContains("/super-admin"));
-
-        // Navigate to the Managers page via the sidebar
-        WebElement managersLink = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//nav[contains(@class,'menu')]//*[contains(text(),'Manager')]")));
-        managersLink.click();
-        wait.until(ExpectedConditions.urlContains("manager"));
-
         // Open the Create Manager modal
-        ManagersLeadershipPage leadershipPage = new ManagersLeadershipPage(driver);
+        ManagersLeadershipPage leadershipPage = navigateToManagersLeadershipPage();
         CreateManagerModal modal = leadershipPage.clickCreateManager();
 
         // Verify all required form fields are present inside the modal
@@ -270,18 +262,7 @@ public class ManagerTest extends BaseClassTest {
     // ── TC-MGR-011 ────────────────────────────────────────────────────────────
     @Test(priority = 11, description = "TC-MGR-011: Managers and Leadership page shows heading and filter tabs")
     public void testManagersLeadershipPageContent() {
-        // We should still be on the Managers & Leadership page from TC-MGR-010
-        if (!driver.getCurrentUrl().contains("manager")) {
-            driver.get(ConfigReader.getBaseUrl());
-            new LoginPage(driver).loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
-            wait.until(ExpectedConditions.urlContains("/super-admin"));
-            WebElement managersLink = wait.until(ExpectedConditions.elementToBeClickable(
-                    By.xpath("//nav[contains(@class,'menu')]//*[contains(text(),'Manager')]")));
-            managersLink.click();
-            wait.until(ExpectedConditions.urlContains("manager"));
-        }
-
-        ManagersLeadershipPage leadershipPage = new ManagersLeadershipPage(driver);
+        ManagersLeadershipPage leadershipPage = navigateToManagersLeadershipPage();
 
         // Verify the page heading is visible
         Assert.assertTrue(leadershipPage.isPageHeadingVisible(),
