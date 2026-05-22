@@ -8,19 +8,19 @@ import java.util.List;
 
 public class SystemConfigPage extends BasePage {
 
-    private final By pageHeading = By.cssSelector("div.page-header h2");
-    private final By pageSubtitle = By.cssSelector("div.page-header p");
-    private final By allConfigCards = By.cssSelector(".config-card");
+    private final By pageHeading = By.xpath("//div[contains(@class,'page-header')]//h2");
+    private final By pageSubtitle = By.xpath("//div[contains(@class,'page-header')]//p");
+    private final By allConfigCards = By.xpath("//*[contains(@class,'config-card')]");
     private final By cohortCardTitle       = By.xpath("//h3[normalize-space()='Cohort Management']");
     private final By serviceLineCardTitle  = By.xpath("//h3[normalize-space()='Service Line Management']");
     private final By learningPathCardTitle = By.xpath("//h3[normalize-space()='Learning Path Management']");
     private final By pocCardTitle          = By.xpath("//h3[normalize-space()='POC Management']");
-    private final By allCreateButtons = By.cssSelector("button.btn-create");
+    private final By allCreateButtons = By.xpath("//button[contains(@class,'btn-create')]");
     private final By createCohortBtn       = By.xpath("//button[normalize-space()='+ Create Cohort']");
     private final By createServiceLineBtn  = By.xpath("//button[normalize-space()='+ Create Service Line']");
     private final By createLearningPathBtn = By.xpath("//button[normalize-space()='+ Create Learning Path']");
     private final By createPocBtn          = By.xpath("//button[normalize-space()='+ Create POC']");
-    private final By modalOverlay  = By.cssSelector("div.modal-overlay, div[class*='modal'], div[class*='overlay']");
+    private final By modalOverlay  = By.xpath("//div[contains(@class,'modal-overlay')] | //div[contains(@class,'modal')] | //div[contains(@class,'overlay')]");
     private final By modalCancelBtn = By.xpath("//button[normalize-space()='Cancel']");
 
     public SystemConfigPage(WebDriver driver) {
