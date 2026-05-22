@@ -10,6 +10,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -37,6 +38,33 @@ import java.util.stream.Collectors;
 public class CohortManagementTest extends BaseClassTest {
 
     private CohortManagementPage cohortPage;
+
+    /**
+     * Safety net: if any test throws mid-execution and leaves a modal overlay open,
+     * this closes it before the next test runs — preventing ElementClickInterceptedException
+     * cascades on every subsequent test in the class.
+     */
+    @AfterMethod(alwaysRun = true)
+    public void closeAnyOpenModal() {
+        // Dismiss any unexpected browser alert first
+        try { driver.switchTo().alert().accept(); } catch (Exception ignored) {}
+
+        // Close the modal overlay if it is still visible
+        try {
+            List<WebElement> overlays = driver.findElements(By.cssSelector("div.modal-overlay"));
+            if (!overlays.isEmpty() && overlays.get(0).isDisplayed()) {
+                if (cohortPage != null) {
+                    cohortPage.closeModal();
+                } else {
+                    ((org.openqa.selenium.JavascriptExecutor) driver).executeScript(
+                            "document.dispatchEvent(new KeyboardEvent('keydown',{'key':'Escape','bubbles':true}))");
+                }
+                wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                        By.cssSelector("div.modal-overlay")));
+                System.out.println("INFO - @AfterMethod closed a lingering modal overlay.");
+            }
+        } catch (Exception ignored) {}
+    }
 
     @BeforeClass(alwaysRun = true, dependsOnMethods = "setUpDriver")
     public void loginAndNavigateToCohortManagement() {
@@ -159,9 +187,14 @@ public class CohortManagementTest extends BaseClassTest {
         wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.cssSelector("[class*='modal'], [role='dialog'], .modal-card")));
 
-        // Check for a text input (for the Cohort Name field)
-        List<WebElement> textInputs = driver.findElements(
-                By.cssSelector("[class*='modal'] input[type='text'], .modal-card input[type='text']"));
+        // Check for a text input (for the Cohort Name field).
+        // Angular forms often render <input> without an explicit type="text" attribute,
+        // so we search for all inputs that are NOT date / checkbox / radio / hidden.
+        List<WebElement> textInputs = driver.findElements(By.cssSelector(
+                "div.modal-overlay input:not([type='date']):not([type='checkbox'])" +
+                ":not([type='radio']):not([type='hidden']), " +
+                "[class*='modal'] input:not([type='date']):not([type='checkbox'])" +
+                ":not([type='radio']):not([type='hidden'])"));
         Assert.assertFalse(textInputs.isEmpty(),
                 "Create Cohort modal should have a text input for Cohort Name");
 
