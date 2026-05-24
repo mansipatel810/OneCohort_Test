@@ -19,8 +19,9 @@ public class TrainingProgressAnalyticsPage extends BasePage {
     private final By progressChart     = By.cssSelector("canvas, [class*='chart'], [class*='bar-chart']");
     private final By svgCharts         = By.cssSelector("svg, [class*='chart']");
     private final By cohortDetailCards = By.cssSelector("[class*='card'][class*='cohort'], [class*='cohort-card']");
-    private final By onTrackIndicator  = By.xpath("//*[contains(text(),'On Track')]");
+    private final By onTrackIndicator  = By.xpath("////*[@class='trend-icon']");
     private final By behindIndicator   = By.xpath("//*[contains(text(),'Behind')]");
+    List<WebElement> fallback = driver.findElements(By.xpath("//div[@class='cohort-grid']/div"));
 
     // Page heading
     private final By pageHeading = By.xpath(
@@ -36,11 +37,7 @@ public class TrainingProgressAnalyticsPage extends BasePage {
             "or parent::*[contains(@class,'card') or contains(@class,'cohort') or contains(@class,'stat')])]");
     private final By anyPercentage = By.xpath("//*[contains(text(),'%')]");
 
-    // Service Line filter dropdown (multiple selector fallbacks)
-    private final By serviceLineFilter = By.cssSelector(
-            "select[name='serviceLine'], select#serviceLineFilter, " +
-            "select[formcontrolname='serviceLine'], " +
-            "select[formcontrolname='serviceLineId']");
+
 
     // Generic cohort cards (broad — used after filter)
     private final By genericCohortCards = By.cssSelector("[class*='card'], [class*='cohort']");
@@ -60,8 +57,6 @@ public class TrainingProgressAnalyticsPage extends BasePage {
 
     public boolean areCohortDetailCardsVisible() {
         if (isDisplayed(cohortDetailCards)) return true;
-        List<WebElement> fallback = driver.findElements(
-                By.cssSelector("[class*='card'], [class*='cohort'], [class*='stat']"));
         return !fallback.isEmpty();
     }
 
@@ -77,6 +72,7 @@ public class TrainingProgressAnalyticsPage extends BasePage {
     }
 
     public boolean isBehindIndicatorVisible() {
+        System.out.print("river.findElements(behindIndicator)");
         return !driver.findElements(behindIndicator).isEmpty();
     }
 
@@ -100,33 +96,4 @@ public class TrainingProgressAnalyticsPage extends BasePage {
         return elements;
     }
 
-    // ── Service Line filter ───────────────────────────────────────────────────
-
-    public boolean isServiceLineFilterPresent() {
-        List<WebElement> selects = driver.findElements(serviceLineFilter);
-        if (!selects.isEmpty()) return true;
-        // Broad fallback
-        return !driver.findElements(By.cssSelector("select")).isEmpty();
-    }
-
-    public List<WebElement> getServiceLineFilterElements() {
-        List<WebElement> selects = driver.findElements(serviceLineFilter);
-        if (selects.isEmpty()) {
-            selects = driver.findElements(By.cssSelector("select"));
-        }
-        return selects;
-    }
-
-    public WebElement getFirstServiceLineFilter() {
-        List<WebElement> selects = getServiceLineFilterElements();
-        return selects.isEmpty() ? null : selects.get(0);
-    }
-
-    public void selectServiceLineFilter(String serviceLineId) {
-        WebElement select = getFirstServiceLineFilter();
-        if (select == null) return;
-        Select s = new Select(select);
-        try { s.selectByValue(serviceLineId); return; } catch (Exception ignored) {}
-        try { s.selectByIndex(1); } catch (Exception ignored) {}
-    }
 }

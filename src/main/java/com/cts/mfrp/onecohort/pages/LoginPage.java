@@ -3,15 +3,17 @@ package com.cts.mfrp.onecohort.pages;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
 
-public class LoginPage extends BasePage {
+public class LoginPage {
+
+    WebDriver driver;
+    WebDriverWait wait;
 
     // No id/name attrs in Angular template — located by placeholder text and DOM structure
     private final By userIdInput   = By.cssSelector("input[placeholder='e.g. 123456']");
@@ -26,18 +28,19 @@ public class LoginPage extends BasePage {
     private final By loginButton   = By.xpath("//button[normalize-space()='Login']");
 
     public LoginPage(WebDriver driver) {
-        super(driver);
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
     }
 
-    // ── Atomic actions ───────────────────────────────────────────────────────
-
     public LoginPage enterUserId(String userId) {
-        type(userIdInput, userId);
+        driver.findElement(userIdInput).clear();
+        driver.findElement(userIdInput).sendKeys(userId);
         return this;
     }
 
     public LoginPage selectRole(String role) {
-        new Select(waitForVisible(roleDropdown)).selectByVisibleText(role);
+        new Select(driver.findElement(roleDropdown)).selectByVisibleText(role);
         return this;
     }
 
@@ -112,17 +115,19 @@ public class LoginPage extends BasePage {
     }
 
     public LoginPage enterPocId(String pocId) {
-        type(pocIdInput, pocId);
+        driver.findElement(pocIdInput).clear();
+        driver.findElement(pocIdInput).sendKeys(pocId);
         return this;
     }
 
     public LoginPage enterCohortId(String cohortId) {
-        type(cohortIdInput, cohortId);
+        driver.findElement(cohortIdInput).clear();
+        driver.findElement(cohortIdInput).sendKeys(cohortId);
         return this;
     }
 
     public void clickLoginButton() {
-        click(loginButton);
+        driver.findElement(loginButton).click();
     }
 
     // ── Alert handling ───────────────────────────────────────────────────────
@@ -158,7 +163,9 @@ public class LoginPage extends BasePage {
         return inputVisible;
     }
 
-    // ── Convenience login flows ──────────────────────────────────────────────
+    public boolean isUserIdInputVisible() {
+        return !driver.findElements(userIdInput).isEmpty();
+    }
 
     public HomePage loginAsSuperAdmin(String userId) {
         enterUserId(userId);
