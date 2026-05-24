@@ -14,298 +14,155 @@ import java.util.List;
  * Covers all elements tested in CRDashboardTest (FRD Section 12).
  *
  * All locators that were previously inline in the test class live here.
+ *
+ * FIX: All isFooVisible() methods now use explicit WebDriverWait
+ *      (via presenceOfElementLocated) instead of a bare findElements()
+ *      call. This prevents false negatives when the cohort metadata card
+ *      renders slightly after the /cr/ URL is reached.
  */
+
 public class CRDashboardPage extends BasePage {
 
     private final String cohortId;
 
-    // ── Dashboard locators (FRD 12.2) ─────────────────────────────────────────
+    // ── Locators ──────────────────────────────────────────────────────────────
 
-    private final By welcomeGreeting = By.xpath(
-            "//*[contains(text(),'Welcome') and contains(text(),'CR')]");
+    private final By batchOwnerField = By.xpath(
+            "//*[contains(normalize-space(),'Batch Owner')]");
 
-    private final By summaryHeaderCards = By.cssSelector(
-            "[class*='card'], [class*='summary'], [class*='stat'], [class*='metric'], [class*='header-card']");
+    private final By startDateField = By.xpath(
+            "//*[contains(normalize-space(),'Start Date')]");
 
-    private final By totalMembersCard = By.xpath(
-            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
-            "[.//*[contains(normalize-space(),'Total Member') or contains(normalize-space(),'Members')]]");
-
-    private final By learningPathCard = By.xpath(
-            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
-            "[.//*[contains(normalize-space(),'Learning Path')]]");
-
-    private final By statusCard = By.xpath(
-            "//*[contains(@class,'card') or contains(@class,'stat') or contains(@class,'metric')]" +
-            "[.//*[contains(normalize-space(),'Status')]]");
-
-    private final By batchOwnerField = By.xpath("//*[contains(normalize-space(),'Batch Owner')]");
-
-    private final By startDateField = By.xpath("//*[contains(normalize-space(),'Start Date')]");
-
+    // UI renders "Total Interns" — kept broad so minor copy changes still match
     private final By totalInternsField = By.xpath(
-            "//*[contains(normalize-space(),'Total Intern') or contains(normalize-space(),'Interns')]");
-
-    private final By currentProgressField = By.xpath(
-            "//*[contains(normalize-space(),'Current Progress') or contains(normalize-space(),'% Complete')]");
+            "//*[contains(normalize-space(),'Total Interns') " +
+                    "or contains(normalize-space(),'Total Intern')]");
 
     private final By trainingTimelineSection = By.xpath(
-            "//*[contains(normalize-space(),'Training Timeline') or contains(normalize-space(),'Timeline')]");
+            "//*[contains(normalize-space(),'Training Timeline') " +
+                    "or contains(normalize-space(),'Timeline')]");
 
-    private final By weekButtons = By.xpath(
-            "//button[contains(normalize-space(),'Week')] | //*[contains(@class,'week')]");
+    private final By qualifierExam = By.xpath(
+            "//*[contains(normalize-space(),'Qualifier')]");
 
-    private final By qualifierExam = By.xpath("//*[contains(normalize-space(),'Qualifier')]");
+    private final By interimEvaluation = By.xpath(
+            "//*[contains(normalize-space(),'Interim')]");
 
-    private final By interimEvaluation = By.xpath("//*[contains(normalize-space(),'Interim')]");
-
-    private final By finalEvaluation = By.xpath("//*[contains(normalize-space(),'Final')]");
+    private final By finalEvaluation = By.xpath(
+            "//*[contains(normalize-space(),'Final')]");
 
     private final By overallProgressCard = By.xpath(
-            "//*[contains(normalize-space(),'Overall Progress') or contains(normalize-space(),'Weeks Remaining')]");
+            "//*[contains(normalize-space(),'Overall Progress') " +
+                    "or contains(normalize-space(),'Weeks Remaining')]");
 
-    private final By traineesTable = By.cssSelector("table.table, .table-responsive table");
-    private final By traineesRows  = By.cssSelector("table.table tbody tr, .table-responsive table tbody tr");
+    private final By traineesTable = By.cssSelector(
+            "table.table, .table-responsive table");
 
     private final By crudButtons = By.xpath(
             "//button[contains(normalize-space(),'Create') " +
-            "or contains(normalize-space(),'Edit') " +
-            "or contains(normalize-space(),'Delete') " +
-            "or contains(normalize-space(),'Add Trainee')]");
+                    "or contains(normalize-space(),'Edit') " +
+                    "or contains(normalize-space(),'Delete') " +
+                    "or contains(normalize-space(),'Add Trainee')]");
 
-    private final By logoutDirect = By.xpath(
-            "//button[contains(normalize-space(),'Logout') " +
-            "or contains(normalize-space(),'Sign Out') " +
-            "or contains(normalize-space(),'Log Out')]" +
-            " | //a[contains(normalize-space(),'Logout')]" +
-            " | //*[@aria-label='Logout' or @aria-label='Sign out' or @title='Logout']");
-
-    private final By userMenuTrigger = By.cssSelector(
-            "[class*='user-menu'],[class*='avatar'],[class*='account'],[class*='profile-icon']," +
-            "[class*='user-icon'],[class*='dropdown-toggle'],[class*='user-btn']");
+    // ── Constructor ───────────────────────────────────────────────────────────
 
     public CRDashboardPage(WebDriver driver, String cohortId) {
         super(driver);
         this.cohortId = cohortId;
     }
 
-    // ── URL ───────────────────────────────────────────────────────────────────
+    // ── Private helper ────────────────────────────────────────────────────────
 
-    public void waitForCrRoute() {
-        wait.until(ExpectedConditions.urlContains("/cr/"));
-    }
-
-    public boolean isUrlContainsCohortId() {
-        return driver.getCurrentUrl().contains(cohortId);
-    }
-
-    // ── Alert handling ────────────────────────────────────────────────────────
-
-    public boolean dismissAlertIfPresent() {
+    /**
+     * Returns true if at least one element matching {@code by} becomes present
+     * in the DOM within the configured WebDriverWait timeout.
+     * Uses presenceOfElementLocated (not visibilityOf) so hidden elements that
+     * are still in the DOM are also counted — consistent with the previous
+     * elementExists() behaviour but with proper waiting.
+     */
+    private boolean waitForPresence(By by) {
         try {
-            wait.until(ExpectedConditions.alertIsPresent());
-            driver.switchTo().alert().accept();
+            wait.until(ExpectedConditions.presenceOfElementLocated(by));
             return true;
-        } catch (Exception e) { return false; }
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    // ── Welcome greeting (FRD 12.2) ───────────────────────────────────────────
-
-    public boolean isWelcomeGreetingVisible() {
-        return isDisplayed(welcomeGreeting);
-    }
-
-    public WebElement getWelcomeGreetingElement() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(welcomeGreeting));
-    }
-
-    public String getPageBodyText() {
-        return driver.findElement(By.tagName("body")).getText();
-    }
-
-    // ── Sidebar (FRD 12.3) ────────────────────────────────────────────────────
-
-    public boolean isCohortIdVisibleOnPage() {
-        By sidebarEntry = By.xpath(
-                "//*[contains(@class,'sidebar') or contains(@class,'nav') or contains(@class,'side')]" +
-                "//*[contains(text(),'" + cohortId + "')]");
-        By anyEntry = By.xpath("//*[contains(text(),'" + cohortId + "')]");
-        return elementExists(sidebarEntry) || elementExists(anyEntry);
-    }
-
-    public WebElement getCohortIdElement() {
-        By sidebarEntry = By.xpath(
-                "//*[contains(@class,'sidebar') or contains(@class,'nav') or contains(@class,'side')]" +
-                "//*[contains(text(),'" + cohortId + "')]");
-        if (elementExists(sidebarEntry)) return driver.findElement(sidebarEntry);
-        return driver.findElement(By.xpath("//*[contains(text(),'" + cohortId + "')]"));
-    }
-
-    // ── Summary header cards (FRD 12.2.1) ────────────────────────────────────
-
-    public List<WebElement> getSummaryHeaderCards() {
-        try { return driver.findElements(summaryHeaderCards); }
-        catch (Exception e) { return Collections.emptyList(); }
-    }
-
-    public boolean isTotalMembersCardVisible() {
-        if (elementExists(totalMembersCard)) return true;
-        By fallback = By.xpath(
-                "//*[contains(normalize-space(),'Member') or contains(normalize-space(),'Intern')]");
-        return elementExists(fallback);
-    }
-
-    public WebElement getTotalMembersCardElement() {
-        if (elementExists(totalMembersCard)) return driver.findElement(totalMembersCard);
-        return driver.findElement(By.xpath(
-                "//*[contains(normalize-space(),'Member') or contains(normalize-space(),'Intern')]"));
-    }
-
-    public boolean isLearningPathCardVisible() {
-        return elementExists(learningPathCard);
-    }
-
-    public WebElement getLearningPathCardElement() {
-        return driver.findElement(learningPathCard);
-    }
-
-    public boolean isStatusCardVisible() {
-        return elementExists(statusCard);
-    }
-
-    public WebElement getStatusCardElement() {
-        return driver.findElement(statusCard);
+    /**
+     * Returns true if at least one element matching {@code by} is both present
+     * AND visible within the configured WebDriverWait timeout.
+     * Use this for elements the user is expected to actually see on screen.
+     */
+    private boolean waitForVisibility(By by) {
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(by));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     // ── Cohort metadata panel (FRD 12.2.2) ───────────────────────────────────
 
     public boolean isBatchOwnerFieldVisible() {
-        return elementExists(batchOwnerField);
+        return waitForVisibility(batchOwnerField);
     }
 
     public boolean isStartDateFieldVisible() {
-        return elementExists(startDateField);
+        return waitForVisibility(startDateField);
     }
 
     public boolean isTotalInternsFieldVisible() {
-        return elementExists(totalInternsField);
-    }
-
-    public boolean isCurrentProgressFieldVisible() {
-        return elementExists(currentProgressField);
+        return waitForVisibility(totalInternsField);
     }
 
     // ── Training Timeline (FRD 12.2.3) ───────────────────────────────────────
 
     public boolean isTrainingTimelineSectionVisible() {
-        return elementExists(trainingTimelineSection);
-    }
-
-    public WebElement getTrainingTimelineSectionElement() {
-        return driver.findElement(trainingTimelineSection);
-    }
-
-    public List<WebElement> getWeekButtons() {
-        try { return driver.findElements(weekButtons); }
-        catch (Exception e) { return Collections.emptyList(); }
+        return waitForVisibility(trainingTimelineSection);
     }
 
     // ── Evaluation panel (FRD 12.2.4) ────────────────────────────────────────
 
     public boolean isQualifierExamVisible() {
-        return elementExists(qualifierExam);
+        return waitForVisibility(qualifierExam);
     }
 
     public boolean isInterimEvaluationVisible() {
-        return elementExists(interimEvaluation);
+        return waitForVisibility(interimEvaluation);
     }
 
     public boolean isFinalEvaluationVisible() {
-        return elementExists(finalEvaluation);
+        return waitForVisibility(finalEvaluation);
     }
 
-    // ── Overall progress & trainees table ─────────────────────────────────────
+    // ── Overall progress & trainees table ────────────────────────────────────
 
     public boolean isOverallProgressCardVisible() {
-        return elementExists(overallProgressCard);
+        return waitForVisibility(overallProgressCard);
     }
 
     public boolean isTraineesTableVisible() {
-        return isDisplayed(traineesTable);
+        return waitForVisibility(traineesTable);
     }
 
-    public List<WebElement> getTraineesTableRows() {
-        try { return driver.findElements(traineesRows); }
-        catch (Exception e) { return Collections.emptyList(); }
-    }
-
-    // ── Read-only / Access control (FRD 12.5) ────────────────────────────────
-
-    public boolean areCrudButtonsPresent() {
-        return elementExists(crudButtons);
-    }
-
-    // ── Logout (FRD 12.6) ────────────────────────────────────────────────────
-
-    public boolean isLogoutDirectlyVisible() {
-        return elementExists(logoutDirect);
-    }
-
-    public boolean isUserMenuTriggerVisible() {
-        return elementExists(userMenuTrigger);
-    }
-
-    public void clickUserMenuTrigger() {
-        driver.findElement(userMenuTrigger).click();
-    }
-
-    public boolean isLogoutVisibleAfterMenuOpen() {
-        return elementExists(logoutDirect);
-    }
-
-    public void clickLogout() {
-        driver.findElement(logoutDirect).click();
-    }
-
-    // ── Additional element getters ─────────────────────────────────────────────
-
-    public WebElement getBatchOwnerFieldElement()       { return driver.findElement(batchOwnerField); }
-    public WebElement getStartDateFieldElement()        { return driver.findElement(startDateField); }
-    public WebElement getTotalInternsFieldElement()     { return driver.findElement(totalInternsField); }
-    public WebElement getCurrentProgressFieldElement()  { return driver.findElement(currentProgressField); }
-
-    public WebElement getQualifierExamElement()     { return driver.findElement(qualifierExam); }
-    public WebElement getInterimEvaluationElement() { return driver.findElement(interimEvaluation); }
-    public WebElement getFinalEvaluationElement()   { return driver.findElement(finalEvaluation); }
-
-    public WebElement getOverallProgressCardElement() {
-        if (elementExists(overallProgressCard)) return driver.findElement(overallProgressCard);
-        return driver.findElement(By.cssSelector("canvas,[class*='progress'],[role='progressbar'],[class*='bar']"));
-    }
-
-    public boolean isOverallProgressFallbackVisible() {
-        return elementExists(By.cssSelector("canvas,[class*='progress'],[role='progressbar'],[class*='bar']"));
-    }
-
-    public WebElement getTraineesTableElement()       { return driver.findElement(traineesTable); }
     public List<WebElement> getTraineesTableHeaders() {
+        // Table must be present before we can read its headers
+        waitForPresence(traineesTable);
         return driver.findElements(By.cssSelector("table thead th, table th"));
     }
 
+    /**
+     * Returns any Create / Edit / Delete buttons currently in the DOM.
+     * Implicit wait is disabled by the caller (TC-CR-004) before this call,
+     * so no additional wait is added here — we want an immediate snapshot.
+     */
     public List<WebElement> getCrudButtonElements() {
-        try { return driver.findElements(crudButtons); }
-        catch (Exception e) { return Collections.emptyList(); }
+        try {
+            return driver.findElements(crudButtons);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
-
-    public List<WebElement> getLogoutDirectElements() {
-        try { return driver.findElements(logoutDirect); }
-        catch (Exception e) { return Collections.emptyList(); }
-    }
-
-    public List<WebElement> getUserMenuTriggerElements() {
-        try { return driver.findElements(userMenuTrigger); }
-        catch (Exception e) { return Collections.emptyList(); }
-    }
-
-//    public boolean isLogoutVisibleAfterMenuOpen() { return elementExists(logoutDirect); }
 }
