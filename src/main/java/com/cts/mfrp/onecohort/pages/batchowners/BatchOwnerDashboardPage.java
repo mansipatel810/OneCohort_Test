@@ -134,7 +134,7 @@ public class BatchOwnerDashboardPage extends BasePage {
     private final By metadataTotalInterns   = By.xpath(
             "//*[contains(normalize-space(),'Total Intern') or contains(normalize-space(),'Interns')]");
     private final By trainingTimelineSection = By.xpath(
-            "//*[contains(normalize-space(),'Training Timeline') or contains(normalize-space(),'Timeline')]");
+            "//*[normalize-space()='Training Timeline']");
     private final By evaluationPanel         = By.xpath("//*[contains(normalize-space(),'Evaluation')]");
     private final By overallProgressCard     = By.xpath(
             "//*[contains(normalize-space(),'Overall Progress') or contains(normalize-space(),'Weeks Remaining')]");
@@ -142,86 +142,27 @@ public class BatchOwnerDashboardPage extends BasePage {
     private final By traineesRows  = By.cssSelector("table.table tbody tr, .table-responsive table tbody tr");
 
     // FRD 13.5.1: Class Representative + Current Progress
-    private final By classRepresentativeField = By.xpath(
-            "//*[contains(normalize-space(),'Class Representative') " +
-            "or contains(normalize-space(),'Class Rep') " +
-            "or normalize-space()='CR']");
-    private final By currentProgressField = By.xpath(
-            "//*[contains(normalize-space(),'Current Progress') " +
-            "or contains(normalize-space(),'% Complete')]");
 
-    // FRD 13.6: Week buttons in Training Timeline
-    private final By weekButtons = By.xpath(
-            "//button[contains(normalize-space(),'Week')] | //*[contains(@class,'week')]");
 
     // FRD 13.5: Individual evaluation milestones
-    private final By qualifierExam     = By.xpath("//*[contains(normalize-space(),'Qualifier')]");
-    private final By interimEvaluation = By.xpath("//*[contains(normalize-space(),'Interim')]");
-    private final By finalEvaluation   = By.xpath("//*[contains(normalize-space(),'Final')]");
+    private final By qualifierExam = By.xpath("//*[normalize-space()='Qualifier Exam']");
+    private final By interimEvaluation = By.xpath("//*[normalize-space()='Interim Evaluation']");
+    private final By finalEvaluation = By.xpath("//*[normalize-space()='Final Evaluation']");
 
     // FRD 13.7: CRUD buttons (must not be present — read-only role)
-    private final By crudButtons = By.xpath(
-            "//button[contains(normalize-space(),'Create') " +
-            "or contains(normalize-space(),'Edit') " +
-            "or contains(normalize-space(),'Delete') " +
-            "or contains(normalize-space(),'Add Trainee') " +
-            "or contains(normalize-space(),'Add Batch Owner')]");
 
-    // FRD 13.7: Logout controls
-    private final By logoutDirect = By.xpath(
-            "//button[contains(normalize-space(),'Logout') " +
-            "or contains(normalize-space(),'Sign Out') " +
-            "or contains(normalize-space(),'Log Out')]" +
-            " | //a[contains(normalize-space(),'Logout') or contains(normalize-space(),'Sign Out')]" +
-            " | //*[@aria-label='Logout' or @aria-label='Sign out' or @title='Logout']" +
-            " | //*[contains(@class,'logout') or contains(@class,'signout')]");
-    private final By userMenuTrigger = By.cssSelector(
-            "[class*='user-menu'],[class*='avatar'],[class*='account'],[class*='profile-icon']," +
-            "[class*='user-icon'],[class*='dropdown-toggle'],[class*='user-btn']");
+
 
     public BatchOwnerDashboardPage(WebDriver driver) {
         super(driver);
     }
 
-    // ── URL / load ────────────────────────────────────────────────────────────
 
-    public void waitForDashboardLoad() {
-        wait.until(ExpectedConditions.urlContains("/batch-owner/"));
-    }
 
-    public boolean isDashboardUrlValid() {
-        String url = driver.getCurrentUrl();
-        return url.contains("batch-owner") || url.contains("poc") || url.contains("dashboard");
-    }
-
-    // ── Welcome greeting ──────────────────────────────────────────────────────
-
-    public boolean isWelcomeGreetingVisible() {
-        return elementExists(welcomeGreeting);
-    }
-
-    public WebElement getWelcomeGreetingElement() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(welcomeGreeting));
-    }
-
-    public boolean isBatchOwnerRoleLabelVisible() {
-        return elementExists(batchOwnerRoleLabel);
-    }
-
-    public WebElement getBatchOwnerRoleLabelElement() {
-        return driver.findElement(batchOwnerRoleLabel);
-    }
-
-    // ── Dashboard heading ─────────────────────────────────────────────────────
 
     public boolean isDashboardHeadingVisible() {
         return elementExists(dashboardHeading);
     }
-
-    public WebElement getDashboardHeadingElement() {
-        return driver.findElement(dashboardHeading);
-    }
-
     // ── Cohorts Summary cards (FRD 13.3.1) ───────────────────────────────────
 
     public boolean isTotalCohortsCardVisible()    { return elementExists(totalCohortsCard); }
@@ -229,53 +170,13 @@ public class BatchOwnerDashboardPage extends BasePage {
     public boolean isCompletedCohortsCardVisible(){ return elementExists(completedCohortsCard); }
     public boolean isUpcomingCohortsCardVisible() { return elementExists(upcomingCohortsCard); }
 
-    public WebElement getTotalCohortsCardElement()    { return driver.findElement(totalCohortsCard); }
-    public WebElement getActiveCohortsCardElement()   { return driver.findElement(activeCohortsCard); }
-    public WebElement getCompletedCohortsCardElement(){ return driver.findElement(completedCohortsCard); }
-    public WebElement getUpcomingCohortsCardElement() { return driver.findElement(upcomingCohortsCard); }
-
-    // ── People Summary cards (FRD 13.3.2) ────────────────────────────────────
-
-    public boolean isTotalInternsCardVisible()      { return elementExists(totalInternsCard); }
-    public boolean isInternsInTrainingCardVisible() { return elementExists(internsInTrainingCard); }
-    public boolean isTrainersCardVisible()          { return elementExists(trainersCard); }
-    public boolean isPocsCardVisible()              { return elementExists(pocsCard); }
-
-    public WebElement getTotalInternsCardElement()      { return driver.findElement(totalInternsCard); }
-    public WebElement getInternsInTrainingCardElement() { return driver.findElement(internsInTrainingCard); }
-    public WebElement getTrainersCardElement()          { return driver.findElement(trainersCard); }
-    public WebElement getPocsCardElement()              { return driver.findElement(pocsCard); }
-
-    // ── Catalog & Rates (FRD 13.3.3) ─────────────────────────────────────────
-
-    public boolean isServiceLinesCardVisible()    { return elementExists(serviceLinesCard); }
-    public boolean isLearningPathsCardVisible()   { return elementExists(learningPathsCard); }
-    public boolean isAvgCompletionCardVisible()   { return elementExists(avgCompletionCard); }
-
-    public WebElement getServiceLinesCardElement()  { return driver.findElement(serviceLinesCard); }
-    public WebElement getLearningPathsCardElement() { return driver.findElement(learningPathsCard); }
-    public WebElement getAvgCompletionCardElement() { return driver.findElement(avgCompletionCard); }
-
-    // ── Stats sections ────────────────────────────────────────────────────────
-
-    public boolean isCohortsPerServiceLineSectionVisible()   { return elementExists(cohortsPerServiceLineSection); }
-    public boolean isCohortsPerLearningPathSectionVisible()  { return elementExists(cohortsPerLearningPathSection); }
-    public boolean isTrainingCompletionDistributionVisible() { return elementExists(trainingCompletionDistribution); }
-
-    public WebElement getCohortsPerServiceLineSectionElement()   { return driver.findElement(cohortsPerServiceLineSection); }
-    public WebElement getCohortsPerLearningPathSectionElement()  { return driver.findElement(cohortsPerLearningPathSection); }
-    public WebElement getTrainingCompletionDistributionElement() { return driver.findElement(trainingCompletionDistribution); }
-
-    // ── Sidebar (FRD 13.7) ────────────────────────────────────────────────────
 
     public boolean isSidebarDashboardLinkVisible() { return elementExists(sidebarDashboardLink); }
     public boolean isSidebarCohortsLinkVisible()   { return elementExists(sidebarCohortsLink); }
 
-    public void clickSidebarCohortsLink() {
-        driver.findElement(sidebarCohortsLink).click();
-    }
 
-    // ── Cohorts list page (FRD 13.4) ─────────────────────────────────────────
+
+
 
     public boolean isSearchBarVisible()          { return elementExists(cohortsSearchBar); }
     public boolean isFiltersButtonVisible()      { return elementExists(filtersButton); }
@@ -295,47 +196,25 @@ public class BatchOwnerDashboardPage extends BasePage {
         try { return driver.findElements(cohortIdLinks); }
         catch (Exception e) { return Collections.emptyList(); }
     }
-
-    public void selectStatusFilter(String value) {
-        try { new Select(driver.findElement(statusFilterDropdown)).selectByVisibleText(value); }
-        catch (Exception ignored) {}
-    }
-
-    public void selectLearningPathFilter(String value) {
-        try { new Select(driver.findElement(learningPathFilterDropdown)).selectByVisibleText(value); }
-        catch (Exception ignored) {}
-    }
-
-    // ── Cohort detail view (FRD 13.5) ────────────────────────────────────────
-
-    public boolean isBackToCohortsLinkVisible()   { return elementExists(backToCohortsLink); }
-    public boolean isDetailSummaryCardsPresent()  {
-        return !driver.findElements(detailSummaryCards).isEmpty();
-    }
     public boolean isDetailTotalMembersVisible()  { return elementExists(detailTotalMembersCard); }
     public boolean isDetailLearningPathVisible()  { return elementExists(detailLearningPathCard); }
     public boolean isDetailStatusVisible()        { return elementExists(detailStatusCard); }
-    public boolean isMetadataBatchOwnerVisible()  { return elementExists(metadataBatchOwner); }
-    public boolean isMetadataStartDateVisible()   { return elementExists(metadataStartDate); }
-    public boolean isMetadataTotalInternsVisible(){ return elementExists(metadataTotalInterns); }
-    public boolean isTrainingTimelineVisible()    { return elementExists(trainingTimelineSection); }
-    public boolean isEvaluationPanelVisible()     { return elementExists(evaluationPanel); }
+    public boolean isTrainingTimelineVisible() {
+        try {
+            new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(20))
+                    .until(d -> {
+                        java.util.List<org.openqa.selenium.WebElement> els =
+                                d.findElements(trainingTimelineSection);
+                        return !els.isEmpty() && els.get(0).isDisplayed();
+                    });
+            return true;
+        } catch (Exception e) { return false; }
+    }
     public boolean isOverallProgressVisible()     { return elementExists(overallProgressCard); }
     public boolean isTraineesTableVisible()       { return isDisplayed(traineesTable); }
 
-    public List<WebElement> getTraineesRows() {
-        try { return driver.findElements(traineesRows); }
-        catch (Exception e) { return Collections.emptyList(); }
-    }
 
-    public void clickBackToCohorts() {
-        driver.findElement(backToCohortsLink).click();
-    }
 
-    public void clickFirstCohortLink() {
-        List<WebElement> links = getCohortIdLinks();
-        if (!links.isEmpty()) links.get(0).click();
-    }
 
     // ── Additional element getters ─────────────────────────────────────────────
 
@@ -356,8 +235,6 @@ public class BatchOwnerDashboardPage extends BasePage {
         if (!links.isEmpty()) return links;
         return driver.findElements(By.cssSelector("table tbody tr td:first-child"));
     }
-
-    public WebElement getSidebarDashboardLinkElement() { return driver.findElement(sidebarDashboardLink); }
     public WebElement getSidebarCohortsLinkElement()   { return driver.findElement(sidebarCohortsLink); }
 
     public void waitForSearchBarVisible() {
@@ -366,10 +243,6 @@ public class BatchOwnerDashboardPage extends BasePage {
     public void waitForStatusFilterVisible() {
         wait.until(ExpectedConditions.visibilityOfElementLocated(statusFilterDropdown));
     }
-    public WebElement getStatusFilterElement()       { return driver.findElement(statusFilterDropdown); }
-    public WebElement getLearningPathFilterElement() { return driver.findElement(learningPathFilterDropdown); }
-
-    public WebElement getCohortsTableElement()           { return driver.findElement(cohortsTable); }
     public List<WebElement> getCohortsTableHeaderCells() {
         return driver.findElements(By.cssSelector("table thead th, table th"));
     }
@@ -401,68 +274,37 @@ public class BatchOwnerDashboardPage extends BasePage {
                 "return null;");
         return el; // may be null
     }
-
-    public List<WebElement> getDetailSummaryCardsList() { return driver.findElements(detailSummaryCards); }
-    public WebElement getDetailTotalMembersElement()    { return driver.findElement(detailTotalMembersCard); }
-    public WebElement getDetailLearningPathElement()    { return driver.findElement(detailLearningPathCard); }
-    public WebElement getDetailStatusElement()          { return driver.findElement(detailStatusCard); }
-
-    public boolean isClassRepresentativeFieldVisible() { return elementExists(classRepresentativeField); }
-    public WebElement getClassRepresentativeElement()  { return driver.findElement(classRepresentativeField); }
-    public boolean isCurrentProgressVisible()          { return elementExists(currentProgressField); }
-    public WebElement getCurrentProgressElement()      { return driver.findElement(currentProgressField); }
-
-    public WebElement getMetadataBatchOwnerElement()   { return driver.findElement(metadataBatchOwner); }
-    public WebElement getMetadataStartDateElement()    { return driver.findElement(metadataStartDate); }
-    public WebElement getMetadataTotalInternsElement() { return driver.findElement(metadataTotalInterns); }
-
-    public WebElement getTrainingTimelineElement() { return driver.findElement(trainingTimelineSection); }
-    public List<WebElement> getWeekButtons() {
-        try { return driver.findElements(weekButtons); }
-        catch (Exception e) { return Collections.emptyList(); }
+    public boolean isQualifierExamVisible() {
+        try {
+            new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(20))
+                    .until(d -> {
+                        java.util.List<org.openqa.selenium.WebElement> els =
+                                d.findElements(qualifierExam);
+                        return !els.isEmpty() && els.get(0).isDisplayed();
+                    });
+            return true;
+        } catch (Exception e) { return false; }
     }
-
-    public boolean isQualifierExamVisible()     { return elementExists(qualifierExam); }
-    public WebElement getQualifierExamElement() { return driver.findElement(qualifierExam); }
-    public boolean isInterimEvaluationVisible()     { return elementExists(interimEvaluation); }
-    public WebElement getInterimEvaluationElement() { return driver.findElement(interimEvaluation); }
-    public boolean isFinalEvaluationVisible()     { return elementExists(finalEvaluation); }
-    public WebElement getFinalEvaluationElement() { return driver.findElement(finalEvaluation); }
-
-    public WebElement getEvaluationPanelElement() { return driver.findElement(evaluationPanel); }
-
-    public WebElement getOverallProgressElement() {
-        if (elementExists(overallProgressCard)) return driver.findElement(overallProgressCard);
-        return driver.findElement(By.cssSelector("canvas,[class*='progress'],[role='progressbar'],[class*='bar']"));
+    public boolean isInterimEvaluationVisible() {
+        try {
+            new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(20))
+                    .until(d -> {
+                        java.util.List<org.openqa.selenium.WebElement> els =
+                                d.findElements(interimEvaluation);
+                        return !els.isEmpty() && els.get(0).isDisplayed();
+                    });
+            return true;
+        } catch (Exception e) { return false; }
     }
-
-    public WebElement getTraineesTableElement()      { return driver.findElement(traineesTable); }
-    public List<WebElement> getTraineesTableHeaders() {
-        return driver.findElements(By.cssSelector("table thead th, table th"));
-    }
-
-    public boolean isCrudButtonsPresent() { return elementExists(crudButtons); }
-    public List<WebElement> getCrudButtonElements() {
-        try { return driver.findElements(crudButtons); }
-        catch (Exception e) { return Collections.emptyList(); }
-    }
-
-    public boolean isLogoutDirectlyVisible() { return elementExists(logoutDirect); }
-    public List<WebElement> getLogoutDirectElements() {
-        try { return driver.findElements(logoutDirect); }
-        catch (Exception e) { return Collections.emptyList(); }
-    }
-    public void clickLogout() { driver.findElement(logoutDirect).click(); }
-
-    public boolean isUserMenuTriggerVisible() { return elementExists(userMenuTrigger); }
-    public List<WebElement> getUserMenuTriggerElements() {
-        try { return driver.findElements(userMenuTrigger); }
-        catch (Exception e) { return Collections.emptyList(); }
-    }
-    public void clickFirstUserMenuTrigger() { driver.findElement(userMenuTrigger).click(); }
-    public boolean isLogoutVisibleAfterMenuOpen() { return elementExists(logoutDirect); }
-
-    public String getPageBodyText() {
-        return driver.findElement(By.tagName("body")).getText();
+    public boolean isFinalEvaluationVisible() {
+        try {
+            new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(20))
+                    .until(d -> {
+                        java.util.List<org.openqa.selenium.WebElement> els =
+                                d.findElements(finalEvaluation);
+                        return !els.isEmpty() && els.get(0).isDisplayed();
+                    });
+            return true;
+        } catch (Exception e) { return false; }
     }
 }
