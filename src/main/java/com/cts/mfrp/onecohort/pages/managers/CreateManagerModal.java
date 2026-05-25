@@ -11,35 +11,18 @@ import java.util.List;
 public class CreateManagerModal extends BasePage {
 
     // ── Locators ──────────────────────────────────────────────────────────────
-    private final By modalContainer = By.cssSelector("[class*='modal'], [role='dialog']");
-
+    // Actual HTML: <input type="text" placeholder="Enter full name">
     private final By fullNameInput = By.cssSelector(
-            "input[formcontrolname*='name'], input[formcontrolname*='Name'], " +
-            "input[placeholder*='Name'], input[placeholder*='Full']");
+            "div.modal input[placeholder='Enter full name']");
 
+    // Actual HTML: <input type="text" placeholder="e.g. USR-30010">
     private final By employeeIdInput = By.cssSelector(
-            "input[placeholder*='USR'], input[placeholder*='Employee'], " +
-            "input[formcontrolname*='emp'], input[formcontrolname*='userId'], " +
-            "input[formcontrolname*='employeeId']");
+            "div.modal input[placeholder*='USR']");
 
+    // Actual HTML: custom div dropdown — NOT a <select>
+    // <div class="sl-dropdown"><div class="sl-trigger">...</div></div>
     private final By serviceLineDropdown = By.cssSelector(
-            "[class*='modal'] select[formcontrolname*='service'], " +
-            "[class*='modal'] select[formcontrolname*='serviceLine'], " +
-            "[role='dialog'] select");
-
-    private final By roleDropdown = By.cssSelector(
-            "[class*='modal'] select[formcontrolname*='role'], " +
-            "[role='dialog'] select[formcontrolname*='role']");
-
-    // FIX LM-004: Submit button is labelled "Create Entry" in the actual HTML,
-    // NOT "Save Manager". Tests assert "Create Entry".
-    private final By submitBtn = By.xpath(
-            "//*[contains(@class,'modal') or @role='dialog']" +
-            "//button[contains(normalize-space(),'Create Entry') " +
-            "or contains(normalize-space(),'Create') " +
-            "or contains(normalize-space(),'Save') " +
-            "or contains(normalize-space(),'Submit')]" +
-            "[not(contains(normalize-space(),'Cancel'))]");
+            "div.modal-overlay div.sl-dropdown");
 
     // ── Constructor ───────────────────────────────────────────────────────────
     public CreateManagerModal(WebDriver driver) {
@@ -47,15 +30,6 @@ public class CreateManagerModal extends BasePage {
     }
 
     // ── Visibility checks ─────────────────────────────────────────────────────
-
-    public boolean isModalVisible() {
-        try {
-            List<WebElement> modals = driver.findElements(modalContainer);
-            return modals.stream().anyMatch(WebElement::isDisplayed);
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
     public boolean isFullNameInputVisible() {
         return isDisplayed(fullNameInput);
@@ -69,30 +43,9 @@ public class CreateManagerModal extends BasePage {
         return isDisplayed(serviceLineDropdown);
     }
 
-    public boolean isRoleDropdownVisible() {
-        return isDisplayed(roleDropdown);
-    }
-
-    public boolean isSubmitButtonVisible() {
-        return isDisplayed(submitBtn);
-    }
-
     // ── Actions ───────────────────────────────────────────────────────────────
 
-    public String getSubmitButtonText() {
-        try {
-            return driver.findElement(submitBtn).getText().trim();
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    public void clickSubmit() {
-        try {
-            click(submitBtn);
-        } catch (Exception ignored) {}
-    }
-
+    /** Closes the modal — tries Cancel/Close button first, falls back to JS Escape. */
     public void closeModal() {
         try {
             List<WebElement> closeBtns = driver.findElements(By.xpath(

@@ -3,61 +3,51 @@ package com.cts.mfrp.onecohort.pages;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
 
-public class LoginPage {
+public class LoginPage extends BasePage {
 
-    WebDriver driver;
-    WebDriverWait wait;
+    // ── Locators ──────────────────────────────────────────────────────────────
+    private final By userIdInput  = By.cssSelector("input[placeholder='e.g. 123456']");
+    private final By roleDropdown = By.cssSelector("div.space-y-5 select");
+    private final By loginButton  = By.xpath("//button[normalize-space()='Login']");
 
-    // No id/name attrs in Angular template — located by placeholder text and DOM structure
-    private final By userIdInput   = By.cssSelector("input[placeholder='e.g. 123456']");
-    private final By roleDropdown  = By.cssSelector("div.space-y-5 select");
-    // ── serviceLineDropdown field REMOVED ────────────────────────────────────
-    // The old selector used formcontrolname which differs across builds and caused
-    // TimeoutException for everyone. Service line is now found positionally
-    // inside selectServiceLine() as the 2nd <select> on the page.
-    // ─────────────────────────────────────────────────────────────────────────
-    private final By pocIdInput    = By.cssSelector("input[placeholder='e.g. USR-40002']");
-    private final By cohortIdInput = By.cssSelector("input[placeholder='e.g. COH-10001']");
-    private final By loginButton   = By.xpath("//button[normalize-space()='Login']");
+    // Flexible locators from Git to handle varying placeholders
+    private final By pocIdInput = By.cssSelector(
+            "input[placeholder*='USR'], input[placeholder*='POC'], " +
+            "input[placeholder*='poc'], input[placeholder*='Poc']");
+
+    private final By cohortIdInput = By.cssSelector(
+            "input[placeholder*='COH'], input[placeholder*='Cohort'], " +
+            "input[placeholder*='cohort']");
 
     public LoginPage(WebDriver driver) {
-        this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        super(driver);
     }
 
+    // ── Atomic actions ────────────────────────────────────────────────────────
+
     public LoginPage enterUserId(String userId) {
-        driver.findElement(userIdInput).clear();
-        driver.findElement(userIdInput).sendKeys(userId);
+        type(userIdInput, userId); // Using your BasePage method
         return this;
     }
 
     public LoginPage selectRole(String role) {
-        new Select(driver.findElement(roleDropdown)).selectByVisibleText(role);
+        new Select(waitForVisible(roleDropdown)).selectByVisibleText(role);
         return this;
     }
 
     /**
-     * Selects the service line dropdown.
-     *
-     * KEY FIX: Does NOT use formcontrolname — that attribute differs across
-     * builds and caused TimeoutException for the whole team.
-     *
-     * Instead:
-     *   Step 1 — wait until 2+ <select> elements exist (role + service line)
-     *   Step 2 — wait for options to populate (handles Render.com cold start)
-     *   Step 3 — grab the 2nd select (index 1) = always the service line
-     *   Step 4 — try value → visible text → partial text → index 1
+     * Git Team's Fix applied here: Finds the service line dynamically as the 2nd <select> 
+     * element on the page, avoiding the TimeoutException caused by Angular builds.
      */
     public LoginPage selectServiceLine(String serviceLineId) {
-
         // Step 1: wait for the 2nd <select> to appear in the DOM
         new FluentWait<>(driver)
                 .withTimeout(Duration.ofSeconds(30))
@@ -82,13 +72,11 @@ public class LoginPage {
         Select select = new Select(slElement);
 
         // 1. Exact value attribute match
-        try { select.selectByValue(serviceLineId); return this; }
-        catch (Exception ignored) {}
-
+        try { select.selectByValue(serviceLineId); return this; } catch (Exception ignored) {}
+        
         // 2. Exact visible text match
-        try { select.selectByVisibleText(serviceLineId); return this; }
-        catch (Exception ignored) {}
-
+        try { select.selectByVisibleText(serviceLineId); return this; } catch (Exception ignored) {}
+        
         // 3. Partial text match e.g. "QEA (SRV-10001)"
         select.getOptions().stream()
                 .filter(o -> o.getText().contains(serviceLineId)
@@ -99,8 +87,7 @@ public class LoginPage {
                         .selectByVisibleText(o.getText()));
 
         try {
-            if (!select.getFirstSelectedOption()
-                    .getAttribute("value").trim().isEmpty()) return this;
+            if (!select.getFirstSelectedOption().getAttribute("value").trim().isEmpty()) return this;
         } catch (Exception ignored) {}
 
         // 4. Last resort: first non-placeholder option
@@ -115,22 +102,26 @@ public class LoginPage {
     }
 
     public LoginPage enterPocId(String pocId) {
-        driver.findElement(pocIdInput).clear();
-        driver.findElement(pocIdInput).sendKeys(pocId);
+        type(pocIdInput, pocId); // Using your BasePage method
         return this;
     }
 
     public LoginPage enterCohortId(String cohortId) {
-        driver.findElement(cohortIdInput).clear();
-        driver.findElement(cohortIdInput).sendKeys(cohortId);
+        type(cohortIdInput, cohortId); // Using your BasePage method
         return this;
     }
 
     public void clickLoginButton() {
-        driver.findElement(loginButton).click();
+        click(loginButton); // Using your BasePage method
     }
 
-    // ── Alert handling ───────────────────────────────────────────────────────
+    // ── Visibility checks ─────────────────────────────────────────────────────
+
+    public boolean isUserIdInputVisible() {
+        return isDisplayed(userIdInput);
+    }
+
+    // ── Alert handling ────────────────────────────────────────────────────────
 
     public String acceptAlertAndGetMessage() {
         Alert alert = wait.until(ExpectedConditions.alertIsPresent());
@@ -146,8 +137,6 @@ public class LoginPage {
         } catch (Exception e) { return false; }
     }
 
-    // ── Page state checks ────────────────────────────────────────────────────
-
     public boolean isOnLoginPage() {
         String url = driver.getCurrentUrl();
         if (url.contains("/login") || url.endsWith("/") ||
@@ -155,17 +144,10 @@ public class LoginPage {
                 url.equals(com.cts.mfrp.onecohort.utils.ConfigReader.getBaseUrl() + "/")) {
             return true;
         }
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
-        boolean inputVisible = !driver.findElements(userIdInput).isEmpty();
-        driver.manage().timeouts().implicitlyWait(
-                Duration.ofSeconds(
-                        com.cts.mfrp.onecohort.utils.ConfigReader.getImplicitWait()));
-        return inputVisible;
+        return isUserIdInputVisible();
     }
 
-    public boolean isUserIdInputVisible() {
-        return !driver.findElements(userIdInput).isEmpty();
-    }
+    // ── Convenience login flows ───────────────────────────────────────────────
 
     public HomePage loginAsSuperAdmin(String userId) {
         enterUserId(userId);
@@ -201,41 +183,5 @@ public class LoginPage {
         selectRole("CR");
         enterCohortId(cohortId);
         clickLoginButton();
-    }
-
-    // ── Element visibility helpers ────────────────────────────────────────────
-
-    public boolean isUserIdInputVisible()   { return isDisplayed(userIdInput); }
-    public boolean isRoleDropdownVisible()  { return isDisplayed(roleDropdown); }
-    public boolean isPocIdInputVisible()    { return isDisplayed(pocIdInput); }
-    public boolean isCohortIdInputVisible() { return isDisplayed(cohortIdInput); }
-    public boolean isLoginButtonVisible()   { return isDisplayed(loginButton); }
-
-    public boolean isServiceLineDropdownVisible() {
-        try {
-            return driver.findElements(By.cssSelector("select")).size() >= 2
-                    && driver.findElements(By.cssSelector("select")).get(1).isDisplayed();
-        } catch (Exception e) { return false; }
-    }
-
-    // ── Element getters ───────────────────────────────────────────────────────
-
-    public WebElement getUserIdInputElement()  { return waitForVisible(userIdInput); }
-    public WebElement getRoleDropdownElement() { return waitForVisible(roleDropdown); }
-
-    public List<WebElement> getAllSelectElements() {
-        return driver.findElements(By.cssSelector("select"));
-    }
-
-    public List<WebElement> getPocIdCandidates() {
-        return driver.findElements(By.xpath(
-                "//input[contains(@placeholder,'USR') or contains(@placeholder,'POC') " +
-                        "or contains(@placeholder,'poc')]"));
-    }
-
-    public List<WebElement> getCohortIdCandidates() {
-        return driver.findElements(By.xpath(
-                "//input[contains(@placeholder,'COH') or contains(@placeholder,'cohort') " +
-                        "or contains(@placeholder,'Cohort') or contains(@placeholder,'INTCLD')]"));
     }
 }

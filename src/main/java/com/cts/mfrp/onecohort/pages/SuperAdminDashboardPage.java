@@ -7,117 +7,60 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 
-public class SuperAdminDashboardPage {
+public class SuperAdminDashboardPage extends BasePage {
 
-    WebDriver driver;
-    WebDriverWait wait;
+    // ── Locators ──────────────────────────────────────────────────────────────
+    private final By dashboardContainer = By.cssSelector("div.dashboard-container");
 
-    By dashboardContainer  = By.xpath("//div[contains(@class,'dashboard-container')]");
-    By superUserBadge      = By.xpath("//span[contains(@class,'text-sm') and contains(text(),'Super User')]");
-    By kpiNumbers          = By.xpath("//p[contains(@class,'kpi-number')]");
+    // KPI number values and Badges
+    private final By kpiNumbers       = By.cssSelector("p.kpi-number");
+    private final By superUserBadge   = By.xpath("//*[self::span or self::div or self::p][contains(text(),'Super User')]");
+    private final By avatarBtn        = By.cssSelector("div.w-10.h-10.bg-blue-600");
 
-    By totalCohortsCard    = By.xpath("//h3[normalize-space()='Total Cohorts']");
-    By activeCard          = By.xpath("//h3[normalize-space()='Active']");
-    By completedCard       = By.xpath("//h3[normalize-space()='Completed']");
-    By upcomingCard        = By.xpath("//h3[normalize-space()='Upcoming']");
+    // Primary KPI cards (Merged locators)
+    private final By totalCohortsCard = By.xpath("//h3[contains(text(),'Total Cohorts') or normalize-space()='Total Cohorts']");
+    private final By activeCard       = By.xpath("//h3[contains(text(),'Active') or normalize-space()='Active']");
+    private final By completedCard    = By.xpath("//h3[contains(text(),'Completed') or normalize-space()='Completed']");
+    private final By upcomingCard     = By.xpath("//h3[contains(text(),'Upcoming') or normalize-space()='Upcoming']");
 
-    By totalInternsCard    = By.xpath("//h3[normalize-space()='Total Interns']");
-    By internsTrainingCard = By.xpath("//h3[normalize-space()='Interns In Training']");
-    By trainersCard        = By.xpath("//h3[normalize-space()='Trainers']");
-    By pocsCard            = By.xpath("//h3[normalize-space()='POCs']");
-    By managersCard        = By.xpath("//h3[normalize-space()='Managers']");
-    By leadersCard         = By.xpath("//h3[normalize-space()='Leaders']");
+    // Additional KPI cards from Git branch
+    private final By totalInternsCard    = By.xpath("//h3[normalize-space()='Total Interns']");
+    private final By internsTrainingCard = By.xpath("//h3[normalize-space()='Interns In Training']");
+    private final By trainersCard        = By.xpath("//h3[normalize-space()='Trainers']");
+    private final By pocsCard            = By.xpath("//h3[normalize-space()='POCs']");
+    private final By managersCard        = By.xpath("//h3[normalize-space()='Managers']");
+    private final By leadersCard         = By.xpath("//h3[normalize-space()='Leaders']");
+    private final By serviceLinesCard    = By.xpath("//h3[normalize-space()='Service Lines']");
+    private final By learningPathsCard   = By.xpath("//h3[normalize-space()='Learning Paths']");
+    private final By avgCompletionCard   = By.xpath("//h3[normalize-space()='Avg. Completion Rate']");
 
-    By serviceLinesCard    = By.xpath("//h3[normalize-space()='Service Lines']");
-    By learningPathsCard   = By.xpath("//h3[normalize-space()='Learning Paths']");
-    By avgCompletionCard   = By.xpath("//h3[normalize-space()='Avg. Completion Rate']");
-
-    By avatarBtn           = By.xpath("//div[contains(@class,'w-10') and contains(@class,'h-10') and contains(@class,'bg-blue-600')]");
-
-    By navDashboard        = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/dashboard']");
-    By navCohorts          = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/cohorts']");
-    By navLeadership       = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/leadership']");
-    By navBatchOwners      = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/batch-owners']");
-    By navTrainingProgress = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/training-progress']");
-    By navSystemConfig     = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/system-config']");
+    // Explicit Nav Locators from Git branch
+    private final By navDashboard        = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/dashboard']");
+    private final By navCohorts          = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/cohorts']");
+    private final By navLeadership       = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/leadership']");
+    private final By navBatchOwners      = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/batch-owners']");
+    private final By navTrainingProgress = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/training-progress']");
+    private final By navSystemConfig     = By.xpath("//nav[contains(@class,'menu')]//a[@href='/super-admin/system-config']");
 
     public SuperAdminDashboardPage(WebDriver driver) {
-        this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        super(driver);
     }
 
-    public void waitForDashboardToLoad() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(dashboardContainer));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//h3[contains(.,'Total Cohorts')]")));
+    // ── Waits & Page State ────────────────────────────────────────────────────
+
+    public void waitForDashboardContainer() {
+        waitForVisible(dashboardContainer);
+        waitForVisible(totalCohortsCard); // Extra safety check added from Git
     }
 
     public String getCurrentUrl() {
         return driver.getCurrentUrl();
     }
 
-    public WebElement getTotalCohortsCardElement() {
-        return driver.findElement(totalCohortsCard);
-    }
-
-    public WebElement getActiveCardElement() {
-        return driver.findElement(activeCard);
-    }
-
-    public WebElement getCompletedCardElement() {
-        return driver.findElement(completedCard);
-    }
-
-    public WebElement getUpcomingCardElement() {
-        return driver.findElement(upcomingCard);
-    }
-
-    public WebElement getTotalInternsCardElement() {
-        return driver.findElement(totalInternsCard);
-    }
-
-    public WebElement getInternsTrainingCardElement() {
-        return driver.findElement(internsTrainingCard);
-    }
-
-    public WebElement getTrainersCardElement() {
-        return driver.findElement(trainersCard);
-    }
-
-    public WebElement getPocsCardElement() {
-        return driver.findElement(pocsCard);
-    }
-
-    public WebElement getManagersCardElement() {
-        return driver.findElement(managersCard);
-    }
-
-    public WebElement getLeadersCardElement() {
-        return driver.findElement(leadersCard);
-    }
-
-    public WebElement getServiceLinesCardElement() {
-        return driver.findElement(serviceLinesCard);
-    }
-
-    public WebElement getLearningPathsCardElement() {
-        return driver.findElement(learningPathsCard);
-    }
-
-    public WebElement getAvgCompletionCardElement() {
-        return driver.findElement(avgCompletionCard);
-    }
-
-    public List<WebElement> getKpiNumberElements() {
-        return driver.findElements(kpiNumbers);
-    }
-
-    public String getSuperUserBadgeText() {
-        return driver.findElement(superUserBadge).getText();
-    }
+    // ── Sidebar Navigation ────────────────────────────────────────────────────
 
     public WebElement getMenuItemElement(String itemText) {
         return driver.findElement(By.xpath(
@@ -129,31 +72,52 @@ public class SuperAdminDashboardPage {
                 "//nav[contains(@class,'menu')]//a[contains(normalize-space(),'" + itemText + "')]")).isEmpty();
     }
 
-    public void clickNavDashboard() {
-        driver.findElement(navDashboard).click();
+    // Explicit nav clickers using safe BasePage waits
+    public void clickNavDashboard() { waitForClickable(navDashboard).click(); }
+    public void clickNavCohorts() { waitForClickable(navCohorts).click(); }
+    public void clickNavLeadership() { waitForClickable(navLeadership).click(); }
+    public void clickNavBatchOwners() { waitForClickable(navBatchOwners).click(); }
+    public void clickNavTrainingProgress() { waitForClickable(navTrainingProgress).click(); }
+    public void clickNavSystemConfig() { waitForClickable(navSystemConfig).click(); }
+
+    // ── KPI Cards Getters ─────────────────────────────────────────────────────
+
+    public WebElement getTotalCohortsCardElement() { return waitForVisible(totalCohortsCard); }
+    public WebElement getActiveCardElement() { return waitForVisible(activeCard); }
+    public WebElement getCompletedCardElement() { return waitForVisible(completedCard); }
+    public WebElement getUpcomingCardElement() { return waitForVisible(upcomingCard); }
+    public WebElement getTotalInternsCardElement() { return waitForVisible(totalInternsCard); }
+    public WebElement getInternsTrainingCardElement() { return waitForVisible(internsTrainingCard); }
+    public WebElement getTrainersCardElement() { return waitForVisible(trainersCard); }
+    public WebElement getPocsCardElement() { return waitForVisible(pocsCard); }
+    public WebElement getManagersCardElement() { return waitForVisible(managersCard); }
+    public WebElement getLeadersCardElement() { return waitForVisible(leadersCard); }
+    public WebElement getServiceLinesCardElement() { return waitForVisible(serviceLinesCard); }
+    public WebElement getLearningPathsCardElement() { return waitForVisible(learningPathsCard); }
+    public WebElement getAvgCompletionCardElement() { return waitForVisible(avgCompletionCard); }
+
+    // ── KPI Numbers & Badges ──────────────────────────────────────────────────
+
+    public List<WebElement> getKpiNumberElements() {
+        try {
+            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(kpiNumbers));
+            return driver.findElements(kpiNumbers);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
-    public void clickNavCohorts() {
-        driver.findElement(navCohorts).click();
+    public String getSuperUserBadgeText() {
+        try {
+            return waitForVisible(superUserBadge).getText();
+        } catch (Exception e) {
+            return "";
+        }
     }
 
-    public void clickNavLeadership() {
-        driver.findElement(navLeadership).click();
-    }
-
-    public void clickNavBatchOwners() {
-        driver.findElement(navBatchOwners).click();
-    }
-
-    public void clickNavTrainingProgress() {
-        driver.findElement(navTrainingProgress).click();
-    }
-
-    public void clickNavSystemConfig() {
-        driver.findElement(navSystemConfig).click();
-    }
+    // ── Logout ────────────────────────────────────────────────────────────────
 
     public void clickAvatar() {
-        driver.findElement(avatarBtn).click();
+        waitForClickable(avatarBtn).click();
     }
 }

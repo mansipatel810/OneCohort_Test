@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(xargs grep -l -i \"leader\\\\|LD0\\\\|role\")",
-      "Bash(ls \"C:/Users/2479385/Downloads/\" | grep -i oncohort)"
-    ]
-  }
-}

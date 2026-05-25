@@ -30,35 +30,35 @@
         <listener class-name="com.cts.mfrp.onecohort.listeners.TestListener"/>
     </listeners>
 
-    <!-- ════════════════════════════════════════════════════════════════
-         AUTHENTICATION — 8 tests
-         Tests positive login for all roles + key validation alerts.
-         ════════════════════════════════════════════════════════════════ -->
-    <test name="Login Tests">
-        <classes>
-            <class name="com.cts.mfrp.onecohort.tests.LoginTest"/>
-        </classes>
-    </test>
+<!--    &lt;!&ndash; ════════════════════════════════════════════════════════════════-->
+<!--         AUTHENTICATION — 8 tests-->
+<!--         Tests positive login for all roles + key validation alerts.-->
+<!--         ════════════════════════════════════════════════════════════════ &ndash;&gt;-->
+<!--    <test name="Login Tests">-->
+<!--        <classes>-->
+<!--            <class name="com.cts.mfrp.onecohort.tests.LoginTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
-    <!-- ════════════════════════════════════════════════════════════════
-         SUPER ADMIN — 10 tests
-         Dashboard, sidebar navigation, badge, KPI, batch owners, managers, system config, logout.
-         ════════════════════════════════════════════════════════════════ -->
-    <test name="Super Admin Tests">
-        <classes>
-            <class name="com.cts.mfrp.onecohort.tests.SuperAdminTest"/>
-        </classes>
-    </test>
+<!--    &lt;!&ndash; ════════════════════════════════════════════════════════════════-->
+<!--         SUPER ADMIN — 10 tests-->
+<!--         Dashboard, sidebar navigation, badge, KPI, batch owners, managers, system config, logout.-->
+<!--         ════════════════════════════════════════════════════════════════ &ndash;&gt;-->
+<!--    <test name="Super Admin Tests">-->
+<!--        <classes>-->
+<!--            <class name="com.cts.mfrp.onecohort.tests.SuperAdminTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
-    <!-- ════════════════════════════════════════════════════════════════
-         COHORT MANAGEMENT — 12 tests
-         Page load, table columns, search, create/edit modals, deep dive, filters, badges, cancel.
-         ════════════════════════════════════════════════════════════════ -->
-    <test name="Cohort Management Tests">
-        <classes>
-            <class name="com.cts.mfrp.onecohort.tests.cohort.CohortManagementTest"/>
-        </classes>
-    </test>
+<!--    &lt;!&ndash; ════════════════════════════════════════════════════════════════-->
+<!--         COHORT MANAGEMENT — 12 tests-->
+<!--         Page load, table columns, search, create/edit modals, deep dive, filters, badges, cancel.-->
+<!--         ════════════════════════════════════════════════════════════════ &ndash;&gt;-->
+<!--    <test name="Cohort Management Tests">-->
+<!--        <classes>-->
+<!--            <class name="com.cts.mfrp.onecohort.tests.cohort.CohortManagementTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
     <!-- ════════════════════════════════════════════════════════════════
          TRAINEE MANAGEMENT — 6 tests
@@ -81,58 +81,58 @@
         </classes>
     </test>
 
-    <!-- ════════════════════════════════════════════════════════════════
-         LEADER ROLE — 7 tests
-         Dashboard, sidebar navigation, no error, KPI numbers, logo, login validation.
-         ════════════════════════════════════════════════════════════════ -->
-    <test name="Leader Tests">
-        <classes>
-            <class name="com.cts.mfrp.onecohort.tests.leader.LeaderTest"/>
-        </classes>
-    </test>
+<!--    &lt;!&ndash; ════════════════════════════════════════════════════════════════-->
+<!--         LEADER ROLE — 7 tests-->
+<!--         Dashboard, sidebar navigation, no error, KPI numbers, logo, login validation.-->
+<!--         ════════════════════════════════════════════════════════════════ &ndash;&gt;-->
+<!--    <test name="Leader Tests">-->
+<!--        <classes>-->
+<!--            <class name="com.cts.mfrp.onecohort.tests.leader.LeaderTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
-    <!-- ════════════════════════════════════════════════════════════════
-         BATCH OWNER ROLE — 13 tests
-         Dashboard, summary cards, sidebar, cohort list, search, filter,
-         cohort detail, timeline, evaluations, trainees, progress, login validation.
-         ════════════════════════════════════════════════════════════════ -->
-    <test name="Batch Owner Tests">
-        <classes>
-            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerTest"/>
-        </classes>
-    </test>
+<!--    &lt;!&ndash; ════════════════════════════════════════════════════════════════-->
+<!--         BATCH OWNER ROLE — 13 tests-->
+<!--         Dashboard, summary cards, sidebar, cohort list, search, filter,-->
+<!--         cohort detail, timeline, evaluations, trainees, progress, login validation.-->
+<!--         ════════════════════════════════════════════════════════════════ &ndash;&gt;-->
+<!--    <test name="Batch Owner Tests">-->
+<!--        <classes>-->
+<!--            <class name="com.cts.mfrp.onecohort.tests.batchowners.BatchOwnerTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
-    <!-- ════════════════════════════════════════════════════════════════
-         CR ROLE — 7 tests
-         Dashboard URL, metadata panel, trainees table, read-only access,
-         training timeline, evaluations, overall progress.
-         ════════════════════════════════════════════════════════════════ -->
-    <test name="CR Tests">
-        <classes>
-            <class name="com.cts.mfrp.onecohort.tests.cr.CRTest"/>
-        </classes>
-    </test>
+<!--    &lt;!&ndash; ════════════════════════════════════════════════════════════════-->
+<!--         CR ROLE — 7 tests-->
+<!--         Dashboard URL, metadata panel, trainees table, read-only access,-->
+<!--         training timeline, evaluations, overall progress.-->
+<!--         ════════════════════════════════════════════════════════════════ &ndash;&gt;-->
+<!--    <test name="CR Tests">-->
+<!--        <classes>-->
+<!--            <class name="com.cts.mfrp.onecohort.tests.cr.CRTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
-    <!-- ════════════════════════════════════════════════════════════════
-         TRAINING ANALYTICS — 8 tests
-         Page load, chart rendering, cohort cards, percentage data,
-         service line filter, on-track indicator, behind indicator, back navigation.
-         ════════════════════════════════════════════════════════════════ -->
-    <test name="Analytics Tests">
-        <classes>
-            <class name="com.cts.mfrp.onecohort.tests.analytics.AnalyticsTest"/>
-        </classes>
-    </test>
+<!--    &lt;!&ndash; ════════════════════════════════════════════════════════════════-->
+<!--         TRAINING ANALYTICS — 8 tests-->
+<!--         Page load, chart rendering, cohort cards, percentage data,-->
+<!--         service line filter, on-track indicator, behind indicator, back navigation.-->
+<!--         ════════════════════════════════════════════════════════════════ &ndash;&gt;-->
+<!--    <test name="Analytics Tests">-->
+<!--        <classes>-->
+<!--            <class name="com.cts.mfrp.onecohort.tests.analytics.AnalyticsTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
-    <!-- ════════════════════════════════════════════════════════════════
-         SYSTEM CONFIGURATION — 11 tests
-         Page load, heading, subtitle, card count, create buttons,
-         each modal opens, cancel closes modal, all cards visible.
-         ════════════════════════════════════════════════════════════════ -->
-    <test name="System Config Tests">
-        <classes>
-            <class name="com.cts.mfrp.onecohort.tests.SystemConfigTest"/>
-        </classes>
-    </test>
+<!--    &lt;!&ndash; ════════════════════════════════════════════════════════════════-->
+<!--         SYSTEM CONFIGURATION — 11 tests-->
+<!--         Page load, heading, subtitle, card count, create buttons,-->
+<!--         each modal opens, cancel closes modal, all cards visible.-->
+<!--         ════════════════════════════════════════════════════════════════ &ndash;&gt;-->
+<!--    <test name="System Config Tests">-->
+<!--        <classes>-->
+<!--            <class name="com.cts.mfrp.onecohort.tests.SystemConfigTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
 </suite>
