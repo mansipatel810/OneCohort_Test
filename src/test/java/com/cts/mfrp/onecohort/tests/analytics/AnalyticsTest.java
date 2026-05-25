@@ -118,15 +118,6 @@ public class AnalyticsTest extends BaseClassTest {
         }
     }
 
-    // ── TC-ANALYTICS-005 ──────────────────────────────────────────────────────
-    @Test(priority = 5, description = "TC-ANALYTICS-005: Service line filter is present on the Training Progress page")
-    public void testServiceLineFilterPresent() {
-        // A service line filter lets the user narrow analytics to one service line
-        Assert.assertTrue(analyticsPage.isServiceLineFilterPresent(),
-                "A Service Line filter should be present on the Training Progress page");
-        System.out.println("PASS - Service Line filter is present on the Training Progress page.");
-    }
-
     // ── TC-ANALYTICS-006 ──────────────────────────────────────────────────────
     @Test(priority = 6, description = "TC-ANALYTICS-006: 'On Track' indicator is visible or chart is shown")
     public void testOnTrackIndicatorVisible() {

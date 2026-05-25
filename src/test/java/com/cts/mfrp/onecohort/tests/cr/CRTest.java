@@ -12,6 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,9 +35,11 @@ public class CRTest extends BaseClassTest {
 
     private static final String CR_COHORT_ID = ConfigReader.getValidCohortId();
     private CRDashboardPage crPage;
+    private SoftAssert as;
 
     @BeforeClass(alwaysRun = true, dependsOnMethods = "setUpDriver")
     public void loginAsCR() {
+        as = new SoftAssert();
         // Log in as CR with a valid user ID and cohort ID
         driver.get(ConfigReader.getBaseUrl());
         new LoginPage(driver).loginAsCR(ConfigReader.getSuperAdminUserId(), CR_COHORT_ID);
@@ -65,12 +68,14 @@ public class CRTest extends BaseClassTest {
     @Test(priority = 2, description = "TC-CR-002: Cohort metadata fields are visible (Batch Owner, Start Date, Total Interns)")
     public void testCohortMetadataFieldsVisible() {
         // These fields give the CR important information about their assigned cohort
-        Assert.assertTrue(crPage.isBatchOwnerFieldVisible(),
+        as.assertTrue(crPage.isBatchOwnerFieldVisible(),
                 "Batch Owner field should be visible in the metadata panel");
-        Assert.assertTrue(crPage.isStartDateFieldVisible(),
+        as.assertTrue(crPage.isStartDateFieldVisible(),
                 "Start Date field should be visible in the metadata panel");
-        Assert.assertTrue(crPage.isTotalInternsFieldVisible(),
+        as.assertTrue(crPage.isTotalInternsFieldVisible(),
                 "Total Interns field should be visible in the metadata panel");
+
+        as.assertAll();
 
         System.out.println("PASS - Cohort metadata fields (Batch Owner, Start Date, Total Interns) are visible.");
     }

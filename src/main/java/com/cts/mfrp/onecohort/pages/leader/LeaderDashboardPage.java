@@ -102,54 +102,13 @@ public class LeaderDashboardPage extends BasePage {
         return this;
     }
 
-    public boolean isDashboardContainerPresent() {
-        return isDisplayed(dashboardContainer);
-    }
-
-    public boolean isLoadingMessageVisible() {
-        return isDisplayed(loadingMsg);
-    }
 
     public boolean isErrorMessageVisible() {
         return isDisplayed(errorMsg);
     }
-
-    // ── Header ────────────────────────────────────────────────────────────────
-
-    public String getWelcomeText() {
-        return getText(welcomeHeading);
-    }
-
-    public String getRoleText() {
-        return getText(roleText);
-    }
-
-    public boolean isAvatarVisible() {
-        return isDisplayed(ldAvatar);
-    }
-
-    public String getAvatarText() {
-        return getText(ldAvatar);
-    }
-
-    // ── Sidebar ───────────────────────────────────────────────────────────────
-
-    public boolean isSidebarVisible() {
-        return isDisplayed(sidebarContainer);
-    }
-
     public boolean isLogoVisible() {
         return isDisplayed(logoImage);
     }
-
-    public String getAppName() {
-        return getText(appNameSpan);
-    }
-
-    public int getNavLinkCount() {
-        return driver.findElements(navLinks).size();
-    }
-
     public List<String> getNavLinkTexts() {
         return driver.findElements(navLinks)
                      .stream()
@@ -159,105 +118,24 @@ public class LeaderDashboardPage extends BasePage {
 
     // ── Dashboard heading / badge ─────────────────────────────────────────────
 
-    public String getDashboardHeading() {
-        return getText(dashboardHeading);
-    }
 
     public String getLeaderBadgeText() {
         return getText(leaderBadge);
     }
-
-    // ── Section titles ────────────────────────────────────────────────────────
-
-    public List<String> getAllSectionTitles() {
-        return driver.findElements(sectionTitles)
-                     .stream()
-                     .map(WebElement::getText)
-                     .collect(Collectors.toList());
-    }
-
-    public boolean isSectionTitlePresent(String title) {
-        return getAllSectionTitles().stream()
-                                   .anyMatch(t -> t.equalsIgnoreCase(title));
-    }
-
-    // ── KPI cards ─────────────────────────────────────────────────────────────
-
     /** Total KPI card count across all 3 sections (expected: 13). */
-    public int getTotalKpiCardCount() {
-        return driver.findElements(allKpiCards).size();
-    }
 
-    public List<String> getKpiCardTitles() {
-        return driver.findElements(kpiCardTitles)
-                     .stream()
-                     .map(WebElement::getText)
-                     .collect(Collectors.toList());
-    }
 
     public List<String> getKpiNumbers() {
         return driver.findElements(kpiNumbers)
-                     .stream()
-                     .map(WebElement::getText)
-                     .collect(Collectors.toList());
+                .stream()
+                .map(WebElement::getText)
+                .collect(Collectors.toList());
     }
-
-    public boolean isKpiCardPresent(String cardTitle) {
-        return getKpiCardTitles().stream()
-                                 .anyMatch(t -> t.equalsIgnoreCase(cardTitle));
-    }
-
-    // ── Stat cards ────────────────────────────────────────────────────────────
-
-    public int getTotalStatCardCount() {
-        return driver.findElements(allStatCards).size();
-    }
-
-    public int getStatCardCountForSection(String sectionTitle) {
-        return driver.findElements(statCardsUnderSection(sectionTitle)).size();
-    }
-
-    public List<String> getStatLabels() {
-        return driver.findElements(statLabels)
-                     .stream()
-                     .map(WebElement::getText)
-                     .collect(Collectors.toList());
-    }
-
-    public List<String> getStatValues() {
-        return driver.findElements(statValues)
-                     .stream()
-                     .map(WebElement::getText)
-                     .collect(Collectors.toList());
-    }
-
-    public int getStatFillCount() {
-        return driver.findElements(statFills).size();
-    }
-
-    // ── Navigation helpers ────────────────────────────────────────────────────
-
-    /** Clicks "Cohorts" in the Leader sidebar nav. */
-    public void clickCohortsNav() {
-        List<WebElement> links = driver.findElements(navLinks);
-        for (WebElement link : links) {
-            if (link.getText().trim().equalsIgnoreCase("Cohorts")) {
-                link.click();
-                return;
-            }
-        }
-        throw new RuntimeException("'Cohorts' nav link not found in Leader sidebar");
-    }
-
-    /** Clicks "Dashboard" in the Leader sidebar nav. */
-    public void clickDashboardNav() {
-        List<WebElement> links = driver.findElements(navLinks);
-        for (WebElement link : links) {
-            if (link.getText().trim().equalsIgnoreCase("Dashboard")) {
-                link.click();
-                return;
-            }
-        }
-        throw new RuntimeException("'Dashboard' nav link not found in Leader sidebar");
+    // THIS was missing — called by LeaderTest.java TC-LEADER-001
+    public List<String> getKpiCardTitles() {
+        return driver.findElements(kpiCardTitles).stream()
+                .map(WebElement::getText)
+                .filter(t -> !t.isEmpty())
+                .collect(Collectors.toList());
     }
 }

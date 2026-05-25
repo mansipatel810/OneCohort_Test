@@ -3,11 +3,13 @@ package com.cts.mfrp.onecohort.pages;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Select;
 
 import java.time.Duration;
+import java.util.List;
 
 public class LoginPage extends BasePage {
 
@@ -16,16 +18,11 @@ public class LoginPage extends BasePage {
     private final By roleDropdown = By.cssSelector("div.space-y-5 select");
     private final By loginButton  = By.xpath("//button[normalize-space()='Login']");
 
-    // Injected by Angular *ngIf after a role that requires Service Line is selected.
-    private final By serviceLineDropdown = By.xpath(
-            "(//div[contains(@class,'space-y-5')]//select)[2]");
-
-    // Injected by Angular *ngIf for Batch Owner role (POC ID field)
+    // Flexible locators from Git to handle varying placeholders
     private final By pocIdInput = By.cssSelector(
-            "input[placeholder*='POC'], input[placeholder*='poc'], " +
-            "input[placeholder*='Poc']");
+            "input[placeholder*='USR'], input[placeholder*='POC'], " +
+            "input[placeholder*='poc'], input[placeholder*='Poc']");
 
-    // Injected by Angular *ngIf for CR role (Cohort ID field)
     private final By cohortIdInput = By.cssSelector(
             "input[placeholder*='COH'], input[placeholder*='Cohort'], " +
             "input[placeholder*='cohort']");
@@ -37,7 +34,7 @@ public class LoginPage extends BasePage {
     // ── Atomic actions ────────────────────────────────────────────────────────
 
     public LoginPage enterUserId(String userId) {
-        type(userIdInput, userId);
+        type(userIdInput, userId); // Using your BasePage method
         return this;
     }
 
@@ -47,77 +44,107 @@ public class LoginPage extends BasePage {
     }
 
     /**
-     * Waits for the service line dropdown to appear (Angular *ngIf) AND for the
-     * backend API to populate its options, then selects the matching entry.
-     * Polls up to 30 s for real options — handles render.com cold-start delays.
+     * Git Team's Fix applied here: Finds the service line dynamically as the 2nd <select> 
+     * element on the page, avoiding the TimeoutException caused by Angular builds.
      */
     public LoginPage selectServiceLine(String serviceLineId) {
-        waitForVisible(serviceLineDropdown);
-
+        // Step 1: wait for the 2nd <select> to appear in the DOM
         new FluentWait<>(driver)
                 .withTimeout(Duration.ofSeconds(30))
                 .pollingEvery(Duration.ofMillis(500))
                 .ignoring(Exception.class)
-                .until(d -> new Select(d.findElement(serviceLineDropdown))
-                        .getOptions().stream()
-                        .anyMatch(o -> !o.getAttribute("value").trim().isEmpty()));
+                .until(d -> d.findElements(By.cssSelector("select")).size() >= 2);
 
-        Select select = new Select(waitForVisible(serviceLineDropdown));
+        // Step 2: wait for real options to load inside the 2nd select
+        new FluentWait<>(driver)
+                .withTimeout(Duration.ofSeconds(30))
+                .pollingEvery(Duration.ofMillis(500))
+                .ignoring(Exception.class)
+                .until(d -> {
+                    WebElement el = d.findElements(By.cssSelector("select")).get(1);
+                    return new Select(el).getOptions().stream()
+                            .anyMatch(o -> !o.getAttribute("value").trim().isEmpty());
+                });
 
-        // 1. Exact value attribute
+        // Step 3: get a fresh reference to the 2nd select
+        WebElement slElement = driver.findElements(By.cssSelector("select")).get(1);
+        wait.until(ExpectedConditions.visibilityOf(slElement));
+        Select select = new Select(slElement);
+
+        // 1. Exact value attribute match
         try { select.selectByValue(serviceLineId); return this; } catch (Exception ignored) {}
-        // 2. Exact visible text
+        
+        // 2. Exact visible text match
         try { select.selectByVisibleText(serviceLineId); return this; } catch (Exception ignored) {}
-        // 3. Partial text match (e.g. "QEA (SRV-10001)")
+        
+        // 3. Partial text match e.g. "QEA (SRV-10001)"
         select.getOptions().stream()
                 .filter(o -> o.getText().contains(serviceLineId)
-                          && !o.getAttribute("value").trim().isEmpty())
+                        && !o.getAttribute("value").trim().isEmpty())
                 .findFirst()
-                .ifPresent(o -> new Select(driver.findElement(serviceLineDropdown))
+                .ifPresent(o -> new Select(
+                        driver.findElements(By.cssSelector("select")).get(1))
                         .selectByVisibleText(o.getText()));
-        // 4. First real option as last resort
+
         try {
-            if (new Select(driver.findElement(serviceLineDropdown))
-                    .getFirstSelectedOption().getAttribute("value").trim().isEmpty()) {
-                select.getOptions().stream()
-                        .filter(o -> !o.getAttribute("value").trim().isEmpty())
-                        .findFirst()
-                        .ifPresent(o -> new Select(driver.findElement(serviceLineDropdown))
-                                .selectByValue(o.getAttribute("value")));
-            }
+            if (!select.getFirstSelectedOption().getAttribute("value").trim().isEmpty()) return this;
         } catch (Exception ignored) {}
+
+        // 4. Last resort: first non-placeholder option
+        select.getOptions().stream()
+                .filter(o -> !o.getAttribute("value").trim().isEmpty())
+                .findFirst()
+                .ifPresent(o -> new Select(
+                        driver.findElements(By.cssSelector("select")).get(1))
+                        .selectByValue(o.getAttribute("value")));
+
         return this;
     }
 
     public LoginPage enterPocId(String pocId) {
-        waitForVisible(pocIdInput).sendKeys(pocId);
+        type(pocIdInput, pocId); // Using your BasePage method
         return this;
     }
 
     public LoginPage enterCohortId(String cohortId) {
-        waitForVisible(cohortIdInput).sendKeys(cohortId);
+        type(cohortIdInput, cohortId); // Using your BasePage method
         return this;
     }
 
     public void clickLoginButton() {
-        click(loginButton);
+        click(loginButton); // Using your BasePage method
     }
 
     // ── Visibility checks ─────────────────────────────────────────────────────
 
-    /** Returns true if the User ID input is visible — confirms login page is loaded. */
     public boolean isUserIdInputVisible() {
         return isDisplayed(userIdInput);
     }
 
     // ── Alert handling ────────────────────────────────────────────────────────
 
-    /** Waits for the browser alert, captures its text, then dismisses it. */
     public String acceptAlertAndGetMessage() {
         Alert alert = wait.until(ExpectedConditions.alertIsPresent());
         String message = alert.getText();
         alert.accept();
         return message;
+    }
+
+    public boolean isAlertPresent() {
+        try {
+            wait.until(ExpectedConditions.alertIsPresent());
+            return true;
+        } catch (Exception e) { return false; }
+    }
+
+    public boolean isOnLoginPage() {
+        String url = driver.getCurrentUrl();
+        if (url.contains("/login") || url.endsWith("/") ||
+                url.equals(com.cts.mfrp.onecohort.utils.ConfigReader.getBaseUrl()) ||
+                url.equals(com.cts.mfrp.onecohort.utils.ConfigReader.getBaseUrl() + "/")) {
+            return true;
+        }
+        return isUserIdInputVisible();
     }
 
     // ── Convenience login flows ───────────────────────────────────────────────
