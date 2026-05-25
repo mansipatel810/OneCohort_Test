@@ -16,14 +16,15 @@ import java.util.List;
 public class SuperAdminTest extends BaseClassTest {
 
     SuperAdminDashboardPage dashPage;
-
     @BeforeClass(alwaysRun = true, dependsOnMethods = "setUpDriver")
     public void loginAsSuperAdmin() {
         driver.get(ConfigReader.getBaseUrl());
         new LoginPage(driver).loginAsSuperAdmin(ConfigReader.getSuperAdminUserId());
         wait.until(ExpectedConditions.urlContains("/super-admin"));
         dashPage = new SuperAdminDashboardPage(driver);
-        dashPage.waitForDashboardToLoad();
+
+        // Fix: Change from waitForDashboardToLoad() to waitForDashboardContainer()
+        dashPage.waitForDashboardContainer();
     }
 
     @Test(priority = 1, description = "TC-SA-001: Dashboard loads with all KPI cards across all three sections")
